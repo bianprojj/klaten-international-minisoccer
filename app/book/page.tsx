@@ -8,8 +8,8 @@ import { headers } from "next/headers";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Booking Lapangan Mini Soccer Klaten",
-  description: "Pilih tanggal, jam, lapangan mini soccer Klaten. Checkout cepat, konfirmasi instan.",
+  title: "Booking Lapangan Mini Soccer Klaten | Jadwal & Harga",
+  description: "Booking lapangan mini soccer Klaten. Pilih tanggal dan jam, checkout cepat, konfirmasi instan. Telp +62 812 3456 7890.",
   alternates: { canonical: "/book" },
 };
 

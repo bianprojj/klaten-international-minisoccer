@@ -30,7 +30,9 @@ export function SiteHeader() {
           <button
             type="button"
             className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--border-strong)] bg-[color:rgba(15,23,42,0.04)] text-[color:var(--foreground)] transition hover:bg-[color:rgba(15,23,42,0.08)] md:hidden"
-            aria-label="Toggle navigation"
+            aria-label="Buka menu navigasi"
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-nav"
             onClick={() => setMobileOpen((value) => !value)}
           >
             <span className="text-lg">{mobileOpen ? "✕" : "☰"}</span>
@@ -43,7 +45,7 @@ export function SiteHeader() {
       </div>
 
       {mobileOpen ? (
-        <div className="border-t border-[color:var(--border-strong)] px-4 py-4 shadow-none md:hidden navbar-shell">
+        <div id="mobile-nav" className="border-t border-[color:var(--border-strong)] px-4 py-4 shadow-none md:hidden navbar-shell">
           <div className="flex flex-col gap-3 text-sm text-[color:var(--foreground)]">
             {siteConfig.navItems.map((item) => (
               <Link

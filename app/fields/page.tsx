@@ -9,10 +9,10 @@ import { headers } from "next/headers";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Lapangan Mini Soccer Klaten",
-  description: "Lihat daftar lapangan mini soccer Klaten, harga per jam transparan, fasilitas lengkap.",
+  title: "Lapangan Mini Soccer Klaten | Harga & Fasilitas",
+  description: "Daftar lapangan mini soccer Klaten. Harga per jam transparan, fasilitas lengkap. Booking online cepat.",
   alternates: { canonical: "/fields" },
-};
+};;
 
 async function getAppUrl() {
   const requestHeaders = await headers();

@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/api/', '/manager/', '/staff/', '/superadmin/', '/sql-editor/'],
     },
-    sitemap: 'https://klatenminisoccer.id/sitemap.xml',
+    sitemap: 'https://klatenminisoccer.web.id/sitemap.xml',
   };
 }

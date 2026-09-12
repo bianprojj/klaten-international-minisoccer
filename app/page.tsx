@@ -10,9 +10,9 @@ import { getFieldHourlyRate } from "@/lib/site-content";
 import CurveCarousel from "@/components/gallery/CurveCarousel";
 
 export const metadata: Metadata = {
-  title: "Booking Lapangan Mini Soccer di Klaten",
+  title: "Klaten Minisoccer | Booking Lapangan Mini Soccer di Klaten",
   description:
-    "Pesan lapangan mini soccer di Klaten secara online dengan fasilitas lengkap, jadwal fleksibel, dan pembayaran aman.",
+    "Booking lapangan mini soccer Klaten online. Harga transparan, fasilitas lengkap, jadwal fleksibel. Telp +62 812 3456 7890.",
   alternates: {
     canonical: "/",
   },
@@ -42,12 +42,22 @@ export default async function Home() {
     "@type": "SportsActivityLocation",
     name: siteConfig.name,
     url: siteConfig.url,
+    image: `${siteConfig.url}/kim-logo.svg`,
+    telephone: "+62 812 3456 7890",
     address: {
       "@type": "PostalAddress",
+      streetAddress: "Klaten",
       addressLocality: "Klaten",
       addressRegion: "Jawa Tengah",
       addressCountry: "ID",
     },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: -7.7115,
+      longitude: 110.6030,
+    },
+    openingHours: "Mo-Su 07:00-22:00",
+    priceRange: "Rp",
     description: siteConfig.description,
     sameAs: [siteConfig.url],
   };
