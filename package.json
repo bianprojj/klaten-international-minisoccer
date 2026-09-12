@@ -22,6 +22,7 @@
     "@supabase/server": "^1.5.3",
     "@supabase/ssr": "^0.12.6",
     "@supabase/supabase-js": "^2.115.0",
+    "@vercel/speed-insights": "^1.1.0",
     "cloudinary": "^1.38.0",
     "framer-motion": "^12.43.0",
     "next": "^15.5.20",
