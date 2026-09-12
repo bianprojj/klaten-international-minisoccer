@@ -4,6 +4,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { siteConfig } from "@/lib/site-config";
 import { getSiteContent } from "@/lib/site-content";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 export const dynamic = "force-dynamic";
@@ -64,6 +65,7 @@ export default function RootLayout({
         <SiteHeader />
         <div id="main-content" className="flex-1">{children}</div>
         <SiteFooter />
+        <SpeedInsights />
       </body>
     </html>
   );

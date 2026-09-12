@@ -69,7 +69,7 @@ export default function AdminDashboard({
                 {admin.role === "staff" && admin.permissions.canReadPayments ? (
                   <a href="#staff-payments" className="rounded-full bg-white/5 px-3 py-1 text-sm text-[color:var(--foreground)] hover:bg-white/10">Staff payments</a>
                 ) : null}
-              </div>
+              </nav>
             </div>
             <Link
               href={
