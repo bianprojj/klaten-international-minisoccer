@@ -198,6 +198,15 @@ If you want, I can open a PR with these changes, run `npm run lint -- --fix`, or
 
 ### 32. Spaghetti cleanup docs rebuild
 - Root dead deleted `cookiejar.txt cookies.txt db.js debug-*.js page.html migration-list.txt prisma-migrate-deploy.log tmp-*`. Push `e85217c`.
+
+## 2026-09-13
+
+### 33. Account migration to new repo and providers
+- Remote moved `Wannn120/KIM-web` to `bianprojj/klaten-international-minisoccer`.
+- Env rotated Resend Cloudinary Supabase pooler. `.env` `.env.local` synced.
+- `components/admin-dashboard.tsx` JSX `</nav>` fixed. Build passes.
+- `@vercel/speed-insights` added. `<SpeedInsights />` in `app/layout.tsx`.
+- Push `c6a4119` done. CI needs Repository secrets. Re-run required.
 - `scripts/` 30 files deleted except `scripts/check-env.js`. CI uses only `ci:check-env`.
 - Root `*.md` 13 files deleted. Kept `AI_ACTIVITIES.md`.
 - `README.md` recreated minimal. `SYSTEM.md` created: arsitektur sistem, database, design, env, alur.
