@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { siteConfig } from "@/lib/site-config";
@@ -64,6 +65,7 @@ export default function RootLayout({
         <SiteHeader />
         <div id="main-content" className="flex-1">{children}</div>
         <SiteFooter />
+        <SpeedInsights />
       </body>
     </html>
   );
