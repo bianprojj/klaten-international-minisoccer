@@ -3,15 +3,6 @@
 import { useEffect, useState } from "react";
 import type { Review } from "@/types";
 
-type RawReview = {
-  id?: string;
-  customerName?: string;
-  rating?: number;
-  comment?: string;
-  date?: string;
-  createdAt?: string;
-};
-
 export function ReviewSection({ initialReviews }: { initialReviews: Review[] }) {
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const [name, setName] = useState("");
@@ -22,32 +13,6 @@ export function ReviewSection({ initialReviews }: { initialReviews: Review[] }) 
   useEffect(() => {
     setReviews(initialReviews);
   }, [initialReviews]);
-
-  useEffect(() => {
-    async function fetchReviews() {
-      try {
-        const res = await fetch("/api/reviews");
-        if (!res.ok) return;
-
-        const result = await res.json();
-        if (result?.success && Array.isArray(result.data)) {
-          setReviews(
-            result.data.map((review: RawReview) => ({
-              ...review,
-              customerName: review.customerName ?? "Guest",
-              rating: review.rating ?? 5,
-              comment: review.comment ?? "",
-              date: review.date ?? review.createdAt ?? "",
-            })) as Review[]
-          );
-        }
-      } catch {
-        // keep server-provided reviews if fetch fails
-      }
-    }
-
-    fetchReviews();
-  }, []);
 
   const saveReviews = (nextReviews: Review[]) => {
     setReviews(nextReviews);

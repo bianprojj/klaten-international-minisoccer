@@ -56,6 +56,7 @@ export function CurveCarouselItem({ image, offset, isActive, width, height, spac
           sizes="(max-width: 1024px) 80vw, 400px"
           className="object-cover transition duration-500"
           priority={isActive}
+          loading={isActive ? "eager" : "lazy"}
         />
         <div className="absolute inset-x-0 bottom-0 rounded-b-[2.5rem] bg-gradient-to-t from-black/90 to-transparent p-5 backdrop-blur-sm">
           <h3 className="text-base font-semibold uppercase tracking-[0.08em] text-emerald-200 drop-shadow-[0_12px_18px_rgba(0,0,0,0.35)] leading-tight line-clamp-2">

@@ -106,9 +106,7 @@ export async function middleware(request: NextRequest) {
   const isPublicPage = pathname === "/" || pathname.startsWith("/book") || pathname.startsWith("/booking") || pathname.startsWith("/fields") || pathname.startsWith("/payment");
 
   if (isPublicPage) {
-    response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-    response.headers.set("Pragma", "no-cache");
-    response.headers.set("Expires", "0");
+    response.headers.set("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
   }
 
   response.headers.set("x-ratelimit-limit", String(rateLimit.limit));

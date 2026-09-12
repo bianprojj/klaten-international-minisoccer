@@ -1,22 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
-import { FALLBACK_REMOTE_IMAGES, getSafeRemoteImageUrl, normalizeRemoteImageUrl } from "@/lib/remote-image";
+import { useMemo, useState } from "react";
+import { FALLBACK_REMOTE_IMAGES, getSafeRemoteImageUrl } from "@/lib/remote-image";
 import type { FacilityImage, SiteContent } from "@/types";
 
 export function HeroSection({ facilities, content = {} as Partial<SiteContent> }: { facilities: FacilityImage[]; content?: Partial<SiteContent> }) {
-  const [assetsReady, setAssetsReady] = useState(false);
-  const [heroImageFailed, setHeroImageFailed] = useState(false);
   const [brokenFacilityImages, setBrokenFacilityImages] = useState<Record<string, boolean>>({});
   const displayFacilities = useMemo(() => facilities.filter((facility) => facility && typeof facility.title === "string"), [facilities]);
-  const validFacilities = useMemo(
-    () => displayFacilities.filter((facility) => typeof facility.imageUrl === "string" && facility.imageUrl.trim().length > 0),
-    [displayFacilities],
-  );
-  const facilityUrls = useMemo(() => validFacilities.map((facility) => normalizeRemoteImageUrl(facility.imageUrl)).join("|"), [validFacilities]);
   const heroBackgroundUrl = getSafeRemoteImageUrl(content.backgroundImageUrl, FALLBACK_REMOTE_IMAGES, 0);
-  const heroImageSrc = heroBackgroundUrl;
   const safeFacilityImage = (facility: FacilityImage, index: number) => {
     const id = facility.id ?? facility.title;
     if (brokenFacilityImages[id]) {
@@ -25,66 +17,6 @@ export function HeroSection({ facilities, content = {} as Partial<SiteContent> }
     return getSafeRemoteImageUrl(facility.imageUrl, FALLBACK_REMOTE_IMAGES, index);
   };
 
-  useEffect(() => {
-    let cancelled = false;
-    const facilityUrlsToLoad = validFacilities.map((facility) => facility.imageUrl).filter(Boolean);
-    let completed = 0;
-
-    const finishAsset = () => {
-      if (cancelled) return;
-      completed += 1;
-      if (completed >= facilityUrlsToLoad.length) {
-        setAssetsReady(true);
-      }
-    };
-
-    setAssetsReady(false);
-    if (facilityUrlsToLoad.length === 0) {
-      setAssetsReady(true);
-      return () => { cancelled = true; };
-    }
-
-    const preloaders = facilityUrlsToLoad.map((url) => {
-      const image = new window.Image();
-      image.onload = finishAsset;
-      image.onerror = finishAsset;
-      image.src = url;
-      return image;
-    });
-    const timeout = window.setTimeout(() => {
-      if (!cancelled) {
-        setAssetsReady(true);
-      }
-    }, 15000);
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timeout);
-      preloaders.forEach((image) => {
-        image.onload = null;
-        image.onerror = null;
-      });
-    };
-  }, [facilityUrls, validFacilities]);
-
-  if (!assetsReady) {
-    return (
-      <section className="relative -mt-16 overflow-hidden bg-[color:var(--background)] pt-20 sm:pt-24" aria-busy="true" aria-label="Memuat halaman utama">
-        <div className="absolute inset-0 hero-skeleton-bg" />
-        <div className="relative px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-          <div className="mx-auto max-w-5xl text-center">
-            <div className="hero-skeleton mx-auto h-3 w-40" />
-            <div className="hero-skeleton mx-auto mt-6 h-12 max-w-3xl" />
-            <div className="hero-skeleton mx-auto mt-7 h-4 max-w-2xl" />
-            <div className="hero-skeleton mx-auto mt-3 h-4 max-w-xl" />
-            <div className="mt-10 flex justify-center gap-4"><div className="hero-skeleton h-11 w-36 rounded-full" /><div className="hero-skeleton h-11 w-44 rounded-full" /></div>
-            <div className="mt-14 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{facilities.map((facility, index) => <div key={facility.id ?? `${facility.title}-${index}`} className="rounded-[2rem] border border-white/10 bg-white/[0.06] p-4"><div className="hero-skeleton aspect-[16/9] rounded-3xl" /><div className="hero-skeleton mx-auto mt-4 h-5 w-3/4" /><div className="hero-skeleton mx-auto mt-3 h-3 w-full" /><div className="hero-skeleton mx-auto mt-2 h-3 w-5/6" /></div>)}</div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
   return (
     <section
       className="relative -mt-16 overflow-hidden bg-[color:var(--background)] pt-20 sm:pt-24"
@@ -92,18 +24,14 @@ export function HeroSection({ facilities, content = {} as Partial<SiteContent> }
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
         {heroBackgroundUrl ? (
           <Image
-            src={heroImageSrc}
-            alt="Hero background"
+            src={heroBackgroundUrl}
+            alt=""
+            aria-hidden="true"
             fill
             priority
-            unoptimized
+            fetchPriority="high"
+            sizes="100vw"
             className="object-cover brightness-110"
-            onError={() => {
-              if (!heroImageFailed) {
-                console.warn("Hero background image failed to load:", heroBackgroundUrl);
-                setHeroImageFailed(true);
-              }
-            }}
           />
         ) : (
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.28),transparent_30%),linear-gradient(120deg,rgba(15,23,42,0.94),rgba(15,23,42,0.8))]" />
