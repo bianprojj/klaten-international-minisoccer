@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/api/', '/manager/', '/staff/', '/superadmin/', '/sql-editor/'],
+      disallow: ['/api/', '/manager/', '/staff/', '/superadmin/'],
     },
     sitemap: 'https://klatenminisoccer.web.id/sitemap.xml',
   };

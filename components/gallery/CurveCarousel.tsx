@@ -1,7 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { VenueGalleryImage } from "@/types";
 import { useCarousel } from "@/hooks/useCarousel";
 import { CurveCarouselDots } from "./CurveCarouselDots";
@@ -56,24 +55,6 @@ export default function CurveCarousel({ images, price }: CurveCarouselProps) {
     [images, activeIndex, visibleRange]
   );
 
-  const handleDragEnd = useCallback(
-    (_event: unknown, info: { offset: { x: number } }) => {
-      if (info.offset.x < -60) next();
-      if (info.offset.x > 60) previous();
-    },
-    [next, previous]
-  );
-
-  const handleWheel = useCallback(
-    (event: React.WheelEvent<HTMLDivElement>) => {
-      if (Math.abs(event.deltaY) < 18) return;
-      event.preventDefault();
-      if (event.deltaY > 0) next();
-      else previous();
-    },
-    [next, previous]
-  );
-
   if (!images.length) return null;
 
   return (
@@ -107,14 +88,9 @@ export default function CurveCarousel({ images, price }: CurveCarouselProps) {
           <div className="pointer-events-none absolute right-0 top-16 h-[260px] w-[260px] rounded-full bg-slate-900/60 blur-3xl" />
 
           <div className="relative mx-auto flex w-full items-center justify-center overflow-visible">
-            <motion.div
+            <div
               className="relative flex w-full items-center justify-center overflow-visible"
               style={{ minHeight: carouselHeight, width: "100%" }}
-              drag="x"
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.28}
-              onDragEnd={handleDragEnd}
-              onWheel={handleWheel}
               role="group"
               aria-label="Gallery carousel"
             >
@@ -134,7 +110,7 @@ export default function CurveCarousel({ images, price }: CurveCarouselProps) {
                   onSelect={() => setActiveIndex(images.indexOf(image))}
                 />
               ))}
-            </motion.div>
+            </div>
 
             <button
               type="button"

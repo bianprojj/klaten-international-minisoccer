@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Image from "next/image";
 import type { VenueGalleryImage } from "@/types";
 
@@ -16,7 +15,6 @@ interface CurveCarouselItemProps {
 
 export function CurveCarouselItem({ image, offset, isActive, width, height, spacing, onSelect }: CurveCarouselItemProps) {
   const x = offset * spacing;
-  const z = -Math.abs(offset) * 120;
   const rotateY = offset * 28;
   const rotateZ = offset * -5;
   const scale = isActive ? 1 : 0.88;
@@ -26,26 +24,11 @@ export function CurveCarouselItem({ image, offset, isActive, width, height, spac
   const zIndex = isActive ? 30 : 20 - Math.abs(offset);
 
   return (
-    <motion.button
+    <button
       type="button"
       onClick={onSelect}
-      whileHover={isActive ? { scale: 1.02, y: -6 } : { scale: 0.92 }}
-      whileTap={{ scale: isActive ? 0.98 : 0.88 }}
-      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[2.5rem] focus-visible:outline-none"
-      style={{ width, height, perspective: 1800, zIndex, borderRadius: 40 }}
-      animate={{
-        x,
-        y: Math.abs(offset) * 12,
-        z,
-        rotateY,
-        rotateZ,
-        scale,
-        opacity,
-        filter: blur,
-        boxShadow,
-      }}
-      initial={false}
-      transition={{ type: "spring", stiffness: 150, damping: 22 }}
+      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[2.5rem] focus-visible:outline-none transition-transform duration-500"
+      style={{ width, height, zIndex, borderRadius: 40, transform: `translate(-50%,-50%) translateX(${x}px) translateY(${Math.abs(offset) * 12}px) scale(${scale}) perspective(1800px) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`, opacity, filter: blur, boxShadow }}
       aria-label={`Tampilkan ${image.title}`}
     >
       <div className="relative h-full overflow-hidden rounded-[2.5rem] border border-white/10 bg-slate-950/80 shadow-[inherit] transition duration-500">
@@ -64,6 +47,6 @@ export function CurveCarouselItem({ image, offset, isActive, width, height, spac
           </h3>
         </div>
       </div>
-    </motion.button>
+    </button>
   );
 }

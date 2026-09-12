@@ -103,7 +103,7 @@ export async function middleware(request: NextRequest) {
   }
 
   const response = NextResponse.next();
-  const isPublicPage = pathname === "/" || pathname.startsWith("/book") || pathname.startsWith("/booking") || pathname.startsWith("/fields") || pathname.startsWith("/payment");
+  const isPublicPage = pathname === "/" || pathname.startsWith("/book") || pathname.startsWith("/booking") || pathname.startsWith("/payment");
 
   if (isPublicPage) {
     response.headers.set("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");

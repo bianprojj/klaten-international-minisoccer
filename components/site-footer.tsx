@@ -23,7 +23,6 @@ export function SiteFooter() {
           <div>
             <p className="mb-3 font-semibold text-[color:var(--foreground)]">Quick links</p>
             <ul className="space-y-2">
-              <li><a href="/fields" className="transition hover:text-[color:var(--accent)]">Lapangan Mini Soccer Klaten</a></li>
               <li><a href="/book" className="transition hover:text-[color:var(--accent)]">Booking Lapangan Klaten</a></li>
               <li><a href="/booking-history" className="transition hover:text-[color:var(--accent)]">Riwayat Booking</a></li>
             </ul>
