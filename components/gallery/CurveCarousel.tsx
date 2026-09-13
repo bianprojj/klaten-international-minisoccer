@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { VenueGalleryImage } from "@/types";
 import { useCarousel } from "@/hooks/useCarousel";
 import { CurveCarouselDots } from "./CurveCarouselDots";
@@ -22,21 +22,13 @@ function normalizeOffset(index: number, activeIndex: number, count: number) {
 
 export default function CurveCarousel({ images, price }: CurveCarouselProps) {
   const { activeIndex, previous, next, setActiveIndex, handleKeyDown } = useCarousel(images.length);
-  const [viewportWidth, setViewportWidth] = useState(420);
-
-  useEffect(() => {
-    const updateWidth = () => setViewportWidth(window.innerWidth);
-    updateWidth();
-  }, []);
-
-  const isMobile = viewportWidth < 768;
-  const isTablet = viewportWidth >= 768 && viewportWidth < 1024;
-  const visibleRange = isMobile ? 1 : isTablet ? 2 : 3;
-  const cardWidth = isMobile ? Math.min(320, Math.round(viewportWidth * 0.82)) : isTablet ? 340 : 420;
-  const cardHeight = Math.round(cardWidth * 1.28);
-  const spacing = isMobile ? 160 : isTablet ? 200 : 250;
-  const carouselHeight = Math.max(cardHeight + 28, 360);
-  const arrowInset = Math.min(Math.max(Math.round((viewportWidth - cardWidth) / 2 - 24), 12), 64);
+  // ponytail: fixed geometry, ceiling no responsive measure, add matchMedia when breakpoints needed
+  const visibleRange = 1;
+  const cardWidth = 320;
+  const cardHeight = 410;
+  const spacing = 160;
+  const carouselHeight = 438;
+  const arrowInset = 12;
 
   const visibleItems = useMemo(
     () =>

@@ -1,15 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+// ponytail: no autoplay, ceiling manual nav, add interval when engagement needs it
 
 export function useCarousel(count: number) {
   const [activeIndex, setActiveIndex] = useState(0);
-
-  useEffect(() => {
-    if (count < 2) return;
-    const timer = window.setInterval(() => setActiveIndex((current) => (current + 1) % count), 3000);
-    return () => window.clearInterval(timer);
-  }, [count]);
 
   const previous = useCallback(() => {
     setActiveIndex((current) => (current - 1 + count) % count);
