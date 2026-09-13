@@ -46,6 +46,22 @@ export default function RootLayout({
       lang="id"
       className="h-full antialiased"
     >
+      <head>
+        <meta name="google-site-verification" content="BsXuXOKxwt6fAebllkzGcfGD91W6OLjAY9YHcVoIYvw" />
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-S9EYH0K5Z9"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-S9EYH0K5Z9');
+            `,
+          }}
+        />
+        <link rel="preconnect" href="https://www.openstreetmap.org" />
+        <link rel="dns-prefetch" href="https://www.openstreetmap.org" />
+      </head>
       <body className="flex min-h-screen flex-col bg-[color:var(--background)] text-[color:var(--foreground)]">
         <script src="/theme-init.js" defer></script>
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:px-4 focus:py-2 focus:bg-white">Lewati ke konten</a>
