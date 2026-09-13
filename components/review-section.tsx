@@ -60,9 +60,9 @@ export function ReviewSection({ initialReviews }: { initialReviews: Review[] }) 
   };
 
   return (
-    <section className="rounded-[3rem] border border-[color:var(--border-strong)] bg-[color:var(--surface-strong)] px-4 py-16 shadow-[0_24px_80px_rgba(15,23,42,0.06)] sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl">
-        <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+    <section className="rounded-[3rem] border border-[color:var(--border-strong)] bg-[color:var(--surface-strong)] px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+      <div className="mx-auto w-full max-w-7xl">
+        <div className="grid items-start gap-6 lg:grid-cols-2 lg:gap-10">
           <div className="space-y-6">
             <div className="rounded-[2.5rem] border border-[color:var(--border-strong)] bg-[color:var(--surface)] p-8 shadow-sm shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
               <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[color:var(--accent-strong)]">Add a review</p>
@@ -119,10 +119,10 @@ export function ReviewSection({ initialReviews }: { initialReviews: Review[] }) 
 
           <div className="space-y-4">
             {reviews.slice(0, 3).map((review) => (
-              <div key={review.id} className="rounded-[2rem] border border-white/10 card-surface p-6">
+              <div key={review.id} className="rounded-[2rem] card-surface p-6">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="font-semibold text-white">{review.customerName}</p>
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold text-[color:var(--foreground)]">{review.customerName}</p>
                     <p className="text-sm text-[color:var(--muted)]">{review.date}</p>
                   </div>
                     <span className="rounded-full border border-[color:rgba(16,185,129,0.18)] bg-[color:rgba(16,185,129,0.06)] px-3 py-1 text-sm text-[color:var(--accent)]">

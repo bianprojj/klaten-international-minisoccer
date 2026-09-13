@@ -15,8 +15,8 @@ interface CurveCarouselItemProps {
 
 export function CurveCarouselItem({ image, offset, isActive, width, height, spacing, onSelect }: CurveCarouselItemProps) {
   const x = offset * spacing;
-  const rotateY = offset * 28;
-  const rotateZ = offset * -5;
+  const rotateY = offset * 18;
+  const rotateZ = offset * -3;
   const scale = isActive ? 1 : 0.88;
   const opacity = isActive ? 1 : 0.66;
   const blur = isActive ? "blur(0px)" : "blur(1.1px)";
@@ -27,8 +27,8 @@ export function CurveCarouselItem({ image, offset, isActive, width, height, spac
     <button
       type="button"
       onClick={onSelect}
-      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[2.5rem] focus-visible:outline-none transition-transform duration-500"
-      style={{ width, height, zIndex, borderRadius: 40, transform: `translate(-50%,-50%) translateX(${x}px) translateY(${Math.abs(offset) * 12}px) scale(${scale}) perspective(1800px) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`, opacity, filter: blur, boxShadow }}
+      className="absolute top-1/2 left-1/2 max-w-full -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[2.5rem] focus-visible:outline-none transition-transform duration-500"
+      style={{ width, height, maxWidth: "100%", zIndex, borderRadius: 40, transform: `translate(-50%,-50%) translateX(${x}px) translateY(${Math.abs(offset) * 12}px) scale(${scale}) perspective(1800px) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`, opacity, filter: blur, boxShadow }}
       aria-label={`Tampilkan ${image.title}`}
     >
       <div className="relative h-full overflow-hidden rounded-[2.5rem] border border-white/10 bg-slate-950/80 shadow-[inherit] transition duration-500">

@@ -8,7 +8,7 @@ interface CurveCarouselDotsProps {
 
 export function CurveCarouselDots({ activeIndex, count, onSelect }: CurveCarouselDotsProps) {
   return (
-    <div className="flex items-center justify-center gap-3 rounded-[2rem] border border-white/10 bg-white/5 px-4 py-3 text-center shadow-[0_18px_60px_rgba(0,0,0,0.12)] backdrop-blur-xl">
+    <div className="flex max-w-full flex-wrap items-center justify-center gap-3 rounded-[2rem] border border-white/10 bg-white/5 px-4 py-3 text-center shadow-[0_18px_60px_rgba(0,0,0,0.12)] backdrop-blur-xl">
       {Array.from({ length: count }).map((_, index) => (
         <button
           key={index}

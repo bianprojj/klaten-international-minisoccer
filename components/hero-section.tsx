@@ -35,7 +35,7 @@ export function HeroSection({ facilities, content = {} as Partial<SiteContent> }
       <div className="pointer-events-none absolute -bottom-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full hero-bottom blur-xl" />
       <div className="absolute inset-0 hero-overlay" />
       <div className="relative px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-        <div className="mx-auto max-w-5xl text-center text-[color:var(--foreground)]">
+        <div className="mx-auto w-full max-w-7xl text-center text-[color:var(--foreground)]">
           <p className="text-sm font-semibold uppercase tracking-[0.35em] text-[color:var(--accent-strong)]">
             {content.locationLabel}
           </p>
@@ -50,22 +50,22 @@ export function HeroSection({ facilities, content = {} as Partial<SiteContent> }
             <div className="pointer-events-none absolute left-1/2 top-1/2 h-28 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-[rgba(251,203,232,0.24)] via-[rgba(147,197,253,0.18)] to-[rgba(199,210,254,0.02)] blur-xl" />
             <a
               href="/book"
-              className="btn-primary relative z-10"
+              className="btn-primary relative z-10 w-full sm:w-auto"
             >
               {content.ctaPrimary}
             </a>
             <a
               href="/booking-history"
-              className="btn-secondary relative z-10"
+              className="btn-secondary relative z-10 w-full sm:w-auto"
             >
               {content.ctaSecondary}
             </a>
           </div>
 
-          <div className="mt-14 grid gap-4 sm:grid-cols-2 xl:grid-cols-4 min-h-[420px]">
+          <div className="mt-14 grid items-stretch gap-4 text-left sm:grid-cols-2 lg:grid-cols-4">
             {displayFacilities.map((facility, index) => (
-              <div key={facility.id ?? facility.title} className="rounded-[2rem] border border-[color:var(--border-strong)] bg-[color:var(--surface)] p-4 shadow-sm backdrop-blur-xl">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-[color:var(--surface)] sm:aspect-[16/9]">
+              <div key={facility.id ?? facility.title} className="flex h-full flex-col rounded-[2rem] border border-[color:var(--border-strong)] bg-[color:var(--surface)] p-4 shadow-sm backdrop-blur-xl">
+                <div className="relative aspect-[16/10] w-full overflow-hidden rounded-3xl bg-[color:var(--surface)]">
                   <Image
                     src={getSafeRemoteImageUrl(facility.imageUrl, FALLBACK_REMOTE_IMAGES, index)}
                     alt={facility.title}
@@ -76,8 +76,8 @@ export function HeroSection({ facilities, content = {} as Partial<SiteContent> }
                     className="object-cover"
                   />
                 </div>
-                <h3 className="mt-4 text-lg font-semibold text-[color:var(--foreground)]">{facility.title}</h3>
-                <p className="mt-2 text-sm text-[color:var(--muted)]">{facility.description}</p>
+                <h3 className="mt-4 line-clamp-1 text-lg font-semibold text-[color:var(--foreground)]">{facility.title}</h3>
+                <p className="mt-2 line-clamp-3 text-sm leading-6 text-[color:var(--muted)]">{facility.description}</p>
               </div>
             ))}
           </div>

@@ -232,14 +232,14 @@ a {
   /* Ambient rainbow accent for light mode cards */
   html[data-theme="light"] .card-surface {
     position: relative;
-    overflow: visible;
+    overflow: hidden;
     background-color: rgba(255,255,255,0.06);
   }
 
   html[data-theme="light"] .card-surface::before {
     content: "";
     position: absolute;
-    inset: -12px -18px -40px -18px;
+    inset: 0;
     z-index: 0;
     border-radius: inherit;
     background: radial-gradient(600px 200px at 10% 10%, rgba(255, 192, 203, 0.06), transparent 10%),
