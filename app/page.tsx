@@ -18,25 +18,16 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
-async function loadReviews() {
-  return await getReviews();
-}
+export const revalidate = 60;
 
 export default async function Home() {
   let reviews: Review[] = [];
-  const features = await getVenueFeatures();
-  const gallery = await getVenueGallery();
-  const content = await getSiteContent();
-  
+  const [features, gallery, content, hourlyRate] = await Promise.all([getVenueFeatures(), getVenueGallery(), getSiteContent(), getFieldHourlyRate()]);
   try {
-    reviews = await loadReviews();
+    reviews = await getReviews();
   } catch (error) {
     console.error('❌ Failed to load reviews:', error);
   }
-  const hourlyRate = await getFieldHourlyRate();
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "SportsActivityLocation",

@@ -1,21 +1,11 @@
-"use client";
-
 import Image from "next/image";
-import { useMemo, useState } from "react";
 import { FALLBACK_REMOTE_IMAGES, getSafeRemoteImageUrl } from "@/lib/remote-image";
 import type { FacilityImage, SiteContent } from "@/types";
 
+// ponytail: no onError fallback state, ceiling 4 imgs, add error boundary when remote 5xx frequent
 export function HeroSection({ facilities, content = {} as Partial<SiteContent> }: { facilities: FacilityImage[]; content?: Partial<SiteContent> }) {
-  const [brokenFacilityImages, setBrokenFacilityImages] = useState<Record<string, boolean>>({});
-  const displayFacilities = useMemo(() => facilities.filter((facility) => facility && typeof facility.title === "string"), [facilities]);
+  const displayFacilities = facilities.filter((facility) => facility && typeof facility.title === "string");
   const heroBackgroundUrl = getSafeRemoteImageUrl(content.backgroundImageUrl, FALLBACK_REMOTE_IMAGES, 0);
-  const safeFacilityImage = (facility: FacilityImage, index: number) => {
-    const id = facility.id ?? facility.title;
-    if (brokenFacilityImages[id]) {
-      return getSafeRemoteImageUrl("", FALLBACK_REMOTE_IMAGES, index);
-    }
-    return getSafeRemoteImageUrl(facility.imageUrl, FALLBACK_REMOTE_IMAGES, index);
-  };
 
   return (
     <section
@@ -72,23 +62,18 @@ export function HeroSection({ facilities, content = {} as Partial<SiteContent> }
             </a>
           </div>
 
-          <div className="mt-14 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-14 grid gap-4 sm:grid-cols-2 xl:grid-cols-4 min-h-[420px]">
             {displayFacilities.map((facility, index) => (
               <div key={facility.id ?? facility.title} className="rounded-[2rem] border border-[color:var(--border-strong)] bg-[color:var(--surface)] p-4 shadow-sm backdrop-blur-xl">
                 <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-[color:var(--surface)] sm:aspect-[16/9]">
                   <Image
-                    src={safeFacilityImage(facility, index)}
+                    src={getSafeRemoteImageUrl(facility.imageUrl, FALLBACK_REMOTE_IMAGES, index)}
                     alt={facility.title}
                     fill
                     sizes="(max-width: 768px) 100vw, 25vw"
                     loading="lazy"
+                    decoding="async"
                     className="object-cover"
-                    onError={() => {
-                      const facilityKey = facility.id ?? facility.title;
-                      if (!brokenFacilityImages[facilityKey]) {
-                        setBrokenFacilityImages((current) => ({ ...current, [facilityKey]: true }));
-                      }
-                    }}
                   />
                 </div>
                 <h3 className="mt-4 text-lg font-semibold text-[color:var(--foreground)]">{facility.title}</h3>

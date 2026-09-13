@@ -22,13 +22,11 @@ function normalizeOffset(index: number, activeIndex: number, count: number) {
 
 export default function CurveCarousel({ images, price }: CurveCarouselProps) {
   const { activeIndex, previous, next, setActiveIndex, handleKeyDown } = useCarousel(images.length);
-  const [viewportWidth, setViewportWidth] = useState(1280);
+  const [viewportWidth, setViewportWidth] = useState(420);
 
   useEffect(() => {
     const updateWidth = () => setViewportWidth(window.innerWidth);
     updateWidth();
-    window.addEventListener("resize", updateWidth);
-    return () => window.removeEventListener("resize", updateWidth);
   }, []);
 
   const isMobile = viewportWidth < 768;
