@@ -1,6 +1,6 @@
 export function SiteFooter() {
   return (
-    <footer className="border-t border-[color:var(--border-strong)] navbar-shell">
+    <footer className="footer-shell border-t border-[color:var(--border-strong)] bg-[color:rgba(255,255,255,0.06)] backdrop-blur-xl">
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-10 lg:grid-cols-[1.2fr_0.8fr] lg:px-8">
         <div className="space-y-4 text-sm text-[color:var(--muted)]">
           <p className="font-semibold text-[color:var(--foreground)]">Klaten Minisoccer</p>

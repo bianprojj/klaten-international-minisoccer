@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { VenueGalleryImage } from "@/types";
 import { useCarousel } from "@/hooks/useCarousel";
 import { CurveCarouselDots } from "./CurveCarouselDots";
@@ -22,21 +22,29 @@ function normalizeOffset(index: number, activeIndex: number, count: number) {
 
 export default function CurveCarousel({ images, price }: CurveCarouselProps) {
   const { activeIndex, previous, next, setActiveIndex, handleKeyDown } = useCarousel(images.length);
-  // ponytail: matchMedia breakpoint only, ceiling no ResizeObserver, upgrade when fluid scaling needed
-  const [narrow, setNarrow] = useState(false);
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
+
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 640px)");
-    const update = () => setNarrow(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
+    const node = trackRef.current;
+    if (!node) return;
+
+    const updateWidth = () => setContainerWidth(node.clientWidth || 0);
+    updateWidth();
+
+    const resizeObserver = new ResizeObserver(() => updateWidth());
+    resizeObserver.observe(node);
+
+    return () => resizeObserver.disconnect();
   }, []);
+
+  const narrow = containerWidth > 0 && containerWidth < 640;
   const visibleRange = narrow ? 0 : 1;
-  const cardWidth = narrow ? 260 : 320;
-  const cardHeight = narrow ? 340 : 410;
-  const spacing = narrow ? 0 : 160;
-  const carouselHeight = narrow ? 368 : 438;
-  const arrowInset = 12;
+  const cardWidth = containerWidth > 0 ? Math.min(Math.max(containerWidth * 0.7, 240), 420) : 320;
+  const cardHeight = Math.round(cardWidth * 0.7);
+  const spacing = containerWidth > 0 ? Math.max(Math.min(containerWidth * 0.26, 140), 90) : 140;
+  const carouselHeight = Math.max(cardHeight + 48, 320);
+  const arrowInset = containerWidth > 0 ? Math.max(10, (containerWidth - cardWidth) / 10) : 12;
 
   const visibleItems = useMemo(
     () =>
@@ -87,6 +95,7 @@ export default function CurveCarousel({ images, price }: CurveCarouselProps) {
 
           <div className="relative mx-auto flex w-full items-center justify-center overflow-hidden">
             <div
+              ref={trackRef}
               className="relative flex w-full items-center justify-center overflow-hidden"
               style={{ minHeight: carouselHeight, width: "100%" }}
               role="group"

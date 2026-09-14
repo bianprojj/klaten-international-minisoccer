@@ -8,6 +8,7 @@ import { siteConfig } from "@/lib/site-config";
 import { getSiteContent } from "@/lib/site-content";
 import { getFieldHourlyRate } from "@/lib/site-content";
 import CurveCarousel from "@/components/gallery/CurveCarousel";
+import { LocationMap } from "@/components/location-map";
 
 export const metadata: Metadata = {
   title: "Klaten Minisoccer | Booking Lapangan Mini Soccer di Klaten",
@@ -37,17 +38,17 @@ export default async function Home() {
     telephone: "+62 812 3456 7890",
     address: {
       "@type": "PostalAddress",
-      streetAddress: "Klaten",
+      streetAddress: "Jl. Desa Karanganom, Karanganom, Klaten Utara",
       addressLocality: "Klaten",
       addressRegion: "Jawa Tengah",
       addressCountry: "ID",
     },
     geo: {
       "@type": "GeoCoordinates",
-      latitude: -7.7115,
-      longitude: 110.6030,
+      latitude: -7.6848873,
+      longitude: 110.6101472,
     },
-    openingHours: "Mo-Su 07:00-22:00",
+    openingHours: "Mo-Su 06:00-23:00",
     priceRange: "Rp",
     description: siteConfig.description,
     sameAs: [siteConfig.url],
@@ -71,14 +72,7 @@ export default async function Home() {
                 Lapangan terletak strategis, mudah dijangkau, dan didukung fasilitas pendukung untuk tim mini soccer.
               </p>
             </div>
-            <div className="overflow-hidden rounded-[2rem] border border-[color:var(--border-strong)] bg-[color:var(--surface)]">
-              <iframe
-                title="Klaten International Minisoccer location"
-                src="https://www.openstreetmap.org/export/embed.html?bbox=110.5950%2C-7.7210%2C110.6110%2C-7.7020&layer=mapnik"
-                className="h-[360px] w-full border-0"
-                loading="lazy"
-              />
-            </div>
+            <LocationMap />
           </div>
         </div>
       </section>

@@ -263,6 +263,11 @@ a {
     @apply border-b border-[color:var(--border-strong)] bg-[color:rgba(255,255,255,0.08)] backdrop-blur-xl;
   }
 
+  .footer-shell {
+    min-height: 220px;
+    display: block;
+  }
+
   .sidebar-shell {
     @apply rounded-3xl border border-[color:var(--border-strong)] bg-[color:var(--surface)] p-4 shadow-none;
   }
