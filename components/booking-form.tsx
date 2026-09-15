@@ -1,5 +1,7 @@
 "use client";
 
+import { fetchJson } from "@/lib/fetch-json";
+
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Field } from "@/types";
@@ -11,6 +13,7 @@ type AvailabilitySlot = {
   startTime: string;
   endTime: string;
   isAvailable: boolean;
+  price?: number;
 };
 
 function getTodayIso() {
@@ -80,13 +83,22 @@ export function BookingForm({ fields }: { fields: Field[] }) {
 
         return response.json();
       })
-      .then((data) => {
-        if (!data?.success || !Array.isArray(data.schedules)) {
-          throw new Error("Schedule data is malformed.");
-        }
+        .then((data) => {
+          if (!data?.success || !Array.isArray(data.schedules)) {
+            throw new Error("Schedule data is malformed.");
+          }
 
-        setSlots(data.schedules);
-      })
+          const raw = data.schedules as unknown as Array<Record<string, unknown>>;
+          const normalized = raw.map((s) => ({
+            id: String(s.id),
+            startTime: String(s.startTime),
+            endTime: String(s.endTime),
+            isAvailable: Boolean(s.isAvailable),
+            price: typeof s.price === "number" ? (s.price as number) : undefined,
+          }));
+
+          setSlots(normalized);
+        })
       .catch((error) => {
         if (error.name === "AbortError") {
           return;
@@ -103,7 +115,7 @@ export function BookingForm({ fields }: { fields: Field[] }) {
   const selectedIds = useMemo(() => new Set(selectedSlots.map((slot) => slot.id)), [selectedSlots]);
   const selectedRange = useMemo(() => getSelectedRange(selectedSlots), [selectedSlots]);
   const selectedDuration = selectedRange ? getDurationHours(selectedRange.startTime, selectedRange.endTime) : 0;
-  const selectedAmount = selectedRange ? selectedField.price * selectedDuration : 0;
+  const selectedAmount = selectedSlots.length > 0 ? selectedSlots.reduce((sum, s) => sum + (s.price ?? 0), 0) : 0;
 
   const selectedLabel = selectedRange
     ? `${selectedRange.startTime} - ${selectedRange.endTime}`
@@ -178,53 +190,52 @@ export function BookingForm({ fields }: { fields: Field[] }) {
   };
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-[color:var(--surface-strong)] p-6 sm:p-8">
+    <div className="rounded-[20px] border border-[rgba(0,81,54,0.16)] bg-[#FFFFFF] p-6 shadow-[0_4px_16px_rgba(26,31,77,0.08)] sm:p-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--accent-strong)]">Book a field</p>
-          <h2 className="mt-2 text-balance text-2xl font-semibold leading-tight text-[color:var(--foreground)] sm:text-3xl">Reserve your preferred slot</h2>
+          <p className="font-[Manrope] text-xs font-semibold text-[#005136]">Book a field</p>
+          <h2 className="mt-2 text-balance font-[Archivo] text-2xl font-extrabold leading-tight tracking-[-0.015em] text-[#1A1F4D] sm:text-[32px]">Reserve your preferred slot</h2>
         </div>
         <div>
-          <p className="text-sm text-[color:var(--muted)]">Choose a field and date, then confirm the available schedule.</p>
+          <p className="font-[Manrope] text-sm text-[rgba(26,31,77,0.62)]">Choose a field and date, then confirm the available schedule.</p>
         </div>
       </div>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        <div className="rounded-3xl border border-white/10 bg-[color:var(--background)] p-4">
-          <p className="text-sm font-medium text-[color:var(--muted)]">Field</p>
-          <p className="mt-2 text-base font-semibold text-[color:var(--foreground)]">{selectedField?.name}</p>
-          <p className="text-sm text-[color:var(--muted)]">{selectedField?.location}</p>
+        <div className="rounded-[20px] border border-[rgba(0,81,54,0.16)] bg-[#F1EED9] p-6">
+          <p className="font-[Manrope] text-sm font-medium text-[rgba(26,31,77,0.62)]">Field</p>
+          <p className="mt-2 font-[Archivo] text-base font-bold text-[#1A1F4D]">{selectedField?.name}</p>
+          <p className="font-[Manrope] text-sm text-[rgba(26,31,77,0.62)]">{selectedField?.location}</p>
         </div>
-        <div className="rounded-3xl border border-white/10 bg-[color:var(--background)] p-4">
-          <label className="block text-sm font-medium text-[color:var(--muted)]">Booking date</label>
+        <div className="rounded-[20px] border border-[rgba(0,81,54,0.16)] bg-[#F1EED9] p-6">
+          <label className="block font-[Manrope] text-sm font-medium text-[rgba(26,31,77,0.62)]">Booking date</label>
           <input
             type="date"
             value={selectedDate}
             onChange={(event) => setSelectedDate(event.target.value)}
-            className="mt-2 w-full rounded-3xl border border-white/10 bg-[color:var(--surface)] px-4 py-3 text-white outline-none focus:border-[color:var(--accent)]"
+            className="mt-2 w-full rounded-[12px] border border-[rgba(0,81,54,0.16)] bg-[#FFFFFF] px-4 py-3 font-[Manrope] text-[#1A1F4D] outline-none focus:border-[#005136]"
           />
-          <p className="mt-2 text-xs text-[color:var(--muted)]">Display: {selectedDate ? formatJakartaDate(selectedDate) : "—"} (DD-MM-YYYY)</p>
+          <p className="mt-2 font-[Manrope] text-xs text-[rgba(26,31,77,0.62)]">Display: {selectedDate ? formatJakartaDate(selectedDate) : "—"} (DD-MM-YYYY)</p>
         </div>
       </div>
 
       <div className="mt-8">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-[color:var(--foreground)]">Available time slots</h3>
-            <p className="mt-1 text-sm text-[color:var(--muted)]">Only one customer can reserve a slot at a time.</p>
+            <h3 className="font-[Archivo] text-lg font-bold text-[#1A1F4D]">Available time slots</h3>
+            <p className="mt-1 font-[Manrope] text-sm text-[rgba(26,31,77,0.62)]">Only one customer can reserve a slot at a time.</p>
           </div>
-          <p className="text-sm text-[color:var(--muted)]">Price per hour: {formatCurrency(selectedField?.price ?? 0)}</p>
         </div>
 
         <div className="mt-4 grid gap-3">
           {loading ? (
-            <div className="rounded-3xl border border-white/10 bg-[color:var(--surface)] p-6 text-sm text-[color:var(--muted)]">Loading availability…</div>
+            <div className="rounded-[20px] border border-[rgba(0,81,54,0.16)] bg-[#FFFFFF] p-6 font-[Manrope] text-sm text-[rgba(26,31,77,0.62)]">Loading availability…</div>
           ) : error ? (
-            <div className="rounded-3xl border border-rose-500/10 bg-rose-500/5 p-6 text-sm text-rose-200">{error}</div>
+            <div className="rounded-[20px] border border-rose-500/20 bg-rose-500/5 p-6 font-[Manrope] text-sm text-rose-700">{error}</div>
           ) : slots.length === 0 ? (
-            <div className="rounded-3xl border border-white/10 bg-[color:var(--surface)] p-6 text-sm text-[color:var(--muted)]">No schedule available for this field on the selected date.</div>
+            <div className="rounded-[20px] border border-[rgba(0,81,54,0.16)] bg-[#FFFFFF] p-6 font-[Manrope] text-sm text-[rgba(26,31,77,0.62)]">No schedule available for this field on the selected date.</div>
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2">
               {slots.map((slot) => {
                 const label = `${slot.startTime} - ${slot.endTime}`;
                 const isSelected = selectedIds.has(slot.id);
@@ -233,33 +244,34 @@ export function BookingForm({ fields }: { fields: Field[] }) {
                     key={slot.id}
                     type="button"
                     onClick={() => handleSlotToggle(slot)}
-                    className={`rounded-3xl border px-4 py-4 text-left transition-all duration-200 ${
+                    className={`rounded-[12px] border px-4 py-4 text-left font-[Manrope] transition-all duration-200 overflow-hidden min-w-0 ${
                       slot.isAvailable
                         ? isSelected
-                          ? "border-emerald-300 bg-gradient-to-br from-emerald-400 to-emerald-500 text-white shadow-[0_0_0_3px_rgba(16,185,129,0.18),0_18px_32px_rgba(16,185,129,0.35)]"
-                          : "border-white/10 bg-[color:var(--background)] text-white hover:border-emerald-400/70 hover:bg-[color:rgba(16,185,129,0.12)]"
-                        : "border-red-300 bg-gradient-to-br from-red-400 to-red-500 text-white cursor-not-allowed shadow-[0_0_0_3px_rgba(239,68,68,0.12)]"
+                          ? "border-none bg-[#C9D651] text-[#1A1F4D] shadow-[0_4px_14px_rgba(201,214,81,0.35)]"
+                          : "border border-[rgba(0,81,54,0.16)] bg-[#FFFFFF] text-[#1A1F4D] hover:border-[#005136]"
+                        : "border-none bg-[#F1EED9]/60 text-[rgba(26,31,77,0.62)] cursor-not-allowed"
                     }`}
                     disabled={!slot.isAvailable}
-                  >
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <p className="text-sm font-semibold text-white">{label}</p>
-                        <p className={`mt-1 text-sm ${slot.isAvailable ? "text-[color:var(--muted)]" : "text-red-50"}`}>
+                    >
+                    <div className="flex min-w-0 flex-col gap-2">
+                      <p className="text-sm font-semibold">{label}</p>
+                      <p className="text-sm font-semibold">{typeof slot.price === "number" && slot.price > 0 ? formatCurrency(slot.price) : "—"}</p>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm opacity-70">
                           {slot.isAvailable ? "Available" : "Booked"}
                         </p>
+                        <span
+                          className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
+                            slot.isAvailable
+                              ? isSelected
+                                ? "bg-[#1A1F4D]/10 text-[#1A1F4D]"
+                                : "bg-[#C9D651] text-[#005136]"
+                              : "bg-transparent border border-[rgba(0,81,54,0.16)] text-[rgba(26,31,77,0.62)]"
+                          }`}
+                        >
+                          {slot.isAvailable ? "Open" : "Unavailable"}
+                        </span>
                       </div>
-                      <span
-                        className={`rounded-full px-3 py-1 text-sm font-medium ${
-                          slot.isAvailable
-                            ? isSelected
-                              ? "bg-white/20 text-white"
-                              : "bg-emerald-500/10 text-emerald-200"
-                            : "bg-white/20 text-white"
-                        }`}
-                      >
-                        {slot.isAvailable ? "Open" : "Unavailable"}
-                      </span>
                     </div>
                   </button>
                 );
@@ -269,37 +281,37 @@ export function BookingForm({ fields }: { fields: Field[] }) {
         </div>
       </div>
 
-      <div className="mt-8 rounded-3xl border border-white/10 bg-[color:var(--background)] p-6">
+      <div className="mt-8 rounded-[20px] border border-[rgba(0,81,54,0.16)] bg-[#F1EED9] p-6">
         <div className="grid gap-4 sm:grid-cols-[1.1fr_0.9fr] sm:items-center">
           <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-[color:var(--accent-strong)]">Booking preview</p>
-            <p className="mt-2 text-lg font-semibold text-[color:var(--foreground)]">{selectedField?.name}</p>
-            <p className="text-sm text-[color:var(--muted)]">{selectedField?.location}</p>
+            <p className="font-[Manrope] text-xs font-semibold text-[#005136]">Booking preview</p>
+            <p className="mt-2 font-[Archivo] text-lg font-bold text-[#1A1F4D]">{selectedField?.name}</p>
+            <p className="font-[Manrope] text-sm text-[rgba(26,31,77,0.62)]">{selectedField?.location}</p>
           </div>
-          <div className="rounded-3xl border border-white/10 bg-[color:var(--surface)] p-4">
+          <div className="rounded-[20px] border border-[rgba(0,81,54,0.16)] bg-[#FFFFFF] p-4">
             <div className="grid gap-3">
               <div>
-                <p className="text-sm text-[color:var(--muted)]">Duration</p>
-                <p className="text-lg font-semibold text-[color:var(--foreground)]">{selectedRange ? `${selectedDuration} hour(s)` : "Select a slot"}</p>
+                <p className="font-[Manrope] text-sm text-[rgba(26,31,77,0.62)]">Duration</p>
+                <p className="font-[Archivo] text-lg font-bold text-[#1A1F4D]">{selectedRange ? `${selectedDuration} hour(s)` : "Select a slot"}</p>
               </div>
               <div>
-                <p className="text-sm text-[color:var(--muted)]">Date & time</p>
-                <p className="mt-1 text-[color:var(--foreground)]">{selectedDate ? formatJakartaDate(selectedDate) : "—"} • {selectedLabel}</p>
+                <p className="font-[Manrope] text-sm text-[rgba(26,31,77,0.62)]">Date & time</p>
+                <p className="mt-1 font-[Manrope] text-[#1A1F4D]">{selectedDate ? formatJakartaDate(selectedDate) : "—"} • {selectedLabel}</p>
               </div>
               {selectedRange && !selectedRange.isContinuous ? (
-                <p className="text-sm text-amber-300">Select continuous slots without gaps.</p>
+                <p className="font-[Manrope] text-sm text-amber-700">Select continuous slots without gaps.</p>
               ) : null}
             </div>
           </div>
         </div>
 
-        <div className="mt-6 flex flex-col gap-3 border-t border-white/10 pt-4 text-[color:var(--foreground)] sm:flex-row sm:items-center sm:justify-between">
-          <span className="text-sm text-[color:var(--muted)]">Estimated total</span>
-          <span className="text-2xl font-semibold">{formatCurrency(selectedAmount)}</span>
+        <div className="mt-6 flex flex-col gap-3 border-t border-[rgba(0,81,54,0.16)] pt-4 text-[#1A1F4D] sm:flex-row sm:items-center sm:justify-between">
+          <span className="font-[Manrope] text-sm text-[rgba(26,31,77,0.62)]">Estimated total</span>
+          <span className="font-[Archivo] text-2xl font-extrabold">{formatCurrency(selectedAmount)}</span>
         </div>
 
         {submitError ? (
-          <p className="mt-4 rounded-3xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-200">{submitError}</p>
+          <p className="mt-4 rounded-[20px] border border-rose-500/20 bg-rose-500/10 p-4 font-[Manrope] text-sm text-rose-700">{submitError}</p>
         ) : null}
 
         <button
@@ -308,7 +320,7 @@ export function BookingForm({ fields }: { fields: Field[] }) {
           disabled={validating}
           aria-busy={validating}
           aria-label={validating ? "Checking availability" : "Continue to checkout"}
-          className="mt-6 w-full rounded-3xl bg-[color:var(--accent)] px-6 py-4 text-base font-semibold text-black transition hover:bg-[color:var(--accent-strong)] disabled:opacity-60"
+          className="btn-primary mt-6 w-full px-6 py-4 text-base disabled:opacity-60"
         >
           <span className={`flex items-center justify-center transform transition-opacity transition-transform duration-200 ease-in-out ${validating ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}`}>
             <svg className="h-5 w-5 animate-spin text-black" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>

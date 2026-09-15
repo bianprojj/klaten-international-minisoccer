@@ -1,22 +1,31 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { Archivo, Manrope } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { siteConfig } from "@/lib/site-config";
-import { getSiteContent } from "@/lib/site-content";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
+const archivo = Archivo({ subsets: ["latin"], weight: ["700", "800", "900"], variable: "--font-heading", display: "swap" });
+const manrope = Manrope({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-body", display: "swap" });
+
+export const viewport: Viewport = { themeColor: "#005136", width: "device-width", initialScale: 1 };
+
 export async function generateMetadata(): Promise<Metadata> {
-  const content = await getSiteContent();
   return {
   metadataBase: new URL(siteConfig.url),
   alternates: { canonical: siteConfig.url },
   title: {
-    default: content.heroTitle || siteConfig.title,
+    default: siteConfig.title,
     template: `%s | ${siteConfig.name}`,
   },
-  description: content.heroSubtitle || siteConfig.description,
+  description: siteConfig.description,
   keywords: siteConfig.keywords,
+  authors: [{ name: siteConfig.name }],
+  creator: siteConfig.name,
+  publisher: siteConfig.name,
+  formatDetection: { email: false, address: false, telephone: false },
+  manifest: "/site.webmanifest",
   icons: [
     { rel: "icon", url: "/favicon.ico" },
     { rel: "icon", type: "image/png", sizes: "32x32", url: "/favicon-32x32.png" },
@@ -27,8 +36,8 @@ export async function generateMetadata(): Promise<Metadata> {
   ],
   robots: { index: true, follow: true },
   openGraph: {
-    title: content.heroTitle || siteConfig.title,
-    description: content.heroSubtitle || siteConfig.description,
+    title: siteConfig.title,
+    description: siteConfig.description,
     url: siteConfig.url,
     siteName: siteConfig.name,
     locale: siteConfig.locale,
@@ -37,8 +46,8 @@ export async function generateMetadata(): Promise<Metadata> {
   },
   twitter: {
     card: "summary_large_image",
-    title: content.heroTitle || siteConfig.title,
-    description: content.heroSubtitle || siteConfig.description,
+    title: siteConfig.title,
+    description: siteConfig.description,
     images: [siteConfig.openGraphImage],
   },
   };
@@ -52,7 +61,7 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className="h-full antialiased"
+      className={`h-full antialiased ${archivo.variable} ${manrope.variable}`}
     >
       <head>
         <meta name="google-site-verification" content="BsXuXOKxwt6fAebllkzGcfGD91W6OLjAY9YHcVoIYvw" />

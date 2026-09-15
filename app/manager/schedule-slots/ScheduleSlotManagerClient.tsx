@@ -1,5 +1,7 @@
 "use client";
 
+import { fetchJson } from "@/lib/fetch-json";
+
 import { useEffect, useState } from "react";
 
 type ScheduleSlotItem = {
@@ -35,9 +37,9 @@ export default function ScheduleSlotManagerClient({ adminName }: { adminName: st
     setError(null);
 
     try {
-      const response = await fetch("/api/admin/schedule-slots", { cache: "no-store" });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Unable to load schedule slots.");
+      const { res: response, data: __body } = await fetchJson("/api/admin/schedule-slots", { cache: "no-store" });
+      const data = __body;
+      if (!response.ok) throw new Error(String(data.message ?? "") || "Unable to load schedule slots.");
       setSlots(data.data || []);
     } catch (err) {
       setError((err as Error).message);
@@ -65,13 +67,13 @@ export default function ScheduleSlotManagerClient({ adminName }: { adminName: st
     try {
       const url = editing ? `/api/admin/schedule-slots/${editing.id}` : "/api/admin/schedule-slots";
       const method = editing ? "PUT" : "POST";
-      const response = await fetch(url, {
+      const { res: response, data: __body } = await fetchJson(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formState),
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Unable to save schedule slot.");
+      const data = __body;
+      if (!response.ok) throw new Error(String(data.message ?? "") || "Unable to save schedule slot.");
       await loadSlots();
       resetForm();
     } catch (err) {
@@ -98,9 +100,9 @@ export default function ScheduleSlotManagerClient({ adminName }: { adminName: st
     setError(null);
 
     try {
-      const response = await fetch(`/api/admin/schedule-slots/${id}`, { method: "DELETE" });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Unable to delete schedule slot.");
+      const { res: response, data: __body } = await fetchJson(`/api/admin/schedule-slots/${id}`, { method: "DELETE" });
+      const data = __body;
+      if (!response.ok) throw new Error(String(data.message ?? "") || "Unable to delete schedule slot.");
       await loadSlots();
       if (editing?.id === id) resetForm();
     } catch (err) {
@@ -112,7 +114,7 @@ export default function ScheduleSlotManagerClient({ adminName }: { adminName: st
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8" id="schedule-slots">
-      <div className="rounded-[2rem] border border-white/10 bg-[color:var(--surface-strong)] p-6 sm:p-8">
+      <div className="glass-panel rounded-[2rem] p-6 sm:p-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[color:var(--accent-strong)]">Schedule manager</p>
@@ -130,7 +132,7 @@ export default function ScheduleSlotManagerClient({ adminName }: { adminName: st
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-[1.4fr_0.6fr]">
-        <section className="rounded-[1.5rem] border border-white/10 bg-[color:var(--surface)] p-5 sm:p-6">
+        <section className="glass-panel rounded-[1.5rem] p-5 sm:p-6">
           <div className="flex items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-semibold text-white sm:text-2xl">Schedule slots</h2>
@@ -175,7 +177,7 @@ export default function ScheduleSlotManagerClient({ adminName }: { adminName: st
             </div>
           </section>
 
-          {showForm ? <section className="rounded-[1.5rem] border border-white/10 bg-[color:var(--surface)] p-5 sm:p-6">
+          {showForm ? <section className="glass-panel rounded-[1.5rem] p-5 sm:p-6">
             <h2 className="text-xl font-semibold text-white sm:text-2xl">Create / update slot</h2>
             <div className="mt-6 space-y-4">
               <div>

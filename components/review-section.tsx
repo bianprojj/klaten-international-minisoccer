@@ -60,13 +60,13 @@ export function ReviewSection({ initialReviews }: { initialReviews: Review[] }) 
   };
 
   return (
-    <section className="rounded-[3rem] border border-[color:var(--border-strong)] bg-[color:var(--surface-strong)] px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-      <div className="mx-auto w-full max-w-7xl">
+    <section className="w-full bg-[#F1EED9] px-4 py-16 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-[1180px]">
         <div className="grid items-start gap-6 lg:grid-cols-2 lg:gap-10">
           <div className="space-y-6">
-            <div className="rounded-[2.5rem] border border-[color:var(--border-strong)] bg-[color:var(--surface)] p-8 shadow-sm shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[color:var(--accent-strong)]">Add a review</p>
-              <h2 className="mt-2 text-3xl font-semibold text-[color:var(--foreground)] sm:text-4xl">Tell us about your game experience</h2>
+            <div className="glass-panel relative rounded-[20px] p-6">
+              <p className="font-[Manrope] text-xs font-semibold text-[#005136]">Ulasan lapangan di Klaten</p>
+              <h2 className="mt-2 font-[Archivo] text-3xl font-extrabold tracking-[-0.015em] text-[#1A1F4D] sm:text-[32px]">Cerita main di Klaten Minisoccer</h2>
               <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
                   <label htmlFor="review-name" className="block text-sm text-[color:var(--muted)]">
@@ -112,14 +112,14 @@ export function ReviewSection({ initialReviews }: { initialReviews: Review[] }) 
                     Submit review
                   </button>
                 </div>
-                {status ? <p className="text-sm text-emerald-300">{status}</p> : null}
+                {status ? <p role="status" aria-live="polite" className="text-sm text-emerald-800">{status}</p> : null}
               </form>
             </div>
           </div>
 
           <div className="space-y-4">
             {reviews.slice(0, 3).map((review) => (
-              <div key={review.id} className="rounded-[2rem] card-surface p-6">
+              <div key={review.id} className="glass-panel rounded-[2rem] p-6">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <p className="truncate font-semibold text-[color:var(--foreground)]">{review.customerName}</p>

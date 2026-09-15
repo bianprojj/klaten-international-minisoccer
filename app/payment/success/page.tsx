@@ -81,7 +81,7 @@ export default async function PaymentSuccessPage({
             </div>
           ) : null}
 
-          <div className="mt-8 rounded-3xl border border-white/10 bg-[color:var(--surface)] p-6 text-left">
+          <div className="mt-8 glass-panel rounded-3xl p-6 text-left">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-[color:var(--foreground)]">Payment summary</h2>
               <span className="rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-[color:var(--muted)]">{status}</span>
@@ -96,7 +96,7 @@ export default async function PaymentSuccessPage({
             </div>
           </div>
 
-          <div className="mt-6 rounded-3xl border border-white/10 bg-[color:var(--surface)] p-6 text-left">
+          <div className="mt-6 glass-panel rounded-3xl p-6 text-left">
             <div className="grid gap-3 text-sm text-[color:var(--muted)] sm:grid-cols-2">
               <div className="flex justify-between gap-4"><span>Invoice</span><span className="text-right font-medium text-[color:var(--foreground)]">{payment?.invoice?.invoiceNumber ?? "—"}</span></div>
               <div className="flex justify-between gap-4"><span>Invoice amount</span><span className="text-right font-medium text-[color:var(--foreground)]">Rp {payment?.invoice?.total?.toLocaleString("id-ID") ?? payment?.amount?.toLocaleString("id-ID") ?? "0"}</span></div>

@@ -24,7 +24,7 @@ export function CurveCarouselItem({ image, offset, isActive, onSelect }: CurveCa
         transform: hidden ? "translate3d(0,0,-520px) scale(.4)" : offset === 0 ? "translate3d(0,0,140px) rotateY(0) scale(1)" : offset === 1 ? "translate3d(168px,0,-40px) rotateY(-42deg) scale(.86)" : offset === -1 ? "translate3d(-168px,0,-40px) rotateY(42deg) scale(.86)" : offset === 2 ? "translate3d(310px,0,-200px) rotateY(-46deg) scale(.7)" : offset === -2 ? "translate3d(-310px,0,-200px) rotateY(46deg) scale(.7)" : offset > 0 ? "translate3d(420px,0,-360px) rotateY(-48deg) scale(.56)" : "translate3d(-420px,0,-360px) rotateY(48deg) scale(.56)",
         opacity: hidden ? 0 : offset === 0 ? 1 : a === 1 ? 0.92 : a === 2 ? 0.55 : 0.22,
         zIndex: 50 - a * 10,
-        boxShadow: isActive ? "0 40px 90px -30px rgba(45,212,191,0.35), 0 0 0 1px rgba(45,212,191,0.25)" : undefined,
+        boxShadow: isActive ? "0 36px 80px -24px rgba(15,23,42,0.45), 0 0 0 1px rgba(13,148,136,0.35)" : "0 24px 60px -28px rgba(15,23,42,0.35)",
       }} // ponytail: inline transforms, ceiling no CSS class map, upgrade when positions grow
       aria-label={`Tampilkan ${image.title}`}
     >

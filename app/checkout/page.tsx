@@ -1,5 +1,7 @@
 "use client";
 
+import { fetchJson } from "@/lib/fetch-json";
+
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatedCard } from "@/components/animated-card";
@@ -84,7 +86,7 @@ export default function CheckoutPage() {
         return;
       }
 
-      const response = await fetch("/api/bookings", {
+      const { res: response, data: __body } = await fetchJson("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -100,7 +102,7 @@ export default function CheckoutPage() {
 
       const result = await response.json();
       if (!response.ok || !result.success || !result.booking?.id) {
-        throw new Error(result.message || "Unable to create booking.");
+        throw new Error(String(result.message ?? "") || "Unable to create booking.");
       }
 
       const paymentResponse = await fetch("/api/payments/create", {

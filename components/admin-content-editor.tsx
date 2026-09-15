@@ -1,5 +1,7 @@
 "use client";
 
+import { fetchJson } from "@/lib/fetch-json";
+
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { siteContent } from "@/lib/mock-data";
@@ -28,7 +30,7 @@ export function AdminContentEditor() {
 
   useEffect(() => {
     void fetch("/api/admin/site-content", { cache: "no-store" })
-      .then((response) => response.json())
+      .then(async (response) => { const t = await response.text(); try { return JSON.parse(t); } catch { return {}; } })
       .then((result) => {
         if (result.success) setContent({ ...siteContent, ...result.data });
       })
@@ -65,13 +67,13 @@ export function AdminContentEditor() {
       return;
     }
     try {
-      const response = await fetch("/api/admin/site-content", {
+      const { res: response, data: __body } = await fetchJson("/api/admin/site-content", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(content),
       });
       const result = await response.json();
-      if (!response.ok || !result.success) throw new Error(result.message || "Unable to save content.");
+      if (!response.ok || !result.success) throw new Error(String(result.message ?? "") || "Unable to save content.");
       setContent({ ...siteContent, ...result.data });
       setMessage("Content saved successfully.");
       setTimeout(() => setMessage(""), 3000);
@@ -83,7 +85,7 @@ export function AdminContentEditor() {
   const uploadImage = async () => {
     setUploadStatus("Uploading...");
     try {
-      const response = await fetch("/api/cloudinary/upload", {
+      const { res: response, data: __body } = await fetchJson("/api/cloudinary/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ imageUrl: content.backgroundImageUrl }),
@@ -91,7 +93,7 @@ export function AdminContentEditor() {
 
       const result = await response.json();
       if (!response.ok || !result.success) {
-        throw new Error(result.message || "Upload failed");
+        throw new Error(String(result.message ?? "") || "Upload failed");
       }
 
       setUploadUrl(result.data.secure_url ?? "");
@@ -115,14 +117,14 @@ export function AdminContentEditor() {
       const formData = new FormData();
       formData.append("file", selectedFile);
 
-      const response = await fetch("/api/cloudinary/upload-file", {
+      const { res: response, data: __body } = await fetchJson("/api/cloudinary/upload-file", {
         method: "POST",
         body: formData,
       });
 
       const result = await response.json();
       if (!response.ok || !result.success) {
-        throw new Error(result.message || "Upload failed");
+        throw new Error(String(result.message ?? "") || "Upload failed");
       }
 
       const secureUrl = result.data.secure_url ?? "";
@@ -145,7 +147,7 @@ export function AdminContentEditor() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-8">
-    <section className="rounded-2xl border border-white/10 bg-[color:var(--surface)] p-6 sm:p-8">
+    <section className="glass-panel rounded-2xl p-6 sm:p-8">
       <div className="mb-6">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--accent-strong)]">Content editor</p>
         <h2 className="mt-2 text-balance text-2xl font-semibold leading-tight text-[color:var(--foreground)]">Change hero text and images</h2>

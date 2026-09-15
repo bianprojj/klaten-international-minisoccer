@@ -6,7 +6,7 @@ export function AnimatedCard({
   className?: string;
 }) {
   return (
-    <div className={`rounded-3xl border border-[color:var(--border-strong)] bg-[color:var(--surface)] p-6 shadow-[0_20px_80px_rgba(16,185,129,0.12)] backdrop-blur transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_100px_rgba(16,185,129,0.16)] ${className}`}>
+    <div className={`card-surface relative transition duration-300 hover:-translate-y-1 hover:shadow-[0_10px_28px_rgba(26,31,77,0.14)] ${className}`}>
       {children}
     </div>
   );

@@ -1,5 +1,7 @@
 "use client";
 
+import { fetchJson } from "@/lib/fetch-json";
+
 import { useEffect, useState } from "react";
 
 interface BookingItem {
@@ -58,10 +60,10 @@ export default function BookingManagerClient({ adminName, useMain = true }: { ad
       if (q) bookingParams.set("q", q);
       if (date) bookingParams.set("date", date);
 
-      const bookingsRes = await fetch(`/api/admin/bookings?${bookingParams.toString()}`, { cache: "no-store" });
-      const bookingsJson = await bookingsRes.json();
+      const { res: bookingsRes, data: __bookingsBody } = await fetchJson(`/api/admin/bookings?${bookingParams.toString()}`, { cache: "no-store" });
+      const bookingsJson: { data?: BookingItem[]; page?: number; totalPages?: number; message?: unknown } = __bookingsBody;
 
-      if (!bookingsRes.ok) throw new Error(bookingsJson.message || "Unable to load bookings");
+      if (!bookingsRes.ok) throw new Error(String(bookingsJson.message ?? "") || "Unable to load bookings");
 
       setBookings(bookingsJson.data || []);
       setPage(bookingsJson.page || pageParam);
@@ -114,15 +116,15 @@ export default function BookingManagerClient({ adminName, useMain = true }: { ad
     try {
       const url = editing ? `/api/admin/bookings/${editing.id}` : "/api/admin/bookings";
       const method = editing ? "PUT" : "POST";
-      const response = await fetch(url, {
+      const { res: response, data: __body } = await fetchJson(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formState,
         }),
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Unable to save booking");
+      const data = __body;
+      if (!response.ok) throw new Error(String(data.message ?? "") || "Unable to save booking");
       await fetchData();
       resetForm();
     } catch (err) {
@@ -152,9 +154,9 @@ export default function BookingManagerClient({ adminName, useMain = true }: { ad
     setError(null);
 
     try {
-      const response = await fetch(`/api/admin/bookings/${id}`, { method: "DELETE" });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Unable to delete booking");
+      const { res: response, data: __body } = await fetchJson(`/api/admin/bookings/${id}`, { method: "DELETE" });
+      const data = __body;
+      if (!response.ok) throw new Error(String(data.message ?? "") || "Unable to delete booking");
       await fetchData();
     } catch (err) {
       setError((err as Error).message);
@@ -166,7 +168,7 @@ export default function BookingManagerClient({ adminName, useMain = true }: { ad
   const content = (
     <div className="mx-auto max-w-7xl space-y-8" id="bookings">
       <div className="mx-auto max-w-7xl space-y-8">
-        <div className="rounded-[2rem] border border-white/10 bg-[color:var(--surface-strong)] p-6 sm:p-8">
+        <div className="glass-panel rounded-[2rem] p-6 sm:p-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[color:var(--accent-strong)]">Booking manager</p>
@@ -180,7 +182,7 @@ export default function BookingManagerClient({ adminName, useMain = true }: { ad
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
-          <section className="rounded-[1.5rem] border border-white/10 bg-[color:var(--surface)] p-5 sm:p-6">
+          <section className="glass-panel rounded-[1.5rem] p-5 sm:p-6">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-xl font-semibold text-white sm:text-2xl">Booking list</h2>
@@ -252,7 +254,7 @@ export default function BookingManagerClient({ adminName, useMain = true }: { ad
             </div>
           </section>
 
-          {showForm ? <section className="rounded-[1.5rem] border border-white/10 bg-[color:var(--surface)] p-5 sm:p-6">
+          {showForm ? <section className="glass-panel rounded-[1.5rem] p-5 sm:p-6">
             <h2 className="text-xl font-semibold text-white sm:text-2xl">Create / update booking</h2>
             <div className="mt-6 space-y-4">
               <div>

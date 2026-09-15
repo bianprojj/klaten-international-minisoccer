@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { expirePendingPayments, syncBookingStatusesFromPayments } from "@/lib/payment-service";
 import { BLOCKING_BOOKING_STATUSES, buildTimeSlots, getScheduleSlots } from "@/lib/booking-engine";
-import { DEFAULT_FIELD, DEFAULT_FIELD_ID, isSupportedFieldId, normalizeFieldId } from "@/lib/venue";
-import { getFieldHourlyRate } from "@/lib/site-content";
+import { DEFAULT_FIELD, DEFAULT_FIELD_ID, isSupportedFieldId, normalizeFieldId, getDefaultFieldPrice } from "@/lib/venue";
 
 export const dynamic = "force-dynamic";
 
@@ -38,8 +37,13 @@ export async function GET(request: Request, props: { params: Promise<{ fieldId: 
   }
 
   try {
-    await syncBookingStatusesFromPayments();
-    await expirePendingPayments();
+    // Keep payment sync best-effort: do not fail whole request if payments table missing
+    try {
+      await syncBookingStatusesFromPayments();
+      await expirePendingPayments();
+    } catch (err) {
+      console.warn('[API] Payment sync/expiry skipped due to error:', err instanceof Error ? err.message : String(err));
+    }
 
     const bookings = await prisma.booking.findMany({
       where: {
@@ -56,11 +60,13 @@ export async function GET(request: Request, props: { params: Promise<{ fieldId: 
 
     const scheduleSlots = await getScheduleSlots();
     const schedules = buildTimeSlots(date, bookings, scheduleSlots);
-    const hourlyRate = await getFieldHourlyRate();
+
+    // Use default field price as an example; actual booking totals are computed per-slot
+    const examplePrice = getDefaultFieldPrice();
 
     const response = NextResponse.json({
       success: true,
-      field: { ...DEFAULT_FIELD, price: hourlyRate },
+      field: { ...DEFAULT_FIELD, price: examplePrice },
       schedules,
     });
     response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");

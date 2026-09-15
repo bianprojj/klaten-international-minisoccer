@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAuthenticatedAdminFromToken, hasAdminPermission } from "@/lib/admin-auth";
 import { DEFAULT_FIELD } from "@/lib/venue";
-import { getFieldHourlyRate } from "@/lib/site-content";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(request: Request) {
   try {
@@ -14,10 +14,11 @@ export async function GET(request: Request) {
       return NextResponse.json({ success: false, message: "Insufficient privileges." }, { status: 403 });
     }
 
-    const hourlyRate = await getFieldHourlyRate();
+    const slot = await prisma.scheduleSlot.findFirst({ orderBy: { sortOrder: "asc" } });
+    const price = slot && typeof slot.price === "number" ? slot.price : DEFAULT_FIELD.price;
     return NextResponse.json({
       success: true,
-      data: [{ ...DEFAULT_FIELD, price: hourlyRate }],
+      data: [{ ...DEFAULT_FIELD, price }],
       total: 1,
       page: 1,
       limit: 1,

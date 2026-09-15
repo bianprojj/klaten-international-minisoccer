@@ -1,5 +1,7 @@
 "use client";
 
+import { fetchJson } from "@/lib/fetch-json";
+
 import { useState } from "react";
 import { AnimatedCard } from "@/components/animated-card";
 import { formatCurrency } from "@/utils/formatting";
@@ -74,13 +76,13 @@ export default function BookingHistoryPage() {
       if (email) query.append("email", email);
       if (phone) query.append("phone", phone);
 
-      const response = await fetch(`/api/bookings?${query.toString()}`, {
+      const { res: response, data: __body } = await fetchJson(`/api/bookings?${query.toString()}`, {
         cache: "no-store",
       });
 
-      const data = await response.json();
+      const data = __body;
       if (!response.ok || !data.success) {
-        throw new Error(data.message || "Unable to load booking history.");
+        throw new Error(String(data.message ?? "") || "Unable to load booking history.");
       }
       
       setBookings(data.bookings as BookingHistoryItem[]);
@@ -152,9 +154,9 @@ export default function BookingHistoryPage() {
 
             <div className="mt-8">
               {loading ? (
-                <div className="rounded-3xl border border-white/10 bg-[color:var(--surface)] p-6 text-sm text-[color:var(--muted)]">Loading booking history…</div>
+                <div className="glass-panel rounded-3xl p-6 text-sm text-[color:var(--muted)]">Loading booking history…</div>
               ) : bookings.length === 0 ? (
-                <div className="rounded-3xl border border-white/10 bg-[color:var(--surface)] p-6 text-sm text-[color:var(--muted)]">No bookings found for this email or phone number.</div>
+                <div className="glass-panel rounded-3xl p-6 text-sm text-[color:var(--muted)]">No bookings found for this email or phone number.</div>
               ) : (
                 <>
                   <div className="hidden md:block overflow-x-auto rounded-2xl border border-white/10">

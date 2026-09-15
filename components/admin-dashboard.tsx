@@ -87,7 +87,7 @@ export default function AdminDashboard({
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-[1.5rem] border border-white/10 bg-[color:var(--surface)] p-5 sm:p-6">
+          <div className="glass-panel rounded-[1.5rem] p-5 sm:p-6">
             <p className="text-sm text-[color:var(--muted)]">Role permissions</p>
             <div className="mt-4 space-y-2">
               {Object.entries(admin.permissions).map(([label, allowed]) => (
@@ -106,25 +106,25 @@ export default function AdminDashboard({
 
           {admin.permissions.canViewReports ? (
             <>
-              <div className="rounded-2xl border border-white/10 bg-[color:var(--surface)] p-5 sm:p-6">
+              <div className="glass-panel rounded-2xl p-5 sm:p-6">
                 <p className="text-sm text-[color:var(--muted)]">Revenue today</p>
                 <p className="mt-3 text-2xl font-semibold text-[color:var(--foreground)] sm:text-3xl">Rp {summary.revenueToday.toLocaleString("id-ID")}</p>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-[color:var(--surface)] p-5 sm:p-6">
+              <div className="glass-panel rounded-2xl p-5 sm:p-6">
                 <p className="text-sm text-[color:var(--muted)]">Revenue this month</p>
                 <p className="mt-3 text-2xl font-semibold text-[color:var(--foreground)] sm:text-3xl">Rp {summary.revenueThisMonth.toLocaleString("id-ID")}</p>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-[color:var(--surface)] p-5 sm:p-6">
+              <div className="glass-panel rounded-2xl p-5 sm:p-6">
                 <p className="text-sm text-[color:var(--muted)]">Bookings today</p>
                 <p className="mt-3 text-2xl font-semibold text-[color:var(--foreground)] sm:text-3xl">{summary.bookingsToday}</p>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-[color:var(--surface)] p-5 sm:p-6">
+              <div className="glass-panel rounded-2xl p-5 sm:p-6">
                 <p className="text-sm text-[color:var(--muted)]">Bookings this month</p>
                 <p className="mt-3 text-2xl font-semibold text-[color:var(--foreground)] sm:text-3xl">{summary.bookingsThisMonth}</p>
               </div>
             </>
           ) : (
-            <div className="rounded-2xl border border-white/10 bg-[color:var(--surface)] p-5 sm:p-6 sm:col-span-2 xl:col-span-3">
+            <div className="glass-panel rounded-2xl p-5 sm:p-6 sm:col-span-2 xl:col-span-3">
               <h2 className="text-xl font-semibold text-[color:var(--foreground)]">Report access restricted</h2>
               <p className="mt-3 text-sm text-[color:var(--muted)]">
                 Your current role does not include report access. Use the permitted actions above to manage bookings, verify payments, or collaborate with your team.
@@ -135,20 +135,20 @@ export default function AdminDashboard({
 
         {!admin.permissions.canViewReports ? (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-2xl border border-white/10 bg-[color:var(--surface)] p-5 sm:p-6">
+            <div className="glass-panel rounded-2xl p-5 sm:p-6">
               <p className="text-sm text-[color:var(--muted)]">Bookings today</p>
               <p className="mt-3 text-2xl font-semibold text-[color:var(--foreground)] sm:text-3xl">{summary.bookingsToday}</p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-[color:var(--surface)] p-5 sm:p-6">
+            <div className="glass-panel rounded-2xl p-5 sm:p-6">
               <p className="text-sm text-[color:var(--muted)]">Bookings this month</p>
               <p className="mt-3 text-2xl font-semibold text-[color:var(--foreground)] sm:text-3xl">{summary.bookingsThisMonth}</p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-[color:var(--surface)] p-5 sm:p-6">
+            <div className="glass-panel rounded-2xl p-5 sm:p-6">
               <p className="text-sm text-[color:var(--muted)]">Pending bookings</p>
               <p className="mt-3 text-2xl font-semibold text-[color:var(--foreground)] sm:text-3xl">{summary.pendingBookings}</p>
             </div>
             {admin.permissions.canReadPayments ? (
-              <div className="rounded-2xl border border-white/10 bg-[color:var(--surface)] p-5 sm:p-6">
+              <div className="glass-panel rounded-2xl p-5 sm:p-6">
                 <p className="text-sm text-[color:var(--muted)]">Pending payments</p>
                 <p className="mt-3 text-2xl font-semibold text-[color:var(--foreground)] sm:text-3xl">{summary.pendingPayments}</p>
               </div>
@@ -160,7 +160,7 @@ export default function AdminDashboard({
 
         {admin.permissions.canViewReports ? (
           <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-2xl border border-white/10 bg-[color:var(--surface)] p-5 sm:p-6">
+            <div className="glass-panel rounded-2xl p-5 sm:p-6">
               <h2 className="text-xl font-semibold text-[color:var(--foreground)]">Peak hours</h2>
               <div className="mt-4 space-y-3">
                 {summary.peakHours.length > 0 ? (
@@ -177,7 +177,7 @@ export default function AdminDashboard({
                 )}
               </div>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-[color:var(--surface)] p-5 sm:p-6">
+            <div className="glass-panel rounded-2xl p-5 sm:p-6">
               <h2 className="text-xl font-semibold text-[color:var(--foreground)]">Customer analytics</h2>
               <div className="mt-6 space-y-3">
                 <div className="flex items-center justify-between gap-2 rounded-2xl bg-white/5 px-4 py-3 text-sm text-[color:var(--muted)]">

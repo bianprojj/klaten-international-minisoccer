@@ -49,6 +49,7 @@ export interface ScheduleSlotRecord {
   endTime: string;
   isActive: boolean;
   sortOrder: number;
+  price?: number;
 }
 
 function parseTimeToMinutes(timeValue: string) {
@@ -77,6 +78,7 @@ export async function getScheduleSlots(): Promise<ScheduleSlotRecord[]> {
     endTime: slot.endTime,
     isActive: slot.isActive,
     sortOrder: slot.sortOrder,
+    price: typeof slot.price === "number" ? slot.price : undefined,
   }));
 }
 
@@ -115,7 +117,9 @@ export function buildTimeSlots(
   scheduleSlots: ScheduleSlotRecord[] = []
 ) {
   if (!scheduleSlots || scheduleSlots.length === 0) {
-    return buildDefaultTimeSlots(date, bookedIntervals);
+    // Attach default price to fallback slots
+    const defaultSlots = buildDefaultTimeSlots(date, bookedIntervals);
+    return defaultSlots.map((s) => ({ ...s, price: undefined }));
   }
 
   return scheduleSlots.map((slot) => ({
@@ -123,6 +127,7 @@ export function buildTimeSlots(
     startTime: slot.startTime,
     endTime: slot.endTime,
     isAvailable: isScheduleSlotAvailable(slot, bookedIntervals),
+    price: slot.price ?? undefined,
   }));
 }
 

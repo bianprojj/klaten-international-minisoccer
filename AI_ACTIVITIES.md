@@ -212,3 +212,61 @@ If you want, I can open a PR with these changes, run `npm run lint -- --fix`, or
 - `README.md` recreated minimal. `SYSTEM.md` created: arsitektur sistem, database, design, env, alur.
 - Push `602dfde`. Build `prisma generate && next build` pass.
 - Skipped: workflow dedup `ci.yml ci-cd.yml prisma-deploy.yml`, manager CRUD `text-white` sweep sisa, Vercel classic verify. Add when next sweep.
+
+## 2026-09-15
+
+### 34. Favicon PNG multi-device
+- `public/` ikon ditambah: `favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png`, `android-chrome-192x192.png`, `android-chrome-512x512.png`, `site.webmanifest`.
+- `app/layout.tsx` `icons[]` wired semua ukuran. Build 56/56 pass.
+
+### 35. Carousel centering debug
+- Penyebab: double translate (`-translate-x-1/2` + inline `translate(-50%,-50%)`), parent flex + `overflow-hidden`, spacing `0.7*container` terlalu lebar.
+- Fix awal: hapus double translate, stage absolute center, lalu pindah ke `.coverflow` perspective center `max-w-5xl`.
+- Hasil: kartu masih menceng kiri atas, panah terlalu jauh. Lanjut rebuild penuh.
+
+### 36. Maps titik akurat
+- Embed Google diganti `pb=!1m18!1m12!1m3!1d14107.132781442164!2d110.61014728467454!3d-7.6848874319996705` Klaten International Minisoccer.
+- `lib/security-headers.ts` `frame-src` tambah google + openstreetmap + midtrans.
+- `components/location-map.tsx` responsif `h-[280px] sm:h-[360px] lg:h-[400px]`, tambah alamat `Jl. Desa Karanganom, Karanganom, Klaten Utara`, jam `06.00-23.00`, link `Get Directions`.
+- `app/page.tsx` JSON-LD geo sync `latitude:-7.6848873 longitude:110.6101472`.
+
+### 37. Push rollback carousel
+- Push `8d868ed` ikon/maps, `f36e1e1` tighten, `51b9274` center. Rollback 2x karena carousel rusak. User koreksi: rollback saja, tanpa repush lokal.
+
+### 38. Rebuild aurora coverflow 3D dari DB venue
+- `components/gallery/CurveCarousel.tsx` baru: putih `bg-white`, stage `.coverflow`, kontrol netral putih, header `slate-900/slate-600/teal-600`.
+- `components/gallery/CurveCarouselItem.tsx`: kartu `280x372px`, `translate3d + rotateY ±42/46/48deg`, `scale 1/.86/.7/.56`, `opacity 1/.92/.55/.22`, glow teal aktif.
+- `components/gallery/CurveCarouselDots.tsx`: pill dots.
+- `hooks/useCarousel.ts`: manual + keyboard + autoplay `2500ms`, pause hover/focus.
+- `app/globals.css`: `.coverflow/.cf-card/.aurora/.nav-btn/.dot`, dots dark-on-white teal aktif.
+- Data dari `VenueGalleryImage` DB. Build 56/56 pass.
+
+### 39. Autoplay 2.5s + galeri putih
+- `useCarousel(images.length,2500)` interval aktif. Pause `onMouseEnter/Leave/onFocus/Blur`.
+- Background aurora dark dihapus, ganti putih. Button netral putih `border-slate-300`. Dots gelap kontras.
+- `.cf-card` border `rgba(0,0,0,0.08)`, shadow aktif `rgba(15,23,42,0.45)` + ring teal agar 3D tetap terlihat di putih.
+
+### 40. Logo SVG ke PNG
+- `public/kim-logo.png` tersedia. Referensi `kim-logo.svg` diganti di `components/site-header.tsx`, `lib/site-config.ts` `openGraphImage`, `app/page.tsx` JSON-LD `image`.
+- `components/site-header.tsx` teks `siteConfig.name` dihapus karena PNG sudah ada tulisan Klaten International Mini Soccer. Logo diperbesar `width=200 height=48 className="h-10 w-auto object-contain"`.
+- Skipped: hapus file `kim-logo.svg` lama, sinkron footer/logo lain. Add when sweep aset.
+
+### 41. Harga per schedule slot time
+- `prisma/schema.prisma` `ScheduleSlot` tambah `price Int @default(0)`.
+- `lib/booking-engine.ts` `getScheduleSlots()` `buildTimeSlots()` kembalikan `price`, `getRequestedScheduleBlocks` + total booking jumlahkan harga slot.
+- `app/api/bookings/route.ts` `app/api/staff/walk-in/route.ts` total = sum slot price.
+- `components/booking-form.tsx` parse `schedules` strict tanpa `any`, tampil harga per slot, total = sum slot terpilih.
+- Hapus ketergantungan `field_hourly_rate` `admin_setting` di logika aplikasi.
+- Skipped: hapus total setting lama di UI admin, migrasi SQL permanen. Add when sweep admin.
+
+### 42. Seed idempoten + guard availability
+- Sebab: `prisma/seed.js` P2010 `relation "schedule_slot" already exists`, P2021 tabel hilang, `npx prisma db push` ancam drop index, `payment` hilang bikin `/api/fields/[fieldId]/availability` fallback tanpa `price`, Windows EPERM lock engine, Next dev `Cannot find module './5611.js'`.
+- Baru: `prisma/fix_slot_prices.js` isi harga per `startTime`, `prisma/dump_slots.js` verifikasi 16 slot (contoh `07:00 08:00 90000`), `prisma/create_missing_tables.js` buat `admin_setting` `venue_feature` `review` bila hilang, `prisma/seed_upsert.js` upsert non-destruktif.
+- `app/api/fields/[fieldId]/availability/route.ts` `syncBookingStatusesFromPayments()` `expirePendingPayments()` jadi best-effort try/catch agar jadwal + `price` tetap kembali.
+- Verifikasi: `GET /api/fields/klaten-field-1/availability?date=2026-09-15` kembalikan `schedules` berisi `price`, `/book` tampil `Rp 90.000`, `Rp 110.000`, dst di `http://192.168.1.37:3002/book` + `http://localhost:3002/book`.
+- Skipped: jadikan `seed_upsert.js` seed kanonis, ganti `seed.js` lama. Add when bersih-bersih seed.
+
+### 43. Fix overflow kartu time-slot
+- Sebab: `price` + badge `Open` keluar box di `components/booking-form.tsx`.
+- Fix: tombol kartu tambah `overflow-hidden min-w-0`, kiri `min-w-0` + `truncate`, kanan `flex flex-col items-end gap-2 min-w-0`, harga `whitespace-nowrap`, badge `inline-block`.
+- Skipped: ubah grid `xl:grid-cols-3` ke 2 kolom / stack badge di layar kecil. Add when overflow mobile muncul.

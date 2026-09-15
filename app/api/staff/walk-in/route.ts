@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedAdminFromToken, hasAdminPermission } from "@/lib/admin-auth";
 import { getRateLimitResult, sanitizeObject } from "@/lib/security-headers";
-import { getFieldHourlyRate } from "@/lib/site-content";
+import { getScheduleSlots, getRequestedScheduleBlocks } from "@/lib/booking-engine";
 import { auditLog } from "@/lib/audit-log";
 
 export const dynamic = "force-dynamic";
@@ -57,8 +57,18 @@ export async function POST(request: Request) {
     }
 
     const durationHours = Math.max(Math.ceil((endMinutes - startMinutes) / 60), 1);
-    const hourlyRate = await getFieldHourlyRate();
-    const totalPrice = hourlyRate * durationHours;
+
+    const scheduleSlots = await getScheduleSlots();
+    const requestedBlocks = getRequestedScheduleBlocks(startTime, endTime, scheduleSlots);
+    let totalPrice = 0;
+    if (requestedBlocks.length > 0) {
+      const slotTimes = requestedBlocks.map((b) => b.start);
+      const slotRecords = await prisma.scheduleSlot.findMany({ where: { startTime: { in: slotTimes } } });
+      totalPrice = slotRecords.reduce((sum, s) => sum + (s.price ?? 0), 0);
+    } else {
+      const hourlyRate = 110000;
+      totalPrice = hourlyRate * durationHours;
+    }
 
     const overlappingBooking = await prisma.booking.findFirst({
       where: {

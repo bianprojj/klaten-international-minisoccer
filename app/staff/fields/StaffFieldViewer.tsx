@@ -1,5 +1,7 @@
 "use client";
 
+import { fetchJson } from "@/lib/fetch-json";
+
 import { useEffect, useState } from "react";
 
 interface FieldItem {
@@ -30,9 +32,9 @@ export default function StaffFieldViewer({ adminName }: { adminName: string }) {
       params.set("page", String(pageParam));
       params.set("limit", String(6));
       if (q) params.set("q", q);
-      const response = await fetch(`/api/admin/fields?${params.toString()}`, { cache: "no-store" });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Unable to load fields");
+      const { res: response, data: __body } = await fetchJson(`/api/admin/fields?${params.toString()}`, { cache: "no-store" });
+      const data = __body;
+      if (!response.ok) throw new Error(String(data.message ?? "") || "Unable to load fields");
       setFields(data.data || []);
       setPage(data.page || pageParam);
       setTotalPages(data.totalPages || 1);
@@ -62,7 +64,7 @@ export default function StaffFieldViewer({ adminName }: { adminName: string }) {
   return (
     <main className="flex-1 px-6 py-16 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-8">
-        <div className="rounded-[2rem] border border-white/10 bg-[color:var(--surface-strong)] p-8">
+        <div className="glass-panel rounded-[2rem] p-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[color:var(--accent-strong)]">Staff field viewer</p>
@@ -75,7 +77,7 @@ export default function StaffFieldViewer({ adminName }: { adminName: string }) {
           </div>
         </div>
 
-        <section className="rounded-[1.5rem] border border-white/10 bg-[color:var(--surface)] p-6">
+        <section className="glass-panel rounded-[1.5rem] p-6">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold text-white">Available fields</h2>
             <div className="flex items-center gap-2">

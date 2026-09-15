@@ -72,30 +72,31 @@ CREATE TABLE schedule_slot (
   end_time VARCHAR(10) NOT NULL,
   is_active BOOLEAN DEFAULT true,
   sort_order INTEGER DEFAULT 0,
+  price INTEGER DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS idx_schedule_slot_sort_order ON schedule_slot(sort_order);
 
-INSERT INTO schedule_slot (id, start_time, end_time, is_active, sort_order, created_at, updated_at)
+INSERT INTO schedule_slot (id, start_time, end_time, is_active, sort_order, price, created_at, updated_at)
 VALUES
-  (gen_random_uuid(), '07:00', '08:00', true, 0, NOW(), NOW()),
-  (gen_random_uuid(), '08:00', '09:00', true, 1, NOW(), NOW()),
-  (gen_random_uuid(), '09:00', '10:00', true, 2, NOW(), NOW()),
-  (gen_random_uuid(), '10:00', '11:00', true, 3, NOW(), NOW()),
-  (gen_random_uuid(), '11:00', '12:00', true, 4, NOW(), NOW()),
-  (gen_random_uuid(), '12:00', '13:00', true, 5, NOW(), NOW()),
-  (gen_random_uuid(), '13:00', '14:00', true, 6, NOW(), NOW()),
-  (gen_random_uuid(), '14:00', '15:00', true, 7, NOW(), NOW()),
-  (gen_random_uuid(), '15:00', '16:00', true, 8, NOW(), NOW()),
-  (gen_random_uuid(), '16:00', '17:00', true, 9, NOW(), NOW()),
-  (gen_random_uuid(), '17:00', '18:00', true, 10, NOW(), NOW()),
-  (gen_random_uuid(), '18:00', '19:00', true, 11, NOW(), NOW()),
-  (gen_random_uuid(), '19:00', '20:00', true, 12, NOW(), NOW()),
-  (gen_random_uuid(), '20:00', '21:00', true, 13, NOW(), NOW()),
-  (gen_random_uuid(), '21:00', '22:00', true, 14, NOW(), NOW()),
-  (gen_random_uuid(), '22:00', '23:00', true, 15, NOW(), NOW());
+  (gen_random_uuid(), '07:00', '08:00', true, 0, 110000, NOW(), NOW()),
+  (gen_random_uuid(), '08:00', '09:00', true, 1, 110000, NOW(), NOW()),
+  (gen_random_uuid(), '09:00', '10:00', true, 2, 110000, NOW(), NOW()),
+  (gen_random_uuid(), '10:00', '11:00', true, 3, 110000, NOW(), NOW()),
+  (gen_random_uuid(), '11:00', '12:00', true, 4, 110000, NOW(), NOW()),
+  (gen_random_uuid(), '12:00', '13:00', true, 5, 110000, NOW(), NOW()),
+  (gen_random_uuid(), '13:00', '14:00', true, 6, 110000, NOW(), NOW()),
+  (gen_random_uuid(), '14:00', '15:00', true, 7, 110000, NOW(), NOW()),
+  (gen_random_uuid(), '15:00', '16:00', true, 8, 110000, NOW(), NOW()),
+  (gen_random_uuid(), '16:00', '17:00', true, 9, 110000, NOW(), NOW()),
+  (gen_random_uuid(), '17:00', '18:00', true, 10, 110000, NOW(), NOW()),
+  (gen_random_uuid(), '18:00', '19:00', true, 11, 150000, NOW(), NOW()),
+  (gen_random_uuid(), '19:00', '20:00', true, 12, 150000, NOW(), NOW()),
+  (gen_random_uuid(), '20:00', '21:00', true, 13, 150000, NOW(), NOW()),
+  (gen_random_uuid(), '21:00', '22:00', true, 14, 120000, NOW(), NOW()),
+  (gen_random_uuid(), '22:00', '23:00', true, 15, 120000, NOW(), NOW());
 
 -- ==================== PAYMENT & TRANSACTION (MIDTRANS) ====================
 CREATE TABLE payment (
@@ -408,8 +409,7 @@ VALUES
   ('b80e8400-e29b-41d4-a716-446655440005', 'heroSubtitle', 'Satu lapangan premium dengan jadwal per jam, booking mudah, dan suasana lapangan terbaik untuk komunitas futsal dan mini soccer.', 'Deskripsi utama website', NOW(), NOW()),
   ('b80e8400-e29b-41d4-a716-446655440006', 'ctaPrimary', 'Pesan sekarang', 'Teks tombol booking utama', NOW(), NOW()),
   ('b80e8400-e29b-41d4-a716-446655440007', 'ctaSecondary', 'Lihat riwayat booking', 'Teks tombol riwayat booking', NOW(), NOW()),
-  ('b80e8400-e29b-41d4-a716-446655440008', 'backgroundImageUrl', 'https://res.cloudinary.com/ljbxjpox/image/upload/v1785465835/utama_cifncb.jpg', 'Background utama hero website', NOW(), NOW()),
-  ('b80e8400-e29b-41d4-a716-446655440009', 'field_hourly_rate', '110000', 'Hourly rental rate for the default field in IDR', NOW(), NOW());
+  ('b80e8400-e29b-41d4-a716-446655440008', 'backgroundImageUrl', 'https://res.cloudinary.com/ljbxjpox/image/upload/v1785465835/utama_cifncb.jpg', 'Background utama hero website', NOW(), NOW());
 
 -- Insert mock RBAC admin accounts (1 staff, 2 manager, 3 super_admin)
 INSERT INTO admin_user (id, name, email, password_hash, role, is_active, last_login_at, created_at, updated_at)

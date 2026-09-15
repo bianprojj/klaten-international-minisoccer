@@ -220,22 +220,22 @@ async function main() {
     console.log('Creating default schedule slots...');
     await prisma.scheduleSlot.createMany({
       data: [
-        { startTime: '06:00', endTime: '07:00', isActive: true, sortOrder: 0 },
-        { startTime: '07:00', endTime: '07:30', isActive: true, sortOrder: 1 },
-        { startTime: '07:30', endTime: '08:30', isActive: true, sortOrder: 2 },
-        { startTime: '08:30', endTime: '09:30', isActive: true, sortOrder: 3 },
-        { startTime: '09:30', endTime: '10:30', isActive: true, sortOrder: 4 },
-        { startTime: '10:30', endTime: '11:30', isActive: true, sortOrder: 5 },
-        { startTime: '11:30', endTime: '12:30', isActive: true, sortOrder: 6 },
-        { startTime: '12:30', endTime: '13:30', isActive: true, sortOrder: 7 },
-        { startTime: '13:30', endTime: '14:30', isActive: true, sortOrder: 8 },
-        { startTime: '14:30', endTime: '15:30', isActive: true, sortOrder: 9 },
-        { startTime: '15:30', endTime: '16:30', isActive: true, sortOrder: 10 },
-        { startTime: '16:30', endTime: '17:30', isActive: true, sortOrder: 11 },
-        { startTime: '17:30', endTime: '18:30', isActive: true, sortOrder: 12 },
-        { startTime: '18:30', endTime: '19:30', isActive: true, sortOrder: 13 },
-        { startTime: '19:30', endTime: '20:30', isActive: true, sortOrder: 14 },
-        { startTime: '20:30', endTime: '21:30', isActive: true, sortOrder: 15 },
+        { startTime: '06:00', endTime: '07:00', isActive: true, sortOrder: 0, price: 90000 },
+        { startTime: '07:00', endTime: '07:30', isActive: true, sortOrder: 1, price: 90000 },
+        { startTime: '07:30', endTime: '08:30', isActive: true, sortOrder: 2, price: 100000 },
+        { startTime: '08:30', endTime: '09:30', isActive: true, sortOrder: 3, price: 100000 },
+        { startTime: '09:30', endTime: '10:30', isActive: true, sortOrder: 4, price: 100000 },
+        { startTime: '10:30', endTime: '11:30', isActive: true, sortOrder: 5, price: 100000 },
+        { startTime: '11:30', endTime: '12:30', isActive: true, sortOrder: 6, price: 110000 },
+        { startTime: '12:30', endTime: '13:30', isActive: true, sortOrder: 7, price: 110000 },
+        { startTime: '13:30', endTime: '14:30', isActive: true, sortOrder: 8, price: 110000 },
+        { startTime: '14:30', endTime: '15:30', isActive: true, sortOrder: 9, price: 110000 },
+        { startTime: '15:30', endTime: '16:30', isActive: true, sortOrder: 10, price: 120000 },
+        { startTime: '16:30', endTime: '17:30', isActive: true, sortOrder: 11, price: 120000 },
+        { startTime: '17:30', endTime: '18:30', isActive: true, sortOrder: 12, price: 140000 },
+        { startTime: '18:30', endTime: '19:30', isActive: true, sortOrder: 13, price: 150000 },
+        { startTime: '19:30', endTime: '20:30', isActive: true, sortOrder: 14, price: 150000 },
+        { startTime: '20:30', endTime: '21:30', isActive: true, sortOrder: 15, price: 120000 },
       ],
     });
   }
@@ -338,7 +338,6 @@ async function main() {
         { key: 'ctaPrimary', value: 'Pesan sekarang', description: 'Teks tombol booking utama' },
         { key: 'ctaSecondary', value: 'Lihat riwayat booking', description: 'Teks tombol riwayat booking' },
         { key: 'backgroundImageUrl', value: '', description: 'Background utama hero website' },
-        { key: 'field_hourly_rate', value: '110000', description: 'Hourly rental rate for the default field in Indonesian Rupiah' },
       ],
     });
   }

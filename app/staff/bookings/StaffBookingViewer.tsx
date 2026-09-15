@@ -1,5 +1,7 @@
 "use client";
 
+import { fetchJson } from "@/lib/fetch-json";
+
 import { useEffect, useState } from "react";
 
 interface StaffBookingItem {
@@ -40,9 +42,9 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
       params.set("limit", String(6));
       if (q) params.set("q", q);
       if (date) params.set("date", date);
-      const response = await fetch(`/api/admin/bookings?${params.toString()}`, { cache: "no-store" });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Unable to load bookings");
+      const { res: response, data: __body } = await fetchJson(`/api/admin/bookings?${params.toString()}`, { cache: "no-store" });
+      const data = __body;
+      if (!response.ok) throw new Error(String(data.message ?? "") || "Unable to load bookings");
       setBookings(data.data || []);
       setPage(data.page || pageParam);
       setTotalPages(data.totalPages || 1);
@@ -78,9 +80,9 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
     }
     setWalkInLoading(true);
     try {
-      const res = await fetch("/api/staff/walk-in", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(walkInForm) });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Gagal membuat booking");
+      const { res, data: __body } = await fetchJson("/api/staff/walk-in", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(walkInForm) });
+      const data = __body;
+      if (!res.ok) throw new Error(String(data.message ?? "") || "Gagal membuat booking");
       setWalkInSuccess(`Booking berhasil! Invoice: ${data.data.invoice.invoiceNumber}`);
       setWalkInForm({ customerName: "", customerPhone: "", customerEmail: "", bookingDate: "", startTime: "", endTime: "", paymentMethod: "Offline" });
       setShowWalkIn(false);
@@ -94,9 +96,9 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
 
   const handleUpdateStatus = async (id: string) => {
     try {
-      const res = await fetch(`/api/admin/bookings/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: editStatus }) });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Gagal update");
+      const { res, data: __body } = await fetchJson(`/api/admin/bookings/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: editStatus }) });
+      const data = __body;
+      if (!res.ok) throw new Error(String(data.message ?? "") || "Gagal update");
       setEditingId(null);
       await fetchBookings(page, query, filterDate);
     } catch (e) {
@@ -107,9 +109,9 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
   const handleDelete = async (id: string) => {
     if (!confirm("Hapus booking ini?")) return;
     try {
-      const res = await fetch(`/api/admin/bookings/${id}`, { method: "DELETE" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Gagal hapus");
+      const { res, data: __body } = await fetchJson(`/api/admin/bookings/${id}`, { method: "DELETE" });
+      const data = __body;
+      if (!res.ok) throw new Error(String(data.message ?? "") || "Gagal hapus");
       await fetchBookings(page, query, filterDate);
     } catch (e) {
       setError((e as Error).message);
@@ -119,7 +121,7 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
   const content = (
     <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8" id="staff-bookings">
       <div className="mx-auto max-w-7xl space-y-6">
-        <div className="rounded-[2rem] border border-white/10 bg-[color:var(--surface-strong)] p-6 sm:p-8">
+        <div className="glass-panel rounded-[2rem] p-6 sm:p-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[color:var(--accent-strong)]">Staff booking viewer</p>
@@ -132,7 +134,7 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
           </div>
         </div>
 
-        <section className="rounded-[1.5rem] border border-white/10 bg-[color:var(--surface)] p-5 sm:p-6">
+        <section className="glass-panel rounded-[1.5rem] p-5 sm:p-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-xl font-semibold text-white sm:text-2xl">Bookings</h2>
             <div className="flex flex-wrap items-center gap-2">
@@ -147,7 +149,7 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
           ) : null}
 
           {showWalkIn && (
-            <div className="mt-6 rounded-3xl border border-white/10 bg-[color:var(--surface)] p-6">
+            <div className="mt-6 glass-panel rounded-3xl p-6">
               <h3 className="text-xl font-semibold text-white">Walk-in Booking</h3>
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 <input placeholder="Nama" value={walkInForm.customerName} onChange={(e) => setWalkInForm(f => ({ ...f, customerName: e.target.value }))} className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white" />

@@ -6,11 +6,11 @@ interface SectionHeadingProps {
   titleClassName?: string;
 }
 
-export function SectionHeading({ eyebrow, title, id, className = "", titleClassName = "text-[color:var(--foreground)]" }: SectionHeadingProps) {
+export function SectionHeading({ eyebrow, title, id, className = "", titleClassName = "text-[#1A1F4D]" }: SectionHeadingProps) {
   return (
     <div className={className}>
-      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--accent-strong)]">{eyebrow}</p>
-      <h2 id={id} className={`mt-2 text-balance text-2xl font-semibold leading-tight sm:text-3xl ${titleClassName}`}>
+      <p className="font-[Manrope] text-xs font-semibold text-[#005136]">{eyebrow}</p>
+      <h2 id={id} className={`mt-2 text-balance font-[Archivo] text-2xl font-extrabold leading-tight tracking-[-0.015em] sm:text-[32px] ${titleClassName}`}>
         {title}
       </h2>
     </div>

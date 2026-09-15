@@ -4,8 +4,7 @@ import { expirePendingPayments, syncBookingStatusesFromPayments } from "@/lib/pa
 import { getRateLimitResult, sanitizeObject, applySecurityHeaders } from "@/lib/security-headers";
 import { prisma } from "@/lib/prisma";
 import { BLOCKING_BOOKING_STATUSES, getRequestedScheduleBlocks, getScheduleSlots, reclaimExpiredSlotBookings } from "@/lib/booking-engine";
-import { DEFAULT_FIELD_ID, DEFAULT_FIELD_NAME, normalizeFieldId } from "@/lib/venue";
-import { getFieldHourlyRate } from "@/lib/site-content";
+import { DEFAULT_FIELD_ID, DEFAULT_FIELD_NAME, normalizeFieldId, getDefaultFieldPrice } from "@/lib/venue";
 
 export const dynamic = "force-dynamic";
 
@@ -116,8 +115,18 @@ export async function POST(request: NextRequest) {
     const startMinutes = parseTimeToMinutes(startTime);
     const endMinutes = parseTimeToMinutes(endTime);
     const durationHours = Math.max(Math.ceil((endMinutes - startMinutes) / 60), 1);
-    const hourlyRate = await getFieldHourlyRate();
-    const totalPrice = hourlyRate * durationHours;
+
+    // Calculate totalPrice by summing schedule slot prices for the requested blocks
+    const requestedSlotTimes = requestedBlocks.map((b) => b.start);
+    const slotRecords = await prisma.scheduleSlot.findMany({ where: { startTime: { in: requestedSlotTimes } } });
+    let totalPrice = 0;
+    if (slotRecords && slotRecords.length > 0) {
+      totalPrice = slotRecords.reduce((sum, s) => sum + (s.price ?? 0), 0);
+    } else {
+      // fallback: use default field price per hour if schedule slots are not configured
+      const defaultPrice = getDefaultFieldPrice();
+      totalPrice = defaultPrice * durationHours;
+    }
 
     const booking = await prisma.booking.create({
       data: {

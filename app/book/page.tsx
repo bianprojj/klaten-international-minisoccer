@@ -1,3 +1,4 @@
+import { fetchJson } from "@/lib/fetch-json";
 import type { Metadata } from "next";
 import { bookingSteps, bookedSlots as fallbackBookedSlots, fields as fallbackFields } from "@/lib/mock-data";
 import { getUpcomingBookings, getFields, mapBookingsToSlots } from "@/lib/data";
@@ -8,8 +9,8 @@ import { headers } from "next/headers";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Booking Lapangan Mini Soccer Klaten | Jadwal & Harga",
-  description: "Booking lapangan mini soccer Klaten. Pilih tanggal dan jam, checkout cepat, konfirmasi instan. Telp +62 812 3456 7890.",
+  title: "Sewa Lapangan Klaten | Booking Mini Soccer & Futsal",
+  description: "Sewa lapangan Klaten di Klaten Minisoccer, Karanganom Klaten Utara. Booking lapangan mini soccer Klaten online, harga transparan, jadwal per jam.",
   alternates: { canonical: "/book" },
 };
 
@@ -50,12 +51,12 @@ async function loadFields() {
 
   try {
     const appUrl = await getAppUrl();
-    const response = await fetch(new URL("/api/fields", appUrl).toString(), {
+    const { res: response, data: __body } = await fetchJson(new URL("/api/fields", appUrl).toString(), {
       cache: "no-store",
     });
 
     if (response.ok) {
-      const data = await response.json();
+      const data = __body;
       if (data?.success && Array.isArray(data.data) && data.data.length > 0) {
         return { fields: data.data, usingFallback: false } as const;
       }
@@ -80,15 +81,15 @@ export default async function BookPage() {
     <main className="flex-1 px-4 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-10">
         <section className="card-surface p-6 sm:p-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--accent-strong)]">Booking flow</p>
-          <h1 className="mt-3 text-balance text-3xl font-semibold leading-tight text-[color:var(--foreground)] sm:text-4xl">Choose your date, time, and payment method</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--accent-strong)]">Alur booking</p>
+          <h1 className="mt-3 text-balance text-3xl font-semibold leading-tight text-[color:var(--foreground)] sm:text-4xl">Sewa Lapangan Klaten: Pilih Tanggal, Jam, Bayar</h1>
           <p className="mt-4 max-w-2xl text-lg text-[color:var(--muted)]">
-            The booking experience is designed for fast checkout with instant confirmation and a clean hourly schedule.
+            Booking lapangan mini soccer Klaten online. Checkout cepat, konfirmasi instan, jadwal per jam 06.00–23.00.
           </p>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {bookingSteps.map((step) => (
-              <div key={step.title} className="rounded-2xl border border-white/10 card-surface p-6">
+              <div key={step.title} className="rounded-2xl border border-white/20 bg-[var(--glass-bg)] p-6 shadow-lg shadow-black/5 backdrop-blur-xl">
                 <h2 className="font-semibold text-[color:var(--foreground)]">{step.title}</h2>
                 <p className="mt-2 text-sm text-[color:var(--muted)]">{step.description}</p>
               </div>
@@ -109,7 +110,7 @@ export default async function BookPage() {
             </div>
 
             <div className="mt-8">
-              <div className="overflow-hidden rounded-3xl border border-white/10 bg-[color:var(--surface)]">
+              <div className="overflow-hidden glass-panel rounded-3xl">
                 <div className="hidden md:block overflow-x-auto">
                   <table className="w-full table-auto text-left text-sm text-[color:var(--muted)]">
                     <thead className="bg-[color:var(--surface-strong)] text-[color:var(--muted)]">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { fetchJson } from "@/lib/fetch-json";
 
 interface StaffPaymentItem {
   id: string;
@@ -37,9 +38,9 @@ export default function StaffPaymentViewer({ adminName, useMain = true }: { admi
       params.set("limit", String(6));
       if (q) params.set("q", q);
       if (status) params.set("status", status);
-      const response = await fetch(`/api/admin/payments?${params.toString()}`, { cache: "no-store" });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Unable to load payments");
+      const { res: response, data: raw } = await fetchJson(`/api/admin/payments?${params.toString()}`, { cache: "no-store" });
+      const data: { data?: StaffPaymentItem[]; page?: number; totalPages?: number; message?: unknown } = raw;
+      if (!response.ok) throw new Error(String(data.message ?? "") === "" ? `Unable to load payments (${response.status}).` : String(data.message));
       setPayments(data.data || []);
       setPage(data.page || pageParam);
       setTotalPages(data.totalPages || 1);
@@ -68,9 +69,9 @@ export default function StaffPaymentViewer({ adminName, useMain = true }: { admi
 
   const handleUpdatePayment = async (id: string) => {
     try {
-      const res = await fetch(`/api/admin/payments/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: editStatus, amount: editAmount }) });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Gagal update");
+      const { res, data: __body } = await fetchJson(`/api/admin/payments/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: editStatus, amount: editAmount }) });
+      const data = __body;
+      if (!res.ok) throw new Error(String(data.message ?? "") || "Gagal update");
       setEditingId(null);
       await fetchPayments(page, query, filterStatus);
     } catch (e) {
@@ -81,9 +82,9 @@ export default function StaffPaymentViewer({ adminName, useMain = true }: { admi
   const handleDeletePayment = async (id: string) => {
     if (!confirm("Hapus pembayaran ini?")) return;
     try {
-      const res = await fetch(`/api/admin/payments/${id}`, { method: "DELETE" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Gagal hapus");
+      const { res, data: __body } = await fetchJson(`/api/admin/payments/${id}`, { method: "DELETE" });
+      const data = __body;
+      if (!res.ok) throw new Error(String(data.message ?? "") || "Gagal hapus");
       await fetchPayments(page, query, filterStatus);
     } catch (e) {
       setError((e as Error).message);
@@ -93,7 +94,7 @@ export default function StaffPaymentViewer({ adminName, useMain = true }: { admi
   const content = (
     <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8" id="staff-payments">
       <div className="mx-auto max-w-7xl space-y-6">
-        <div className="rounded-[2rem] border border-white/10 bg-[color:var(--surface-strong)] p-6 sm:p-8">
+        <div className="glass-panel rounded-[2rem] p-6 sm:p-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[color:var(--accent-strong)]">Staff payment viewer</p>
@@ -106,7 +107,7 @@ export default function StaffPaymentViewer({ adminName, useMain = true }: { admi
           </div>
         </div>
 
-        <section className="rounded-[1.5rem] border border-white/10 bg-[color:var(--surface)] p-5 sm:p-6">
+        <section className="glass-panel rounded-[1.5rem] p-5 sm:p-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-xl font-semibold text-white sm:text-2xl">Payment records</h2>
             <div className="flex items-center gap-2">

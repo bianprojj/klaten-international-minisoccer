@@ -3,14 +3,19 @@ import { prisma } from "@/lib/prisma";
 import { BLOCKING_BOOKING_STATUSES } from "@/lib/booking-engine";
 import { formatJakartaDateKey } from "@/lib/timezone";
 import { DEFAULT_FIELD_NAME, DEFAULT_FIELD } from "@/lib/venue";
-import { getFieldHourlyRate } from "@/lib/site-content";
 import { facilityImages, getFallbackReviews } from "@/lib/mock-data";
 import { FALLBACK_REMOTE_IMAGES, getSafeRemoteImageUrl, normalizeRemoteImageUrl } from "@/lib/remote-image";
 import type { FacilityImage, VenueGalleryImage } from "@/types";
 
 export async function getFields(): Promise<Field[]> {
-  const hourlyRate = await getFieldHourlyRate();
-  return [{ ...DEFAULT_FIELD, price: hourlyRate }];
+  try {
+    const slot = await prisma.scheduleSlot.findFirst({ orderBy: { sortOrder: "asc" } });
+    const price = slot && typeof slot.price === "number" ? slot.price : DEFAULT_FIELD.price;
+    return [{ ...DEFAULT_FIELD, price }];
+  } catch (error) {
+    console.error("[DATA] Unable to load default slot price:", error);
+    return [{ ...DEFAULT_FIELD, price: DEFAULT_FIELD.price }];
+  }
 }
 
 export async function getVenueFeatures(): Promise<FacilityImage[]> {
