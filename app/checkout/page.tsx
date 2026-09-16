@@ -100,7 +100,7 @@ export default function CheckoutPage() {
         }),
       });
 
-      const result = await response.json();
+      const result = __body;
       if (!response.ok || !result.success || !result.booking?.id) {
         throw new Error(String(result.message ?? "") || "Unable to create booking.");
       }
