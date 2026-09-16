@@ -6,7 +6,7 @@ import { SectionHeading } from "@/components/section-heading";
 import { getReviews, getVenueFeatures, getVenueGallery } from "@/lib/data";
 import { siteConfig } from "@/lib/site-config";
 import { getSiteContent } from "@/lib/site-content";
-import { getDefaultFieldPrice } from "@/lib/venue";
+import { getDefaultFieldPrice, PRICE_RANGE_TEXT, PRICE_DISCOUNT_NOTE } from "@/lib/venue";
 import CurveCarousel from "@/components/gallery/CurveCarousel";
 import { LocationMap } from "@/components/location-map";
 
@@ -41,7 +41,7 @@ export default async function Home() {
   const ratingValue = reviewCount ? Number((ratings.reduce((a, b) => a + b, 0) / reviewCount).toFixed(1)) : 4.9;
   const faqs = [
     { q: "Di mana lapangan mini soccer di Klaten?", a: "Klaten Minisoccer di Jl. Desa Karanganom, Karanganom, Klaten Utara, Klaten, Jawa Tengah. Buka setiap hari 06.00–23.00 WIB." },
-    { q: "Berapa harga sewa lapangan Klaten?", a: `Harga sewa mulai Rp ${hourlyRate.toLocaleString("id-ID")} per jam, transparan di halaman booking tanpa biaya tersembunyi.` },
+    { q: "Berapa harga sewa lapangan Klaten?", a: `Harga sewa sekitar ${PRICE_RANGE_TEXT} per jam. ${PRICE_DISCOUNT_NOTE}` },
     { q: "Bagaimana cara booking lapangan Klaten online?", a: "Pilih tanggal dan jam di halaman Booking, isi nama dan WhatsApp, lalu bayar via Midtrans. Konfirmasi instan." },
     { q: "Jam berapa lapangan buka?", a: "Setiap hari 06.00–23.00 WIB, termasuk akhir pekan dan hari libur." },
     { q: "Apakah cocok untuk futsal dan komunitas?", a: "Ya. Lapangan 5v5 premium, lampu malam, sewa bola dan sepatu, ruang ganti, cocok untuk futsal, mini soccer, dan komunitas." },
@@ -57,7 +57,7 @@ export default async function Home() {
         image: [`${siteConfig.url}/kim-logo.png`],
         telephone: siteConfig.phone,
         email: siteConfig.email,
-        priceRange: `Rp ${hourlyRate.toLocaleString("id-ID")}`,
+        priceRange: PRICE_RANGE_TEXT,
         description: siteConfig.description,
         address: {
           "@type": "PostalAddress",

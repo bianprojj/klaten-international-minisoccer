@@ -37,8 +37,12 @@ export function isSupportedFieldId(fieldId?: string | null) {
   return normalized === DEFAULT_FIELD_ID || LEGACY_FIELD_IDS.includes(normalized as typeof LEGACY_FIELD_IDS[number]);
 }
 
+export const PRICE_RANGE_TEXT = "Rp 214.000 - Rp 750.000";
+export const PRICE_RANGE_SHORT = "Rp 214.000 - 750.000";
+export const PRICE_DISCOUNT_NOTE = "Mungkin ada diskon, pantengin sosial media kami.";
+
 export function getDefaultFieldPrice() {
-  return DEFAULT_FIELD.price;
+  return 214000;
 }
 
 export function isDefaultFieldId(fieldId?: string) {

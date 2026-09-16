@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Sewa Lapangan Klaten | Booking Mini Soccer & Futsal",
-  description: "Sewa lapangan Klaten di Klaten Minisoccer, Karanganom Klaten Utara. Booking lapangan mini soccer Klaten online, harga transparan, jadwal per jam.",
+  description: "Sewa lapangan Klaten di Klaten Minisoccer, Karanganom Klaten Utara. Booking lapangan mini soccer Klaten online, harga sekitar Rp 214.000 - 750.000, jadwal per jam.",
   alternates: { canonical: "/book" },
 };
 

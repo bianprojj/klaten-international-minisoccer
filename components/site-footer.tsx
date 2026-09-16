@@ -4,7 +4,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-[1180px] gap-10 px-6 py-10 lg:grid-cols-[1.2fr_0.8fr] lg:px-8">
         <div className="space-y-4 text-sm font-[Manrope] text-[#F1EED9]">
           <p className="font-semibold text-[#FFFFFF]">Klaten Minisoccer</p>
-          <p className="text-[#F1EED9]">Sewa lapangan mini soccer di Klaten, Karanganom Klaten Utara. Booking online, harga transparan, jadwal per jam.</p>
+          <p className="text-[#F1EED9]">Sewa lapangan mini soccer di Klaten, Karanganom Klaten Utara. Booking online, harga sekitar Rp 214.000 - 750.000, jadwal per jam.</p>
           <address className="not-italic text-[#F1EED9]">
             Klaten, Jawa Tengah, Indonesia<br />
             Telp: <a href="tel:+6281234567890" className="text-[#C9D651] hover:underline">+62 812 3456 7890</a><br />

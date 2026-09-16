@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import type { VenueGalleryImage } from "@/types";
 import { useCarousel } from "@/hooks/useCarousel";
+import { PRICE_RANGE_SHORT, PRICE_DISCOUNT_NOTE } from "@/lib/venue";
 import { CurveCarouselDots } from "./CurveCarouselDots";
 import { CurveCarouselItem } from "./CurveCarouselItem";
 
@@ -64,9 +65,9 @@ export default function CurveCarousel({ images, price }: CurveCarouselProps) {
             </p>
           </div>
 
-          <div className="inline-flex max-w-full flex-wrap items-center gap-3 self-start rounded-full border border-[rgba(0,81,54,0.16)] bg-[#FFFFFF] px-5 py-3 font-[Manrope] text-sm text-[rgba(26,31,77,0.62)] shadow-[0_4px_16px_rgba(26,31,77,0.08)] lg:self-auto">
+          <div className="inline-flex max-w-full flex-wrap items-center gap-3 self-start rounded-full border border-[rgba(0,81,54,0.16)] bg-[#FFFFFF] px-5 py-3 font-[Manrope] text-sm text-[rgba(26,31,77,0.62)] shadow-[0_4px_16px_rgba(26,31,77,0.08)] lg:self-auto" title={PRICE_DISCOUNT_NOTE}>
             <span className="font-semibold text-[#1A1F4D]">Harga sewa</span>
-            <span className="rounded-full bg-[#C9D651] px-3 py-2 text-xs font-semibold text-[#005136]">Rp {price.toLocaleString("id-ID")} / jam</span>
+            <span className="rounded-full bg-[#C9D651] px-3 py-2 text-xs font-semibold text-[#005136]">{PRICE_RANGE_SHORT} / jam</span>
           </div>
         </div>
 
