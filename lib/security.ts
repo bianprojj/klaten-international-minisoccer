@@ -1,7 +1,7 @@
 import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
-// Re-export canonical security helpers from security-headers.ts
+/** Re-export canonical security helpers from security-headers.ts */
 export { applySecurityHeaders, getRateLimitResult } from "./security-headers";
 
 interface CookieOptions {
@@ -39,6 +39,12 @@ function getSecret() {
   return secret;
 }
 
+/**
+ * Creates a JWT token with HS256 algorithm
+ * @param payload - Payload to encode in the token
+ * @param secret - Optional secret override (defaults to JWT_SECRET env)
+ * @returns Signed JWT token string
+ */
 export function createJwt(payload: Record<string, unknown>, secret = getSecret()) {
   const header = { alg: "HS256", typ: "JWT" };
   const now = Math.floor(Date.now() / 1000);
@@ -55,6 +61,12 @@ export function createJwt(payload: Record<string, unknown>, secret = getSecret()
   return `${signingInput}.${toBase64Url(signature)}`;
 }
 
+/**
+ * Verifies a JWT token and returns the payload if valid
+ * @param token - JWT token string to verify
+ * @param secret - Optional secret override (defaults to JWT_SECRET env)
+ * @returns Decoded payload if valid, null if invalid/expired
+ */
 export function verifyJwt(token: string, secret = getSecret()) {
   const parts = token.split(".");
   if (parts.length !== 3) {

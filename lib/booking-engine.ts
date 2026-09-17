@@ -1,25 +1,57 @@
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_TIMEZONE, formatJakartaDateKey, parseDateOnlyInTimeZone } from "@/lib/timezone";
 
+/**
+ * Booking status types matching the database enum
+ */
 export type BookingStatus = "pending" | "confirmed" | "completed" | "cancelled" | "expired" | "refunded" | "rescheduled";
 
+/**
+ * Statuses that block a time slot from being booked
+ */
 export const BLOCKING_BOOKING_STATUSES: BookingStatus[] = ["pending", "confirmed", "completed", "rescheduled"];
+
+/**
+ * Statuses that allow reclaiming a time slot for new bookings
+ */
 export const RECLAIMABLE_BOOKING_STATUSES: BookingStatus[] = ["expired", "cancelled", "refunded"];
 
+/**
+ * Checks if a booking status blocks a time slot from new bookings
+ * @param status - Booking status string (case-insensitive)
+ * @returns True if the status blocks the slot
+ */
 export function isBookingSlotBlocked(status: string | undefined | null): boolean {
   const normalized = status?.trim().toLowerCase();
   return !!normalized && BLOCKING_BOOKING_STATUSES.includes(normalized as BookingStatus);
 }
 
+/**
+ * Checks if a booking status allows reclaiming the time slot
+ * @param status - Booking status string (case-insensitive)
+ * @returns True if the slot can be reclaimed
+ */
 export function shouldReclaimBookingStatus(status: string | undefined | null): boolean {
   const normalized = status?.trim().toLowerCase();
   return !!normalized && RECLAIMABLE_BOOKING_STATUSES.includes(normalized as BookingStatus);
 }
 
+/**
+ * Checks if a time slot is available for new bookings
+ * @param status - Booking status string (case-insensitive)
+ * @returns True if slot is available
+ */
 export function isBookingStatusAvailableInSlot(status: string | undefined | null): boolean {
   return !isBookingSlotBlocked(status);
 }
 
+/**
+ * Deletes reclaimable bookings for a specific date/time slot
+ * Used to free up slots that were expired/cancelled/refunded
+ * @param bookingDate - Optional date to filter (defaults to all)
+ * @param startTime - Optional start time to filter (defaults to all)
+ * @returns Prisma deleteMany result with count of deleted bookings
+ */
 export async function reclaimExpiredSlotBookings(bookingDate?: string | Date, startTime?: string) {
   const where: Record<string, unknown> = {
     status: {
@@ -43,6 +75,9 @@ export async function reclaimExpiredSlotBookings(bookingDate?: string | Date, st
   });
 }
 
+/**
+ * Schedule slot record from database
+ */
 export interface ScheduleSlotRecord {
   id: string;
   startTime: string;

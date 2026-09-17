@@ -1,5 +1,13 @@
+/**
+ * Default timezone for the application (Indonesia Western Time - WIB)
+ */
 export const DEFAULT_TIMEZONE = "Asia/Jakarta";
 
+/**
+ * Normalizes a time string to HH:MM format
+ * @param timeValue - Time string in various formats (HH:MM, H:MM, HHMM, numeric hour)
+ * @returns Normalized time string in HH:MM format
+ */
 export function normalizeTimeString(timeValue: string | null | undefined): string {
   if (!timeValue) return "00:00";
   const trimmed = String(timeValue).trim();
@@ -19,6 +27,13 @@ export function normalizeTimeString(timeValue: string | null | undefined): strin
   return `${String(Math.floor(numeric)).padStart(2, "0")}:00`;
 }
 
+/**
+ * Parses a date string/value and returns a Date normalized to the specified timezone
+ * Handles both YYYY-MM-DD strings and ISO date strings
+ * @param dateValue - Date string or Date object
+ * @param timezone - IANA timezone identifier (default: Asia/Jakarta)
+ * @returns Date object normalized to the timezone, or invalid Date if parsing fails
+ */
 export function parseDateOnlyInTimeZone(dateValue: string | Date, timezone = DEFAULT_TIMEZONE): Date {
   if (dateValue instanceof Date) {
     return new Date(dateValue.getTime());

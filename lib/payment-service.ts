@@ -10,11 +10,21 @@ import { formatJakartaDateKey } from "@/lib/timezone";
 
 const paymentProvider = new DemoPaymentProvider();
 
+/**
+ * Resolves the base URL for the application
+ * @param explicitBaseUrl - Optional explicit base URL override
+ * @returns Normalized base URL without trailing slash
+ */
 function resolveAppBaseUrl(explicitBaseUrl?: string) {
   const configured = explicitBaseUrl?.trim() || process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://klaten-international-minisoccer.vercel.app");
   return configured.replace(/\/+$/, "");
 }
 
+/**
+ * Normalizes Midtrans payment status to internal PaymentStatus enum
+ * @param status - Raw status string from Midtrans or other providers
+ * @returns Normalized PaymentStatus enum value
+ */
 export function normalizePaymentStatus(status: string): PaymentStatus {
   const lower = String(status ?? "").toLowerCase().trim();
 
@@ -28,6 +38,12 @@ export function normalizePaymentStatus(status: string): PaymentStatus {
   return "pending";
 }
 
+/**
+ * Builds Prisma where conditions for payment lookup by identifier
+ * Supports transactionId, midtransOrderId, and bookingId (if UUID)
+ * @param identifier - Payment identifier (transactionId, midtransOrderId, or bookingId)
+ * @returns Array of Prisma where conditions for OR query
+ */
 export function buildPaymentLookupWhere(identifier: string) {
   const normalizedIdentifier = identifier?.trim() ?? "";
   if (!normalizedIdentifier) {
@@ -46,6 +62,11 @@ export function buildPaymentLookupWhere(identifier: string) {
   return conditions;
 }
 
+/**
+ * Finds a payment by identifier (transactionId, midtransOrderId, or bookingId)
+ * @param identifier - Payment identifier
+ * @returns Payment with booking relation or null
+ */
 async function findPaymentByIdentifier(identifier: string) {
   const conditions = buildPaymentLookupWhere(identifier);
   if (conditions.length === 0) {
