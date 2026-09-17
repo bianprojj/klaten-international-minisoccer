@@ -8,12 +8,12 @@
    - Environments: .env.local, .env
 
  ✓ Starting...
- ✓ Ready in 1996ms
- ✓ Compiled /middleware in 218ms (116 modules)
+ ✓ Ready in 9.1s
+ ✓ Compiled /middleware in 224ms (116 modules)
  ○ Compiling / ...
- ✓ Compiled / in 1660ms (710 modules)
- GET / 200 in 3091ms
- GET / 200 in 413ms
- GET / 200 in 572ms
- ✓ Compiled in 332ms (278 modules)
- ✓ Compiled in 212ms (278 modules)
+ ✓ Compiled / in 1800ms (710 modules)
+ GET / 200 in 3233ms
+ ○ Compiling /superadmin/login ...
+ ✓ Compiled /superadmin/login in 703ms (723 modules)
+ GET /superadmin/login 200 in 1029ms
+ ✓ Compiled in 229ms (283 modules)

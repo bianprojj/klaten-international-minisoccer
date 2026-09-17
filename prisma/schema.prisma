@@ -182,15 +182,17 @@ model AdminSetting {
 }
 
 model AdminUser {
-  id           String   @id @default(uuid()) @map("id")
-  name         String   @map("name")
-  email        String   @unique @map("email")
-  passwordHash String   @map("password_hash")
-  role         String   @default("staff") @map("role")
-  isActive     Boolean  @default(true) @map("is_active")
-  lastLoginAt  DateTime? @map("last_login_at")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id             String   @id @default(uuid()) @map("id")
+  name           String   @map("name")
+  email          String   @unique @map("email")
+  passwordHash   String   @map("password_hash")
+  role           String   @default("staff") @map("role")
+  isActive       Boolean  @default(true) @map("is_active")
+  lastLoginAt    DateTime? @map("last_login_at")
+  passwordChangedAt DateTime? @map("password_changed_at")
+  mustChangePassword Boolean @default(false) @map("must_change_password")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
   sessions AdminSession[]
 

@@ -1,10 +1,12 @@
-import crypto from "crypto";
+import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getAuthenticatedAdminFromToken, hasAdminPermission } from "@/lib/admin-auth";
+import { getAuthenticatedAdminFromToken, hasAdminPermission, validatePasswordComplexity } from "@/lib/admin-auth";
 
 function tokenFrom(request: Request) { const match = (request.headers.get("cookie") ?? "").match(/admin-session=([^;]+)/); return match ? decodeURIComponent(match[1]) : ""; }
-function hash(value: string) { return crypto.createHash("sha256").update(value).digest("hex"); }
+async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 12);
+}
 async function authorize(request: Request) { const admin = await getAuthenticatedAdminFromToken(tokenFrom(request)); return admin && hasAdminPermission(admin, "canManageAdmins") ? admin : null; }
 const select = { id: true, name: true, email: true, role: true, isActive: true, lastLoginAt: true, createdAt: true, updatedAt: true } as const;
 
@@ -22,7 +24,13 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     if (typeof body.email === "string") data.email = body.email.trim().toLowerCase();
     if (body.role === "super_admin" || body.role === "manager" || body.role === "staff") data.role = body.role;
     if (typeof body.isActive === "boolean") data.isActive = body.isActive;
-    if (typeof body.password === "string" && body.password.length >= 6) data.passwordHash = hash(body.password);
+    if (typeof body.password === "string" && body.password.length > 0) {
+      const passwordValidation = validatePasswordComplexity(body.password);
+      if (!passwordValidation.valid) {
+        return NextResponse.json({ success: false, message: "Password does not meet complexity requirements.", errors: passwordValidation.errors }, { status: 400 });
+      }
+      data.passwordHash = await hashPassword(body.password);
+    }
     const updated = await prisma.adminUser.update({ where: { id }, data, select });
     return NextResponse.json({ success: true, data: updated });
   } catch (error) { console.error("[ADMIN] Update admin user error:", error); return NextResponse.json({ success: false, message: "Unable to update admin user." }, { status: 500 }); }

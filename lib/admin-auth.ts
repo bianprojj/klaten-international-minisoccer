@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createJwt, verifyJwt, setSecureCookie, clearSecureCookie } from "@/lib/security";
@@ -16,22 +17,94 @@ const SEEDED_ADMIN_CREDENTIALS = [
   {
     name: "Primary Super Admin",
     email: "superadmin1@klatenminisoccer.id",
-    password: "superadmin123",
+    password: "SuperAdmin@123!",
     role: "super_admin" as const,
   },
   {
     name: "Booking Manager",
     email: "manager1@klatenminisoccer.id",
-    password: "manager123",
+    password: "Manager@123!",
     role: "manager" as const,
   },
   {
     name: "Support Staff",
     email: "staff@klatenminisoccer.id",
-    password: "staff123",
+    password: "Staff@123!",
     role: "staff" as const,
   },
 ];
+
+// Account lockout configuration
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+const failedAttemptsStore = new Map<string, { count: number; lockedUntil: number }>();
+
+function checkAccountLockout(email: string): { allowed: boolean; remainingAttempts: number; lockedUntil?: number } {
+  const normalizedEmail = email.toLowerCase().trim();
+  const record = failedAttemptsStore.get(normalizedEmail);
+  
+  if (!record) {
+    return { allowed: true, remainingAttempts: MAX_FAILED_ATTEMPTS };
+  }
+  
+  if (record.lockedUntil && record.lockedUntil > Date.now()) {
+    return { allowed: false, remainingAttempts: 0, lockedUntil: record.lockedUntil };
+  }
+  
+  if (record.lockedUntil && record.lockedUntil <= Date.now()) {
+    // Lockout expired, reset
+    failedAttemptsStore.delete(normalizedEmail);
+    return { allowed: true, remainingAttempts: MAX_FAILED_ATTEMPTS };
+  }
+  
+  return { allowed: true, remainingAttempts: MAX_FAILED_ATTEMPTS - record.count };
+}
+
+function recordFailedAttempt(email: string): void {
+  const normalizedEmail = email.toLowerCase().trim();
+  const record = failedAttemptsStore.get(normalizedEmail) || { count: 0, lockedUntil: 0 };
+  
+  record.count += 1;
+  
+  if (record.count >= MAX_FAILED_ATTEMPTS) {
+    record.lockedUntil = Date.now() + LOCKOUT_DURATION_MS;
+  }
+  
+  failedAttemptsStore.set(email.toLowerCase().trim(), record);
+}
+
+function clearFailedAttempts(email: string): void {
+  failedAttemptsStore.delete(email.toLowerCase().trim());
+}
+
+export function validatePasswordComplexity(password: string): { valid: boolean; errors: string[] } {
+  const errors: string[] = [];
+  
+  if (password.length < 8) {
+    errors.push("Password must be at least 8 characters long");
+  }
+  
+  if (!/[A-Z]/.test(password)) {
+    errors.push("Password must contain at least one uppercase letter");
+  }
+  
+  if (!/[a-z]/.test(password)) {
+    errors.push("Password must contain at least one lowercase letter");
+  }
+  
+  if (!/[0-9]/.test(password)) {
+    errors.push("Password must contain at least one number");
+  }
+  
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    errors.push("Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;':\"\\,.<>/?)");
+  }
+  
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
 
 export const ADMIN_ROLES = {
   staff: "staff",
@@ -75,6 +148,15 @@ export interface AuthenticatedAdmin {
 
 function hashSecret(input: string) {
   return crypto.createHash("sha256").update(input).digest("hex");
+}
+
+async function hashPassword(password: string): Promise<string> {
+  const saltRounds = 12;
+  return bcrypt.hash(password, saltRounds);
+}
+
+async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(password, hash);
 }
 
 function normalizeAdminRole(role: string): AdminRole {
@@ -194,11 +276,12 @@ async function ensureSeededAdminUsers() {
     });
 
     if (!existing) {
+      const passwordHash = await hashPassword(seededAdmin.password);
       await prisma.adminUser.create({
         data: {
           name: seededAdmin.name,
           email: seededAdmin.email.toLowerCase(),
-          passwordHash: hashSecret(seededAdmin.password),
+          passwordHash,
           role: seededAdmin.role,
           isActive: true,
         },
@@ -209,7 +292,7 @@ async function ensureSeededAdminUsers() {
 
 async function ensureDefaultAdminUser() {
   await ensureSeededAdminUsers();
-  const passwordHash = hashSecret(DEFAULT_ADMIN_PASSWORD);
+  const passwordHash = await hashPassword(DEFAULT_ADMIN_PASSWORD);
   const normalizedEmail = DEFAULT_ADMIN_EMAIL.toLowerCase();
 
   const existing = await prisma.adminUser.findUnique({
@@ -262,21 +345,37 @@ export async function authenticateAdmin(email: string, password: string) {
     throw new Error("Admin email and password are required.");
   }
 
+  // Check account lockout
+  const lockoutStatus = checkAccountLockout(normalizedEmail);
+  if (!lockoutStatus.allowed) {
+    const minutesLeft = Math.ceil((lockoutStatus.lockedUntil! - Date.now()) / 60000);
+    throw new Error(`Account temporarily locked due to too many failed attempts. Try again in ${minutesLeft} minutes.`);
+  }
+
   const adminUser = await findAdminUserByEmail(normalizedEmail);
 
   if (!adminUser) {
+    recordFailedAttempt(normalizedEmail);
     throw new Error("Admin credentials are invalid.");
   }
 
-  const providedPasswordHash = hashSecret(normalizedPassword);
-  if (providedPasswordHash !== adminUser.passwordHash) {
+  const isPasswordValid = await verifyPassword(normalizedPassword, adminUser.passwordHash);
+  if (!isPasswordValid) {
+    recordFailedAttempt(normalizedEmail);
     throw new Error("Admin credentials are invalid.");
   }
+
+  // Clear failed attempts on successful login
+  clearFailedAttempts(normalizedEmail);
+
+  // Check if user must change password (first login or forced reset)
+  const mustChangePassword = adminUser.mustChangePassword === true || adminUser.passwordChangedAt === null;
 
   const sessionToken = createJwt({
     sub: adminUser.id,
     email: adminUser.email,
     role: adminUser.role,
+    mustChangePassword,
   });
 
   const tokenHash = hashSecret(sessionToken);
@@ -295,6 +394,7 @@ export async function authenticateAdmin(email: string, password: string) {
       name: adminUser.name,
       email: adminUser.email,
       role: adminUser.role,
+      mustChangePassword,
     },
     token: sessionToken,
   };
