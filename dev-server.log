@@ -1,0 +1,19 @@
+
+> minisoccer@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.5.20
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.48:3000
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Ready in 1996ms
+ ✓ Compiled /middleware in 218ms (116 modules)
+ ○ Compiling / ...
+ ✓ Compiled / in 1660ms (710 modules)
+ GET / 200 in 3091ms
+ GET / 200 in 413ms
+ GET / 200 in 572ms
+ ✓ Compiled in 332ms (278 modules)
+ ✓ Compiled in 212ms (278 modules)

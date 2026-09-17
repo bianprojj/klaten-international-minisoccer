@@ -376,7 +376,7 @@ export async function syncBookingStatusesFromPayments() {
       refunded: "refunded",
     };
 
-    const nextBookingStatus = bookingStatusMap[payment.status] ?? payment.booking.status;
+    const nextBookingStatus = bookingStatusMap[payment.status as PaymentStatus] ?? payment.booking.status;
 
     if (payment.booking.status !== nextBookingStatus) {
       await prisma.booking.update({

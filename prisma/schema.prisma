@@ -8,6 +8,7 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+// Enums for application-level type safety (stored as VARCHAR in DB)
 enum AdminRole {
   super_admin
   manager
@@ -63,7 +64,6 @@ enum InvoiceStatus {
 
 model Booking {
   id            String        @id @default(uuid()) @map("id")
-  // approvedById and approvedBy removed to match production DB (column not present)
   bookingDate   DateTime      @map("booking_date")
   startTime     String        @map("start_time")
   endTime       String        @map("end_time")
@@ -72,7 +72,7 @@ model Booking {
   customerName  String        @map("customer_name")
   customerPhone String        @map("customer_phone")
   customerEmail String?       @map("customer_email")
-  status        BookingStatus @default(pending) @map("status")
+  status        String        @default("pending") @map("status")
   notes         String?       @map("notes")
   createdAt     DateTime      @default(now()) @map("created_at")
   updatedAt     DateTime      @updatedAt @map("updated_at")
@@ -81,27 +81,26 @@ model Booking {
   invoice  Invoice?
   reviews  Review[]
 
-  // Active-slot uniqueness is enforced by a partial DB index in migration SQL so
-  // expired/cancelled/refunded records can be reclaimed without blocking new bookings.
+  @@unique([bookingDate, startTime], map: "booking_booking_date_start_time_key")
   @@map("booking")
 }
 
 model Payment {
-  id              String        @id @default(uuid()) @map("id")
-  bookingId       String        @map("booking_id")
-  booking         Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  transactionId   String        @unique @map("transaction_id")
-  midtransOrderId String?       @unique @map("midtrans_order_id")
-  snapToken       String?       @map("snap_token")
-  snapUrl         String?       @map("payment_link_url")
-  amount          Int           @map("amount")
-  paymentMethod   PaymentMethod @default(Midtrans) @map("payment_method")
-  provider        String        @default("Midtrans") @map("provider")
-  status          PaymentStatus @default(pending) @map("status")
-  paidAt          DateTime?     @map("paid_at")
-  expiredAt       DateTime?     @map("expired_at")
-  createdAt       DateTime      @default(now()) @map("created_at")
-  updatedAt       DateTime      @updatedAt @map("updated_at")
+  id              String   @id @default(uuid()) @map("id")
+  bookingId       String   @map("booking_id")
+  booking         Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  transactionId   String   @unique @map("transaction_id")
+  midtransOrderId String?  @unique @map("midtrans_order_id")
+  snapToken       String?  @map("snap_token")
+  snapUrl         String?  @map("payment_link_url")
+  amount          Int      @map("amount")
+  paymentMethod   String   @default("Midtrans") @map("payment_method")
+  provider        String   @default("Midtrans") @map("provider")
+  status          String   @default("pending") @map("status")
+  paidAt          DateTime? @map("paid_at")
+  expiredAt       DateTime? @map("expired_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   invoice Invoice?
 
@@ -109,37 +108,37 @@ model Payment {
 }
 
 model Invoice {
-  id            String        @id @default(uuid()) @map("id")
-  invoiceNumber String        @unique @map("invoice_number")
-  bookingId     String        @unique @map("booking_id")
-  booking       Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  paymentId     String        @unique @map("payment_id")
-  payment       Payment       @relation(fields: [paymentId], references: [id], onDelete: Cascade)
-  customerName  String?       @map("customer_name")
-  customerEmail String?       @map("customer_email")
-  customerPhone String?       @map("customer_phone")
-  subtotal      Int           @map("subtotal")
-  tax           Int           @default(0) @map("tax")
-  discount      Int           @default(0) @map("discount")
-  total         Int           @map("total")
-  status        InvoiceStatus @default(issued) @map("status")
-  issuedAt      DateTime      @default(now()) @map("issued_at")
-  paidAt        DateTime?     @map("paid_at")
-  createdAt     DateTime      @default(now()) @map("created_at")
-  updatedAt     DateTime      @updatedAt @map("updated_at")
+  id            String       @id @default(uuid()) @map("id")
+  invoiceNumber String       @unique @map("invoice_number")
+  bookingId     String       @unique @map("booking_id")
+  booking       Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  paymentId     String       @unique @map("payment_id")
+  payment       Payment      @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  customerName  String?      @map("customer_name")
+  customerEmail String?      @map("customer_email")
+  customerPhone String?      @map("customer_phone")
+  subtotal      Int          @map("subtotal")
+  tax           Int          @default(0) @map("tax")
+  discount      Int          @default(0) @map("discount")
+  total         Int          @map("total")
+  status        String       @default("issued") @map("status")
+  issuedAt      DateTime     @default(now()) @map("issued_at")
+  paidAt        DateTime?    @map("paid_at")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
 
   @@map("invoice")
 }
 
 model Review {
-  id           String   @id @default(uuid()) @map("id")
-  bookingId    String?  @map("booking_id")
-  booking      Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  customerName String   @map("customer_name")
-  rating       Int      @map("rating")
-  comment      String   @map("comment")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id           String    @id @default(uuid()) @map("id")
+  bookingId    String?   @map("booking_id")
+  booking      Booking?  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  customerName String    @map("customer_name")
+  rating       Int       @map("rating")
+  comment      String    @map("comment")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
 
   @@map("review")
 }
@@ -183,15 +182,15 @@ model AdminSetting {
 }
 
 model AdminUser {
-  id           String    @id @default(uuid()) @map("id")
-  name         String    @map("name")
-  email        String    @unique @map("email")
-  passwordHash String    @map("password_hash")
-  role         AdminRole @default(staff) @map("role")
-  isActive     Boolean   @default(true) @map("is_active")
+  id           String   @id @default(uuid()) @map("id")
+  name         String   @map("name")
+  email        String   @unique @map("email")
+  passwordHash String   @map("password_hash")
+  role         String   @default("staff") @map("role")
+  isActive     Boolean  @default(true) @map("is_active")
   lastLoginAt  DateTime? @map("last_login_at")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   sessions AdminSession[]
 
@@ -238,9 +237,6 @@ model VenueGallery {
   @@map("venue_gallery")
 }
 
-/// Webhook events table to record incoming payment provider notifications and
-/// prevent duplicate processing. This is used by the payments webhook route to
-/// ensure idempotency and for auditing.
 model WebhookEvent {
   id         String   @id @default(uuid()) @map("id")
   eventHash  String   @unique @map("event_hash")

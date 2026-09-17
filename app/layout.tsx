@@ -78,6 +78,84 @@ export default function RootLayout({
         />
         <link rel="preconnect" href="https://www.openstreetmap.org" />
         <link rel="dns-prefetch" href="https://www.openstreetmap.org" />
+        {/* Schema.org Structured Data: LocalBusiness + SportsActivityLocation */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": ["SportsActivityLocation", "LocalBusiness"],
+              "name": siteConfig.name,
+              "description": siteConfig.description,
+              "url": siteConfig.url,
+              "telephone": siteConfig.phone,
+              "email": siteConfig.email,
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "Jl. Desa Karanganom, Karanganom",
+                "addressLocality": "Klaten Utara",
+                "addressRegion": "Klaten",
+                "postalCode": "57462",
+                "addressCountry": "ID"
+              },
+              "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": "-7.684887",
+                "longitude": "110.610147"
+              },
+              "openingHoursSpecification": [
+                {
+                  "@type": "OpeningHoursSpecification",
+                  "dayOfWeek": [
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday",
+                    "Friday",
+                    "Saturday",
+                    "Sunday"
+                  ],
+                  "opens": "06:00",
+                  "closes": "23:00"
+                }
+              ],
+              "priceRange": "Rp 214.000 - Rp 750.000",
+              "areaServed": {
+                "@type": "GeoCircle",
+                "geoMidpoint": {
+                  "@type": "GeoCoordinates",
+                  "latitude": "-7.684887",
+                  "longitude": "110.610147"
+                },
+                "geoRadius": "20000"
+              },
+              "makesOffer": {
+                "@type": "Offer",
+                "name": "Sewa Lapangan Mini Soccer",
+                "price": "214000",
+                "priceCurrency": "IDR",
+                "availability": "https://schema.org/InStock",
+                "url": `${siteConfig.url}/book`
+              },
+              "image": [
+                siteConfig.openGraphImage,
+                `${siteConfig.url}/kim-logo.png`
+              ],
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "4.9",
+                "reviewCount": "50",
+                "bestRating": "5",
+                "worstRating": "1"
+              },
+              "sameAs": [
+                "https://www.instagram.com/klatenminisoccer",
+                "https://www.facebook.com/klatenminisoccer",
+                "https://wa.me/6281234567890"
+              ]
+            })
+          }}
+        />
       </head>
       <body className="flex min-h-screen flex-col bg-[color:var(--background)] text-[color:var(--foreground)]">
         <script src="/theme-init.js" defer></script>

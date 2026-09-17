@@ -14,14 +14,26 @@ export async function GET(request: Request) {
       return NextResponse.json({ success: false, message: "Insufficient privileges." }, { status: 403 });
     }
 
-    const slot = await prisma.scheduleSlot.findFirst({ orderBy: { sortOrder: "asc" } });
-    const price = slot && typeof slot.price === "number" ? slot.price : DEFAULT_FIELD.price;
+    const slots = await prisma.scheduleSlot.findMany({
+      where: { isActive: true },
+      orderBy: { sortOrder: "asc" },
+    });
+
+    const fields = slots.map((slot, index) => ({
+      ...DEFAULT_FIELD,
+      id: slot.id,
+      name: `Slot ${slot.startTime} - ${slot.endTime}`,
+      price: slot.price,
+      sortOrder: slot.sortOrder,
+      isActive: slot.isActive,
+    }));
+
     return NextResponse.json({
       success: true,
-      data: [{ ...DEFAULT_FIELD, price }],
-      total: 1,
+      data: fields,
+      total: fields.length,
       page: 1,
-      limit: 1,
+      limit: fields.length,
       totalPages: 1,
     });
   } catch (error) {
@@ -30,6 +42,36 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST() {
-  return NextResponse.json({ success: false, message: "Field creation is disabled for this single-venue deployment." }, { status: 410 });
+export async function POST(request: Request) {
+  try {
+    const cookieHeader = request.headers.get("cookie") || "";
+    const match = cookieHeader.match(/admin-session=([^;]+)/);
+    const token = match ? decodeURIComponent(match[1]) : "";
+    const admin = await getAuthenticatedAdminFromToken(token);
+    if (!admin) return NextResponse.json({ success: false, message: "Admin session not found." }, { status: 401 });
+    if (!hasAdminPermission(admin, "canManageFields")) {
+      return NextResponse.json({ success: false, message: "Insufficient privileges." }, { status: 403 });
+    }
+
+    const body = await request.json();
+
+    const startTime = typeof body.startTime === "string" ? body.startTime.trim() : "";
+    const endTime = typeof body.endTime === "string" ? body.endTime.trim() : "";
+    const price = Number(body.price);
+    const isActive = body.isActive !== false;
+    const sortOrder = Number(body.sortOrder ?? 0);
+
+    if (!startTime || !endTime || Number.isNaN(price)) {
+      return NextResponse.json({ success: false, message: "startTime, endTime, and price are required." }, { status: 400 });
+    }
+
+    const slot = await prisma.scheduleSlot.create({
+      data: { startTime, endTime, price, isActive, sortOrder },
+    });
+
+    return NextResponse.json({ success: true, data: slot }, { status: 201 });
+  } catch (error) {
+    console.error("[ADMIN] Create schedule slot error:", error);
+    return NextResponse.json({ success: false, message: "Unable to create schedule slot." }, { status: 500 });
+  }
 }

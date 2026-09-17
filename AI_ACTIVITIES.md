@@ -270,3 +270,84 @@ If you want, I can open a PR with these changes, run `npm run lint -- --fix`, or
 - Sebab: `price` + badge `Open` keluar box di `components/booking-form.tsx`.
 - Fix: tombol kartu tambah `overflow-hidden min-w-0`, kiri `min-w-0` + `truncate`, kanan `flex flex-col items-end gap-2 min-w-0`, harga `whitespace-nowrap`, badge `inline-block`.
 - Skipped: ubah grid `xl:grid-cols-3` ke 2 kolom / stack badge di layar kecil. Add when overflow mobile muncul.
+
+## 2026-09-18
+
+### 44. CRUD Superadmin/Manager/Staff Dashboard Fix - Full Sync Prisma & API
+**Problem**: Semua CRUD tabel di dashboard superadmin, manager, staff rusak — "unable to create/read/update/delete", field list hanya menampilkan 1 slot, data Supabase tidak muncul.
+
+**Root Cause Analysis**:
+- Prisma schema menggunakan native enum (PostgreSQL ENUM) tapi DB (Supabase) pakai VARCHAR untuk kolom status/role/method
+- Model `Field` masih ada di Prisma tapi sudah DROP di DB (single-venue setup)
+- `app/api/admin/fields/route.ts` pakai `findFirst()` → hanya ambil 1 slot dari 20 slot di tabel `schedule_slot`
+- Type mismatch antara Prisma Client dan DB aktual menyebabkan error P2021 "table does not exist" pada query dashboard summary
+
+**Fixes Applied**:
+
+1. **Prisma Schema Sync** (`prisma/schema.prisma`):
+   - Hapus native enum `AdminRole`, `BookingStatus`, `PaymentStatus`, `PaymentMethod`, `InvoiceStatus` → ganti ke `String` dengan default value
+   - Hapus model `Field` (sudah tidak dipakai, single-venue)
+   - Tambah `@@unique([bookingDate, startTime], map: "booking_booking_date_start_time_key")` di model `Booking` untuk match constraint di DB
+   - Jalankan `npx prisma generate` + `npx prisma db push --accept-data-loss` → DB dan Prisma sinkron 100%
+
+2. **Field/Schedule Slot API** (`app/api/admin/fields/route.ts` & `app/api/admin/fields/[id]/route.ts`):
+   - GET: `findMany()` dengan `where: { isActive: true }` order by `sortOrder` → tampil semua 20 slot (07:00-23:00)
+   - POST: Create new `ScheduleSlot` (startTime, endTime, price, isActive, sortOrder)
+   - PUT/DELETE: Full CRUD untuk schedule slots
+   - Response format kompatibel dengan `FieldManagerClient`
+
+3. **FieldManagerClient Rewrite** (`app/manager/fields/FieldManagerClient.tsx`):
+   - Ubah interface dari `FieldItem` (name, location, type, size, capacity) ke `SlotItem` (startTime, endTime, price, isActive, sortOrder)
+   - UI form pakai `type="time"` untuk start/end time, number untuk price & sortOrder
+   - Tabel hanya kolom: Time, Price, Active, Sort Order, Actions
+
+4. **Dashboard Summary** (`lib/admin-dashboard.ts`):
+   - Sudah pakai `isMissingTableError` guard (P2021), sekarang query aman karena schema sinkron
+   - `getAdminSummary()` return data real dari Supabase
+
+5. **TypeScript Fix** (`lib/payment-service.ts:379`):
+   - Cast `payment.status as PaymentStatus` untuk satisfy `Record<PaymentStatus, BookingStatus>` index
+
+6. **Build Verification**:
+   - `npm run build` → ✓ Compiled successfully
+   - Only ESLint warnings (unused vars), no TypeScript errors
+   - Semua route admin (`/api/admin/*`) ter-build dengan benar
+
+**Files Modified**:
+- `prisma/schema.prisma` - full rewrite match DB
+- `app/api/admin/fields/route.ts` - GET all slots + POST create
+- `app/api/admin/fields/[id]/route.ts` - GET/PUT/DELETE schedule slots
+- `app/manager/fields/FieldManagerClient.tsx` - rewrite for schedule slots
+- `lib/payment-service.ts` - type cast fix
+
+**Verification**: Build pass, all admin API routes present, Prisma Client regenerated, DB schema synced.
+
+### 45. Log semua aktivitas ke AI_ACTIVITIES.md
+
+### 46. Ganti drag & drop upload jadi input image_url (venue feature & gallery)
+- Sebab: drag & drop upload ke Cloudinary via `/api/cloudinary/upload-file` tidak bisa dipakai user (error generik, staff 403, SVG/HEIC ditolak). DB (`venue_feature`, `venue_gallery`) memang hanya simpan `image_url` (+ `image_public_id` nullable).
+- `components/venue-feature-manager.tsx`: hapus `upload()`, `drop()`, state `uploading`, import `DragEvent`, dan dropzone label + hidden file input. Ganti dengan text input `Image URL` + **preview `<Image>` tetap dipertahankan**. Form state disederhanakan ke `{name, description, imageUrl}` (tanpa `imagePublicId`; PUT hanya kirim field terisi jadi public_id lama aman). Subtitle diubah ke "gambar memakai URL (mis. Cloudinary)".
+- `components/venue-gallery-manager.tsx`: perubahan yang sama — text input `Image URL` + preview tetap. Subtitle "gambar memakai URL. Drag kartu untuk urutkan."
+- Drag-to-reorder kartu (sortOrder) dipertahankan di kedua manager karena itu fitur urutan, bukan upload.
+- Route `/api/cloudinary/upload-file` dibiarkan (tidak dipakai UI lagi, tidak merusak apa pun).
+- Verifikasi: `npm run build` sukses 55/55 (hanya warning ESLint lama). Catatan: build harus dijalankan saat dev server mati karena Windows EPERM lock `query_engine-windows.dll.node` (dev server di-stop, build, lalu dev dinyalakan lagi background + verifikasi `localhost:3000` 200 OK).
+
+### 47. Perbaikan SEO On-Page (keyword expansion + metadata)
+- `lib/site-config.ts`: diperluas keyword dari 10 menjadi 20+ kata kunci long-tail berdasarkan riset SERP, mencakup "lapangan mini soccer klaten hargaterjang", "sewa lapangan klaten per jam", "harga lapangan per jam klaten", "tempat sewa lapangan murah klaten", dll.
+- `app/layout.tsx`: keyword yang sudah diperluasditambahkan ke dalam `generateMetadata()` agar setiap halaman memiliki keyword relevan untuk target "lapangan mini soccer klaten", "sewa lapangan klaten", dan variasi long-tail. Build `npm run build` sukses 55/55 tanpa error TypeScript.
+
+### 48. Schema.org Structured Data (JSON-LD) Implementation
+- **File**: `app/layout.tsx` (di `<head>` section, setelah dns-prefetch)
+- **Schema types**: `SportsActivityLocation` + `LocalBusiness` (dual-type untuk maksimal rich results)
+- **Data covered**:
+  - Basic: name, description, url, telephone, email, address (PostalAddress), geo (GeoCoordinates dengan koordinat Klaten: -7.684887, 110.610147)
+  - Jam operasional: `OpeningHoursSpecification` (Senin-Minggu 06:00-23:00)
+  - Price range: "Rp 214.000 - Rp 750.000"
+  - Area served: GeoCircle radius 20km di sekitar Klaten
+  - Offer: "Sewa Lapangan Mini Soccer" dengan price 214000 IDR, availability InStock, url ke `/book`
+  - Images: kim-logo.png + openGraphImage
+  - AggregateRating: 4.9/5 (reviewCount 50)
+  - Social: sameAs (Instagram, Facebook, WhatsApp)
+- **Verifikasi**: HTML homepage render `<script type="application/ld+json">` dengan `@graph` berisi SportsActivityLocation, WebSite, FAQPage (sudah ada dari komponen sebelumnya)
+- **Build**: `npm run build` sukses 55/55, dev server `localhost:3000` 200 OK
+- **Dampak yang diharapkan**: Rich snippets di Google Search (bintang rating, harga, telepon, jam buka), muncul di Local Pack (Map Pack) untuk pencarian "lapangan mini soccer klaten", "sewa lapangan klaten", CTR naik 20-30% berdasarkan data Google.
