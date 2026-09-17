@@ -70,9 +70,8 @@ export default function AdminResourceManager({ resource, canManage, adminName }:
       payload.email = window.prompt("Email", String(row.email ?? "")) ?? String(row.email ?? "");
       payload.role = window.prompt("Role: staff, manager, super_admin", String(row.role ?? "staff")) ?? String(row.role ?? "staff");
       payload.isActive = window.confirm("Keep this admin active?");
-      const newPassword = window.prompt("Password baru (min 6 karakter). Kosongkan jika tidak ingin mengganti.");
-      if (newPassword && newPassword.length >= 6) { payload.password = newPassword; }
-      else if (newPassword && newPassword.length < 6) { alert("Password terlalu pendek (min 6 karakter). Password tidak diubah."); }
+      const newPassword = window.prompt("Password baru (min 8 karakter, huruf besar+kecil, angka, simbol). Kosongkan jika tidak ingin mengganti.");
+      if (newPassword) { payload.password = newPassword; }
     } else if (resource === "settings") {
       payload.key = window.prompt("Setting key", String(row.key ?? "")) ?? String(row.key ?? "");
       payload.value = window.prompt("Setting value", String(row.value ?? "")) ?? String(row.value ?? "");

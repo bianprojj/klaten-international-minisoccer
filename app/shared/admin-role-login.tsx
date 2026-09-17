@@ -2,7 +2,7 @@
 
 import { fetchJson } from "@/lib/fetch-json";
 
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { AnimatedCard } from "@/components/animated-card";
 
 export function createRoleLoginPage(targetPath: string, title: string, subtitle: string) {
@@ -11,6 +11,24 @@ export function createRoleLoginPage(targetPath: string, title: string, subtitle:
     const passwordRef = useRef<HTMLInputElement>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [csrfToken, setCsrfToken] = useState("");
+
+    useEffect(() => {
+      let cancelled = false;
+      (async () => {
+        try {
+          const { res: response, data: body } = await fetchJson("/api/admin/csrf", { credentials: "include" });
+          if (!cancelled && response.ok && typeof body.csrfToken === "string") {
+            setCsrfToken(body.csrfToken);
+          }
+        } catch {
+          // Error ditampilkan saat submit jika token belum siap
+        }
+      })();
+      return () => {
+        cancelled = true;
+      };
+    }, []);
 
     const submitLogin = async (event?: FormEvent<HTMLFormElement>) => {
       if (event) {
@@ -28,6 +46,12 @@ export function createRoleLoginPage(targetPath: string, title: string, subtitle:
         return;
       }
 
+      if (!csrfToken) {
+        setError("Token keamanan belum siap. Refresh halaman lalu coba lagi.");
+        setLoading(false);
+        return;
+      }
+
       try {
         const { res: response, data: __body } = await fetchJson("/api/admin/login", {
           method: "POST",
@@ -35,7 +59,7 @@ export function createRoleLoginPage(targetPath: string, title: string, subtitle:
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ email: nextEmail, password: nextPassword }),
+          body: JSON.stringify({ email: nextEmail, password: nextPassword, csrfToken }),
         });
 
         const data = __body;

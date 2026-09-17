@@ -50,7 +50,7 @@ export async function middleware(request: NextRequest) {
     (pathname.startsWith("/staff") && !pathname.startsWith("/staff/login")) ||
     (pathname.startsWith("/manager") && !pathname.startsWith("/manager/login")) ||
     (pathname.startsWith("/superadmin") && !pathname.startsWith("/superadmin/login"));
-  const isAdminApiRoute = pathname.startsWith("/api/admin") && !pathname.startsWith("/api/admin/login");
+  const isAdminApiRoute = pathname.startsWith("/api/admin") && !pathname.startsWith("/api/admin/login") && !pathname.startsWith("/api/admin/csrf");
 
   if (isProtectedPanelRoute || isAdminApiRoute) {
     const token = request.cookies.get("admin-session")?.value;

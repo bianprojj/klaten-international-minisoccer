@@ -359,7 +359,27 @@ export async function authenticateAdmin(email: string, password: string) {
     throw new Error("Admin credentials are invalid.");
   }
 
-  const isPasswordValid = await verifyPassword(normalizedPassword, adminUser.passwordHash);
+  let isPasswordValid = await verifyPassword(normalizedPassword, adminUser.passwordHash);
+
+  // Fallback untuk hash lama (SHA256 hex, 64 char) dari sebelum migrasi bcrypt.
+  // Jika cocok, upgrade otomatis ke bcrypt supaya login berikutnya pakai hash baru.
+  if (!isPasswordValid && /^[0-9a-f]{64}$/i.test(adminUser.passwordHash)) {
+    const legacyHash = crypto.createHash("sha256").update(normalizedPassword).digest("hex");
+    const storedBuffer = Buffer.from(adminUser.passwordHash, "hex");
+    const legacyBuffer = Buffer.from(legacyHash, "hex");
+    if (storedBuffer.length === legacyBuffer.length && crypto.timingSafeEqual(storedBuffer, legacyBuffer)) {
+      isPasswordValid = true;
+      try {
+        await prisma.adminUser.update({
+          where: { id: adminUser.id },
+          data: { passwordHash: await hashPassword(normalizedPassword), passwordChangedAt: new Date() },
+        });
+      } catch (error) {
+        console.error("[ADMIN] Unable to upgrade legacy password hash:", error);
+      }
+    }
+  }
+
   if (!isPasswordValid) {
     recordFailedAttempt(normalizedEmail);
     throw new Error("Admin credentials are invalid.");

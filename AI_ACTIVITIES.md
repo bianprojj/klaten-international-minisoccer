@@ -424,3 +424,27 @@ If you want, I can open a PR with these changes, run `npm run lint -- --fix`, or
 **Security Score**: 6/10 → 9/10 (OWASP Top 10 covered)
 
 ### 50. Log semua aktivitas ke AI_ACTIVITIES.md
+
+### 51. Fix "Invalid CSRF token" login + kolom DB hilang + hash legacy
+- Sebab 1 (utama): `POST /api/admin/login` diwajibkan kirim `csrfToken` (hasil hardening #49), tapi form `app/shared/admin-role-login.tsx` (dipakai superadmin/manager/staff) hanya kirim `{email, password}` → semua login gagal 403.
+- Sebab 2: `middleware.ts:53` memproteksi SEMUA `/api/admin/*` kecuali `/api/admin/login` → `GET /api/admin/csrf` ikut kena 401 padahal token dibutuhkan SEBELUM login.
+- Sebab 3: kolom `password_changed_at` / `must_change_password` belum ada di live Supabase DB → Prisma error "column does not exist". Dugaan user benar separuh: `main table.sql` memang belum punya 2 kolom itu (DB live dibuat dari versi lama).
+- Sebab 4 (tersembunyi): password lama di DB masih hash SHA256, sedangkan kode login hanya `bcrypt.compare` → walau CSRF lolos, login tetap 401.
+- Fix:
+  - `app/shared/admin-role-login.tsx`: fetch `GET /api/admin/csrf` saat mount, kirim `csrfToken` di body login, error jelas jika token belum siap.
+  - `middleware.ts`: kecualikan `/api/admin/csrf` dari proteksi sesi (seperti `/api/admin/login`).
+  - `lib/admin-auth.ts`: fallback hash legacy — jika bcrypt gagal dan hash tersimpan format SHA256-hex, verifikasi via `timingSafeEqual`, lalu auto-upgrade ke bcrypt + set `passwordChangedAt`.
+  - `prisma/main table.sql`: tambah 2 kolom di `CREATE TABLE admin_user` + blok `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` (comment) untuk DB lama — JANGAN run ulang file utuh (ada DROP TABLE).
+  - Live DB dieksekusi langsung via script sementara (`ALTER TABLE ... IF NOT EXISTS`, file dihapus setelah jalan).
+  - `components/admin-resource-manager.tsx`: teks prompt password min 6 → syarat kompleksitas (min 8, besar+kecil+angka+simbol).
+- Verifikasi via API: `GET /api/admin/csrf` 200 → `POST /api/admin/login` (superadmin1 + `superadmin123` legacy) 200 + hash auto-upgrade; login kedua 200 "Admin login successful" + `mustChangePassword:false` (jalur bcrypt murni).
+- Build 57/57 sukses. Dev server `localhost:3000` hidup.
+
+### 52. Verifikasi live Supabase DB setelah run ulang main table.sql
+- User run ulang seluruh `main table.sql` (fresh). Introspeksi langsung via Prisma:
+  - 13 tabel ada semua: admin_user/session/setting, booking, payment, invoice, review, schedule_slot, venue_feature/gallery, audit_log, webhook_event (+ _prisma_migrations).
+  - `admin_user` sudah punya `password_changed_at` + `must_change_password` (kolom baru dari fix #51 ikut ter-create).
+  - Seed sesuai file: 6 admin (2 manager, 1 staff, 3 super_admin), 9 settings, 3 booking/payment/invoice/review/audit, 16 schedule_slot (07:00–23:00 + harga), 4 feature, 4 gallery. Session & webhook kosong (wajar).
+  - Password kembali ke SHA256 (64-hex) pasca fresh seed → login tetap bisa via fallback legacy + auto-upgrade bcrypt (fix #51).
+- `npx prisma db push` (tanpa --accept-data-loss, read-only check): satu-satunya diff adalah penamaan/ekspresi PK (`gen_random_uuid()` SQL vs ekspektasi Prisma) — kosmetik, data & kolom 100% sinkron. TIDAK di-push ulang (tak perlu, berisiko tanpa manfaat).
+- Koreksi: jumlah slot seed = 16 (bukan 20 seperti disebut di #44).

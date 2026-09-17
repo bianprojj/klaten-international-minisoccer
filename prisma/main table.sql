@@ -195,9 +195,16 @@ CREATE TABLE admin_user (
   role VARCHAR(50) DEFAULT 'staff',
   is_active BOOLEAN DEFAULT true,
   last_login_at TIMESTAMP,
+  password_changed_at TIMESTAMP,
+  must_change_password BOOLEAN DEFAULT false,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Tambahan untuk DB yang SUDAH dibuat dari versi lama file ini (jalankan blok ini saja,
+-- JANGAN run ulang seluruh file karena berisi DROP TABLE yang menghapus data):
+-- ALTER TABLE admin_user ADD COLUMN IF NOT EXISTS password_changed_at TIMESTAMP;
+-- ALTER TABLE admin_user ADD COLUMN IF NOT EXISTS must_change_password BOOLEAN DEFAULT false;
 
 CREATE TABLE admin_session (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
