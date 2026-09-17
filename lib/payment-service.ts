@@ -10,21 +10,11 @@ import { formatJakartaDateKey } from "@/lib/timezone";
 
 const paymentProvider = new DemoPaymentProvider();
 
-/**
- * Resolves the base URL for the application
- * @param explicitBaseUrl - Optional explicit base URL override
- * @returns Normalized base URL without trailing slash
- */
 function resolveAppBaseUrl(explicitBaseUrl?: string) {
   const configured = explicitBaseUrl?.trim() || process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://klaten-international-minisoccer.vercel.app");
   return configured.replace(/\/+$/, "");
 }
 
-/**
- * Normalizes Midtrans payment status to internal PaymentStatus enum
- * @param status - Raw status string from Midtrans or other providers
- * @returns Normalized PaymentStatus enum value
- */
 export function normalizePaymentStatus(status: string): PaymentStatus {
   const lower = String(status ?? "").toLowerCase().trim();
 
@@ -38,12 +28,6 @@ export function normalizePaymentStatus(status: string): PaymentStatus {
   return "pending";
 }
 
-/**
- * Builds Prisma where conditions for payment lookup by identifier
- * Supports transactionId, midtransOrderId, and bookingId (if UUID)
- * @param identifier - Payment identifier (transactionId, midtransOrderId, or bookingId)
- * @returns Array of Prisma where conditions for OR query
- */
 export function buildPaymentLookupWhere(identifier: string) {
   const normalizedIdentifier = identifier?.trim() ?? "";
   if (!normalizedIdentifier) {
@@ -62,11 +46,6 @@ export function buildPaymentLookupWhere(identifier: string) {
   return conditions;
 }
 
-/**
- * Finds a payment by identifier (transactionId, midtransOrderId, or bookingId)
- * @param identifier - Payment identifier
- * @returns Payment with booking relation or null
- */
 async function findPaymentByIdentifier(identifier: string) {
   const conditions = buildPaymentLookupWhere(identifier);
   if (conditions.length === 0) {
@@ -579,10 +558,8 @@ export async function processWebhookEvent(transactionId: string, status: Payment
   if (normalized === "success") {
     const invoice = await prisma.invoice.findUnique({ where: { bookingId: booking.id } });
 
-    let attachment: Awaited<ReturnType<typeof buildInvoiceAttachmentAuto>> | undefined;
-    if (invoice) {
-      try {
-        attachment = await buildInvoiceAttachmentAuto({
+    const attachment = invoice
+      ? await buildInvoiceAttachmentAuto({
           invoiceNumber: invoice.invoiceNumber,
           customerName: invoice.customerName ?? booking.customerName,
           customerEmail: invoice.customerEmail ?? booking.customerEmail,
@@ -612,55 +589,21 @@ export async function processWebhookEvent(transactionId: string, status: Payment
             paidAt: updatedPayment.paidAt ?? null,
             midtransOrderId: updatedPayment.midtransOrderId ?? null,
           },
-        });
-      } catch (pdfError) {
-        console.error("[payment-service] PDF generation failed, sending email without attachment", {
-          bookingId: booking.id,
-          error: pdfError instanceof Error ? pdfError.message : String(pdfError),
-        });
-      }
-    }
+        })
+      : undefined;
 
-    // Validate customer email before sending
-    const customerEmail = booking.customerEmail?.trim();
-    if (!customerEmail) {
-      console.warn("[payment-service] Customer email missing, skipping confirmation email", {
-        bookingId: booking.id,
-        customerName: booking.customerName,
-      });
-    } else {
-      try {
-        const notificationResult = await sendNotification("email-confirmation", {
-          bookingId: booking.id,
-          invoiceNumber: invoice?.invoiceNumber,
-          amount: updatedPayment.amount,
-          customerName: booking.customerName,
-          fieldName: DEFAULT_FIELD_NAME,
-          startAt: `${formatJakartaDateKey(booking.bookingDate)} ${booking.startTime} WIB`,
-          endAt: `${formatJakartaDateKey(booking.bookingDate)} ${booking.endTime} WIB`,
-          email: customerEmail,
-          phone: booking.customerPhone,
-          attachment,
-        });
-
-        if (!notificationResult.success) {
-          console.error("[payment-service] Confirmation email failed", {
-            bookingId: booking.id,
-            error: notificationResult.message,
-          });
-        } else {
-          console.info("[payment-service] Confirmation email sent successfully", {
-            bookingId: booking.id,
-            notificationId: notificationResult.id,
-          });
-        }
-      } catch (emailError) {
-        console.error("[payment-service] Unexpected error sending confirmation email", {
-          bookingId: booking.id,
-          error: emailError instanceof Error ? emailError.message : String(emailError),
-        });
-      }
-    }
+    await sendNotification("email-confirmation", {
+      bookingId: booking.id,
+      invoiceNumber: invoice?.invoiceNumber,
+      amount: updatedPayment.amount,
+      customerName: booking.customerName,
+      fieldName: DEFAULT_FIELD_NAME,
+      startAt: `${formatJakartaDateKey(booking.bookingDate)} ${booking.startTime} WIB`,
+      endAt: `${formatJakartaDateKey(booking.bookingDate)} ${booking.endTime} WIB`,
+      email: booking.customerEmail ?? undefined,
+      phone: booking.customerPhone,
+      attachment,
+    });
   }
 
   if (["cancelled", "expired", "failed"].includes(normalized)) {
