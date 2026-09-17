@@ -105,7 +105,7 @@ function getEmailSubject(event: NotificationEvent) {
   }
 }
 
-async function sendEmail(event: NotificationEvent, payload: NotificationPayload) {
+async function sendEmail(event: NotificationEvent, payload: NotificationPayload, retries = 3) {
   const to = payload.email;
   const configuredFrom = process.env.RESEND_FROM_EMAIL?.trim();
   const from = configuredFrom && configuredFrom.includes("<") ? configuredFrom : configuredFrom ? configuredFrom : "MiniSoccer <onboarding@resend.dev>";
@@ -170,20 +170,53 @@ async function sendEmail(event: NotificationEvent, payload: NotificationPayload)
     timestamp: new Date().toISOString(),
   });
 
-  const response = await resendClient.emails.send(emailPayload);
+  let lastError: Error | undefined;
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const response = await resendClient.emails.send(emailPayload);
 
-  console.info("[notifications] Email send response", {
-    event,
-    recipient: to,
-    sender: from,
-    response,
-    timestamp: new Date().toISOString(),
-  });
+      console.info("[notifications] Email send response", {
+        event,
+        recipient: to,
+        sender: from,
+        response,
+        attempt,
+      });
 
-  if (typeof response === "object" && response && "error" in response && response.error) {
-    const resendError = response.error as { message?: string };
-    throw new Error(resendError.message ?? "Resend email send failed.");
+      if (typeof response === "object" && response && "error" in response && response.error) {
+        const resendError = response.error as { message?: string };
+        throw new Error(resendError.message ?? "Resend email send failed.");
+      }
+
+      return response;
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      
+      // Don't retry on validation/auth errors (4xx)
+      const isRetryable = error instanceof Error && 
+        !error.message.includes("API key") && 
+        !error.message.includes("validation") &&
+        !error.message.includes("unauthorized") &&
+        !error.message.includes("forbidden");
+      
+      if (!isRetryable || attempt === retries) {
+        throw error;
+      }
+      
+      // Exponential backoff: 1s, 2s, 4s
+      const delay = Math.pow(2, attempt - 1) * 1000;
+      console.warn("[notifications] Email send failed, retrying", {
+        attempt,
+        maxRetries: retries,
+        delay: `${delay}ms`,
+        error: lastError.message,
+      });
+      
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
   }
+  
+  throw lastError;
 }
 
 export async function sendNotification(event: NotificationEvent, payload: NotificationPayload): Promise<NotificationResult> {

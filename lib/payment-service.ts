@@ -579,8 +579,10 @@ export async function processWebhookEvent(transactionId: string, status: Payment
   if (normalized === "success") {
     const invoice = await prisma.invoice.findUnique({ where: { bookingId: booking.id } });
 
-    const attachment = invoice
-      ? await buildInvoiceAttachmentAuto({
+    let attachment: Awaited<ReturnType<typeof buildInvoiceAttachmentAuto>> | undefined;
+    if (invoice) {
+      try {
+        attachment = await buildInvoiceAttachmentAuto({
           invoiceNumber: invoice.invoiceNumber,
           customerName: invoice.customerName ?? booking.customerName,
           customerEmail: invoice.customerEmail ?? booking.customerEmail,
@@ -610,21 +612,55 @@ export async function processWebhookEvent(transactionId: string, status: Payment
             paidAt: updatedPayment.paidAt ?? null,
             midtransOrderId: updatedPayment.midtransOrderId ?? null,
           },
-        })
-      : undefined;
+        });
+      } catch (pdfError) {
+        console.error("[payment-service] PDF generation failed, sending email without attachment", {
+          bookingId: booking.id,
+          error: pdfError instanceof Error ? pdfError.message : String(pdfError),
+        });
+      }
+    }
 
-    await sendNotification("email-confirmation", {
-      bookingId: booking.id,
-      invoiceNumber: invoice?.invoiceNumber,
-      amount: updatedPayment.amount,
-      customerName: booking.customerName,
-      fieldName: DEFAULT_FIELD_NAME,
-      startAt: `${formatJakartaDateKey(booking.bookingDate)} ${booking.startTime} WIB`,
-      endAt: `${formatJakartaDateKey(booking.bookingDate)} ${booking.endTime} WIB`,
-      email: booking.customerEmail ?? undefined,
-      phone: booking.customerPhone,
-      attachment,
-    });
+    // Validate customer email before sending
+    const customerEmail = booking.customerEmail?.trim();
+    if (!customerEmail) {
+      console.warn("[payment-service] Customer email missing, skipping confirmation email", {
+        bookingId: booking.id,
+        customerName: booking.customerName,
+      });
+    } else {
+      try {
+        const notificationResult = await sendNotification("email-confirmation", {
+          bookingId: booking.id,
+          invoiceNumber: invoice?.invoiceNumber,
+          amount: updatedPayment.amount,
+          customerName: booking.customerName,
+          fieldName: DEFAULT_FIELD_NAME,
+          startAt: `${formatJakartaDateKey(booking.bookingDate)} ${booking.startTime} WIB`,
+          endAt: `${formatJakartaDateKey(booking.bookingDate)} ${booking.endTime} WIB`,
+          email: customerEmail,
+          phone: booking.customerPhone,
+          attachment,
+        });
+
+        if (!notificationResult.success) {
+          console.error("[payment-service] Confirmation email failed", {
+            bookingId: booking.id,
+            error: notificationResult.message,
+          });
+        } else {
+          console.info("[payment-service] Confirmation email sent successfully", {
+            bookingId: booking.id,
+            notificationId: notificationResult.id,
+          });
+        }
+      } catch (emailError) {
+        console.error("[payment-service] Unexpected error sending confirmation email", {
+          bookingId: booking.id,
+          error: emailError instanceof Error ? emailError.message : String(emailError),
+        });
+      }
+    }
   }
 
   if (["cancelled", "expired", "failed"].includes(normalized)) {

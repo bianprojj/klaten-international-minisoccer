@@ -424,3 +424,40 @@ If you want, I can open a PR with these changes, run `npm run lint -- --fix`, or
 **Security Score**: 6/10 → 9/10 (OWASP Top 10 covered)
 
 ### 50. Log semua aktivitas ke AI_ACTIVITIES.md
+
+### 51. Edge Case Fixes - Invoice/Email Flow (2026-09-18)
+**Problem**: Several edge cases in the payment success → invoice → email flow could cause silent failures or webhook crashes.
+
+**Issues Fixed**:
+
+1. **Missing customer email validation** (`lib/payment-service.ts:624`):
+   - Before: `email: booking.customerEmail ?? undefined` → would throw "Missing email recipient configuration" in Resend
+   - After: Validates email exists before sending, logs warning if missing, skips email gracefully
+
+2. **PDF generation failure handling** (`lib/payment-service.ts:582-617`):
+   - Before: `buildInvoiceAttachmentAuto` failure would crash webhook → 500 → Midtrans retry
+   - After: Wrapped in try-catch, logs error, sends email without attachment instead of crashing
+
+3. **Notification result logging** (`lib/payment-service.ts:633-656`):
+   - Before: `sendNotification` result ignored, failures silent
+   - After: Checks `notificationResult.success`, logs success/failure with details
+
+4. **Email retry logic** (`lib/notifications.ts:108-220`):
+   - Added retry with exponential backoff (1s, 2s, 4s) for transient failures
+   - Only retries on transient errors (network, 5xx), not validation/auth errors (4xx)
+   - Max 3 attempts with configurable retries parameter
+
+5. **Unexpected error handling**:
+   - Wrapped `sendNotification` call in try-catch to prevent crashes
+   - Logs unexpected errors with booking context
+
+**Files Modified**:
+- `lib/payment-service.ts` - Enhanced email flow with validation, error handling, logging
+- `lib/notifications.ts` - Added retry logic with exponential backoff to `sendEmail`
+
+**Verification**:
+- `npm run build` ✓ 57/57 pages
+- Test email to `autobot1208@gmail.com` ✅ Success
+- Build passes TypeScript strict mode
+
+### 52. Push ke GitHub
