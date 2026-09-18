@@ -478,3 +478,8 @@ If you want, I can open a PR with these changes, run `npm run lint -- --fix`, or
 - `site-config.ts` description dilengkapkan: alamat Jl. Desan Karanganom, harga Rp 214.000-750.000, buka setiap hari 06.00–23.00, telp baru +62 857 744 40016.
 - Catatan: hasil Google di screenshot user = cache lama (title/deskripsi/footer lama). Akan berubah sendiri setelah deploy + Google crawl ulang; percepat via Search Console → URL Inspection → Request Indexing.
 - Build 57/57 sukses.
+
+### 57. Deskripsi SEO gaya iklan
+- `site-config.ts` description ditulis ulang bernada promosi: sambutan selamat datang, klaim satu-satunya & terbaik di Klaten, lapangan premium standar internasional, ajakan "ajak timmu dan buktikan sendiri keseruannya", tetap memuat alamat/harga/jam/telp.
+- Berlaku otomatis ke meta description, OpenGraph, Twitter card, dan Schema.org (semua ambil dari siteConfig.description).
+- Build 57/57 sukses.

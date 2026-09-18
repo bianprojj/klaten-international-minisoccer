@@ -2,7 +2,7 @@ export const siteConfig = {
   name: "Klaten International Minisoccer",
   title: "Klaten International Minisoccer | Sewa Lapangan Mini Soccer di Klaten",
   description:
-    "Sewa lapangan mini soccer di Klaten International Minisoccer, Jl. Desan Karanganom, Karanganom, Klaten Utara. Booking lapangan Klaten online, harga Rp 214.000 - 750.000, buka setiap hari 06.00–23.00. Telp +62 857 744 40016.",
+    "Selamat datang di Klaten International Minisoccer — satu-satunya dan terbaik di Klaten! Rasakan sensasi bermain di lapangan mini soccer premium standar internasional di Jl. Desan Karanganom, Karanganom, Klaten Utara. Booking online mudah, harga Rp 214.000 - 750.000, buka setiap hari 06.00–23.00. Ajak timmu dan buktikan sendiri keseruannya! Telp +62 857 744 40016.",
   url: process.env.NEXT_PUBLIC_APP_URL || "https://klatenminisoccer.web.id",
   locale: "id_ID",
   keywords: [
