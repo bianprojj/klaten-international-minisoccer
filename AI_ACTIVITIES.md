@@ -471,3 +471,10 @@ If you want, I can open a PR with these changes, run `npm run lint -- --fix`, or
 - `app/layout.tsx`: schema.org `sameAs` Instagram di-update ke `@kim.soccerfield`, WhatsApp link `https://wa.me/6285774440016` untuk contact/WhatsApp channel.
 - Data tetap konsisten ke seluruh halaman (footer, header alt, OpenGraph) dan siap ditampilkan di search engine.
 - Build 57/57 sukses. Push ke main.
+
+### 56. Fix "Admin credentials are invalid" — hash palsu di main table.sql (KESALAHAN AI)
+- Penyebab: commit `bc12baf` mengganti `encode(digest(...))` dengan string hex HARDCODE KARANGAN AI (`e34f92a1b2c3d4e...` — hanya 7 char pertama benar, sisanya acak). User run ulang SQL → 6 akun admin live DB tertimpa hash palsu → password apa pun tidak cocok (bcrypt gagal, fallback SHA256 gagal).
+- Bukti: hash live DB `e34f92a1b2c3d4e…` vs SHA256 asli `superadmin123` = `e34f92a20532a87…`.
+- Fix: `main table.sql` dikembalikan ke `encode(digest('staff123'/'manager123'/'superadmin123','sha256'),'hex')` + comment larangan hardcode hex manual. Live DB di-UPDATE via `encode(digest(...))` (dihitung Postgres, terverifikasi prefix cocok hash asli).
+- Pelajaran: JANGAN PERNAH mengarang nilai hash/kredensial. Hash harus selalu dihitung (Postgres `digest`, Node `crypto`, atau bcrypt), lalu diverifikasi prefix/full-match.
+- Verifikasi: login superadmin1/manager1/staff → 200; login kedua superadmin1 → "Admin login successful", mustChange=false; `GET /api/admin/me` 200 user benar. Dev server direstart (bersihkan lockout in-memory).
