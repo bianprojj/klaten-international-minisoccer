@@ -13,15 +13,14 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-[1180px] flex-nowrap items-center justify-between gap-2 px-3 py-1.5 sm:px-4 lg:px-6">
         <div className="flex h-14 items-center overflow-hidden md:h-16 min-w-0">
           <Link href="/" className="inline-flex items-center" aria-label={`Beranda ${siteConfig.name}`}>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
+              <span className="self-center text-[color:var(--foreground)] font-bold text-lg sm:text-xl whitespace-nowrap">KLATEN</span>
               <Image src="/kim-logo.png" alt="Klaten International Minisoccer" width={48} height={48} className="object-contain" />
-              <span className="self-center text-[color:var(--foreground)] font-bold text-lg sm:text-xl">
-                KLATEN<br />
-                INTERNATIONAL<br />
-                MINISOCCER
-              </span>
+              <div className="flex flex-col gap-1 self-center">
+                <span className="text-[color:var(--foreground)] font-bold text-lg sm:text-xl whitespace-nowrap">INTERNATIONAL</span>
+                <span className="text-[color:var(--foreground)] font-bold text-lg sm:text-xl whitespace-nowrap">MINISOCCER</span>
+              </div>
             </div>
-            <Image src="/kim-logo.png" alt="Klaten International Minisoccer logo" width={360} height={86} priority className="h-28 w-auto max-w-none object-contain object-center md:h-36" />
           </Link>
         </div>
 
