@@ -479,6 +479,12 @@ If you want, I can open a PR with these changes, run `npm run lint -- --fix`, or
 - Catatan: hasil Google di screenshot user = cache lama (title/deskripsi/footer lama). Akan berubah sendiri setelah deploy + Google crawl ulang; percepat via Search Console → URL Inspection → Request Indexing.
 - Build 57/57 sukses.
 
+### 58. Header final: 1 icon besar + teks gradient
+- Logo besar 360x86 di kanan DIBUANG — tinggal 1 icon di pojok kiri, diperbesar 48→56/64px.
+- Penyebab teks terpotong: container `h-14 overflow-hidden` — diganti `min-h-16/md:min-h-20` tanpa overflow-hidden; ukuran teks disesuaikan (text-sm/base, leading-tight) agar 3 baris muat.
+- Teks `font-black` (900, tebal) + gradient `from-[#005136] via-[#2c9e5f] to-[#C9D651]` (hijau → neon green brand) via bg-clip-text.
+- Build 57/57 sukses.
+
 ### 57. Deskripsi SEO gaya iklan
 - `site-config.ts` description ditulis ulang bernada promosi: sambutan selamat datang, klaim satu-satunya & terbaik di Klaten, lapangan premium standar internasional, ajakan "ajak timmu dan buktikan sendiri keseruannya", tetap memuat alamat/harga/jam/telp.
 - Berlaku otomatis ke meta description, OpenGraph, Twitter card, dan Schema.org (semua ambil dari siteConfig.description).

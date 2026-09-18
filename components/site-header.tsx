@@ -11,17 +11,14 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-white/20 bg-[var(--glass-bg)] shadow-lg shadow-black/5 backdrop-blur-xl">
       <div className="mx-auto flex max-w-[1180px] flex-nowrap items-center justify-between gap-2 px-3 py-1.5 sm:px-4 lg:px-6">
-        <div className="flex h-14 items-center overflow-hidden md:h-16 min-w-0">
-          <Link href="/" className="inline-flex items-center" aria-label={`Beranda ${siteConfig.name}`}>
-            <div className="flex items-center gap-2">
-              <Image src="/kim-logo.png" alt="Klaten International Minisoccer" width={48} height={48} className="object-contain" />
-              <span className="self-center text-[color:var(--foreground)] font-bold text-lg sm:text-xl">
-                KLATEN<br />
-                INTERNATIONAL<br />
-                MINISOCCER
-              </span>
-            </div>
-            <Image src="/kim-logo.png" alt="Klaten International Minisoccer logo" width={360} height={86} priority className="h-28 w-auto max-w-none object-contain object-center md:h-36" />
+        <div className="flex min-h-16 items-center md:min-h-20 min-w-0">
+          <Link href="/" className="inline-flex items-center gap-3" aria-label={`Beranda ${siteConfig.name}`}>
+            <Image src="/kim-logo.png" alt="Klaten International Minisoccer" width={72} height={72} priority className="h-14 w-14 object-contain md:h-16 md:w-16" />
+            <span className="self-center bg-gradient-to-br from-[#005136] via-[#2c9e5f] to-[#C9D651] bg-clip-text text-sm font-black leading-tight text-transparent sm:text-base">
+              KLATEN<br />
+              INTERNATIONAL<br />
+              MINISOCCER
+            </span>
           </Link>
         </div>
 
