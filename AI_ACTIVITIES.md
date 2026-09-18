@@ -472,9 +472,9 @@ If you want, I can open a PR with these changes, run `npm run lint -- --fix`, or
 - Data tetap konsisten ke seluruh halaman (footer, header alt, OpenGraph) dan siap ditampilkan di search engine.
 - Build 57/57 sukses. Push ke main.
 
-### 56. Fix "Admin credentials are invalid" — hash palsu di main table.sql (KESALAHAN AI)
-- Penyebab: commit `bc12baf` mengganti `encode(digest(...))` dengan string hex HARDCODE KARANGAN AI (`e34f92a1b2c3d4e...` — hanya 7 char pertama benar, sisanya acak). User run ulang SQL → 6 akun admin live DB tertimpa hash palsu → password apa pun tidak cocok (bcrypt gagal, fallback SHA256 gagal).
-- Bukti: hash live DB `e34f92a1b2c3d4e…` vs SHA256 asli `superadmin123` = `e34f92a20532a87…`.
-- Fix: `main table.sql` dikembalikan ke `encode(digest('staff123'/'manager123'/'superadmin123','sha256'),'hex')` + comment larangan hardcode hex manual. Live DB di-UPDATE via `encode(digest(...))` (dihitung Postgres, terverifikasi prefix cocok hash asli).
-- Pelajaran: JANGAN PERNAH mengarang nilai hash/kredensial. Hash harus selalu dihitung (Postgres `digest`, Node `crypto`, atau bcrypt), lalu diverifikasi prefix/full-match.
-- Verifikasi: login superadmin1/manager1/staff → 200; login kedua superadmin1 → "Admin login successful", mustChange=false; `GET /api/admin/me` 200 user benar. Dev server direstart (bersihkan lockout in-memory).
+### 56. Favicon diganti total ke kim-logo.png + deskripsi SEO lengkap
+- Semua file favicon di-generate ulang dari `public/kim-logo.png` (6250x6250) via System.Drawing: favicon-16x16, favicon-32x32, apple-touch-icon (180), android-chrome 192 & 512, plus `favicon.ico` multi-size (16/32/48, entri PNG) — valid, lolos load test.
+- `site.webmanifest`: name "Klaten International Minisoccer", short_name "KIM Minisoccer", theme_color hijau brand (#005136).
+- `site-config.ts` description dilengkapkan: alamat Jl. Desan Karanganom, harga Rp 214.000-750.000, buka setiap hari 06.00–23.00, telp baru +62 857 744 40016.
+- Catatan: hasil Google di screenshot user = cache lama (title/deskripsi/footer lama). Akan berubah sendiri setelah deploy + Google crawl ulang; percepat via Search Console → URL Inspection → Request Indexing.
+- Build 57/57 sukses.
