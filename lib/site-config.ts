@@ -30,7 +30,7 @@ export const siteConfig = {
   ],
   openGraphImage: "/kim-logo.png",
   phone: "+62 857 744 40016",
-  email: "hello@klatenminisoccer.web.id",
+  email: "admin@dev.klatenminisoccer.web.id",
   instagram: "https://www.instagram.com/kim.soccerfield/",
   address: "Jl. Desan Karanganom, Karanganom, Kec. Klaten Utara, Kabupaten Klaten, Jawa Tengah 57438",
   hours: "06.00–23.00 Setiap hari",
