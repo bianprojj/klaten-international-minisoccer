@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Halaman Tidak Ditemukan | Klaten Minisoccer",
+  title: "Halaman Tidak Ditemukan | Klaten International Minisoccer",
   description: "Halaman tidak ditemukan. Kembali ke sewa lapangan mini soccer di Klaten.",
   robots: { index: false, follow: true },
 };

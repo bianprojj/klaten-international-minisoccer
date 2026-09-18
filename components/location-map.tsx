@@ -30,7 +30,7 @@ export function LocationMap() {
       <div ref={containerRef} className="h-[280px] w-full overflow-hidden rounded-[20px] border border-[rgba(0,81,54,0.16)] bg-[#FFFFFF] shadow-[0_4px_16px_rgba(26,31,77,0.08)] sm:h-[360px] lg:h-[400px]">
         {isVisible ? (
           <iframe
-            title="Peta lokasi Klaten Minisoccer Karanganom Klaten Utara"
+            title="Peta lokasi Klaten International Minisoccer Karanganom Klaten Utara"
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14107.132781442164!2d110.61014728467454!3d-7.6848874319996705!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a418c77c195ff%3A0xbc8f5e57b5a60649!2sKlaten%20International%20Minisoccer!5e0!3m2!1sid!2sid!4v1789349897571!5m2!1sid!2sid"
             className="h-full w-full border-0"
             loading="lazy"

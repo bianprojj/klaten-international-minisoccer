@@ -61,7 +61,7 @@ export default function CurveCarousel({ images, price }: CurveCarouselProps) {
               Galeri Lapangan Mini Soccer Klaten
             </h2>
             <p className="mt-5 max-w-2xl font-[Manrope] text-base leading-8 text-[rgba(26,31,77,0.62)] sm:text-lg">
-              Foto lapangan Klaten Minisoccer: rumput premium 5v5, lampu malam, ruang ganti. Cocok untuk sewa lapangan Klaten, futsal, komunitas.
+              Foto lapangan Klaten International Minisoccer: rumput premium 5v5, lampu malam, ruang ganti. Cocok untuk sewa lapangan Klaten, futsal, komunitas.
             </p>
           </div>
 

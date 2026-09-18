@@ -66,7 +66,7 @@ export function ReviewSection({ initialReviews }: { initialReviews: Review[] }) 
           <div className="space-y-6">
             <div className="glass-panel relative rounded-[20px] p-6">
               <p className="font-[Manrope] text-xs font-semibold text-[#005136]">Ulasan lapangan di Klaten</p>
-              <h2 className="mt-2 font-[Archivo] text-3xl font-extrabold tracking-[-0.015em] text-[#1A1F4D] sm:text-[32px]">Cerita main di Klaten Minisoccer</h2>
+              <h2 className="mt-2 font-[Archivo] text-3xl font-extrabold tracking-[-0.015em] text-[#1A1F4D] sm:text-[32px]">Cerita main di Klaten International Minisoccer</h2>
               <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
                   <label htmlFor="review-name" className="block text-sm text-[color:var(--muted)]">
