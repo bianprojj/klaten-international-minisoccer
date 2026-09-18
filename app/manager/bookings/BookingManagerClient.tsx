@@ -1,6 +1,7 @@
 "use client";
 
 import { fetchJson } from "@/lib/fetch-json";
+import { LoadingOverlay, Spinner } from "@/components/ui/spinner";
 
 import { useEffect, useState } from "react";
 
@@ -295,8 +296,14 @@ export default function BookingManagerClient({ adminName, useMain = true }: { ad
                 <label className="text-sm text-[color:var(--muted)]">Notes</label>
                 <textarea value={formState.notes} onChange={(e) => handleChange("notes", e.target.value)} className="mt-2 w-full rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white outline-none" rows={4} />
               </div>
+              {!editing ? (
+                <p className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs leading-6 text-[color:var(--muted)]">
+                  Payment & invoice dibuat otomatis: Cash (Offline) — status sukses & lunas, tanpa Midtrans.
+                </p>
+              ) : null}
               <div className="flex gap-3">
-                <button onClick={handleSave} disabled={loading} className="btn-primary px-6 py-3 disabled:opacity-60">
+                <button onClick={handleSave} disabled={loading} className="btn-primary flex items-center gap-2 px-6 py-3 disabled:opacity-60">
+                  {loading ? <Spinner size={18} /> : null}
                   {editing ? "Update booking" : "Create booking"}
                 </button>
                 <button onClick={resetForm} type="button" className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-6 py-3 text-sm text-white">
@@ -310,5 +317,12 @@ export default function BookingManagerClient({ adminName, useMain = true }: { ad
     </div>
   );
 
-  return useMain ? <main className="flex-1 px-6 py-16 lg:px-8">{content}</main> : content;
+  const wrapped = (
+    <>
+      {content}
+      <LoadingOverlay show={loading} label={editing || showForm ? "Menyimpan booking..." : "Memuat booking..."} />
+    </>
+  );
+
+  return useMain ? <main className="flex-1 px-6 py-16 lg:px-8">{wrapped}</main> : wrapped;
 }

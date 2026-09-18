@@ -50,6 +50,27 @@ export interface ScheduleSlotRecord {
   isActive: boolean;
   sortOrder: number;
   price?: number;
+  dayOfWeek?: string;
+}
+
+// Day-of-week logic lives in client-safe ./schedule-days (re-exported here for server callers).
+export {
+  DAY_KEYS,
+  DAY_LABELS,
+  DAY_SHORT,
+  EVERYDAY_VALUE,
+  WEEKDAYS_VALUE,
+  WEEKEND_VALUE,
+  formatDayOfWeek,
+  normalizeDayOfWeek,
+  slotAppliesOnDate,
+} from "./schedule-days";
+export type { DayKey } from "./schedule-days";
+import { slotAppliesOnDate } from "./schedule-days";
+
+/** Filter slots to those active on the given date. */
+export function filterSlotsByDate(slots: ScheduleSlotRecord[], date: string | Date): ScheduleSlotRecord[] {
+  return slots.filter((slot) => slotAppliesOnDate(slot.dayOfWeek, date));
 }
 
 function parseTimeToMinutes(timeValue: string) {
@@ -79,6 +100,7 @@ export async function getScheduleSlots(): Promise<ScheduleSlotRecord[]> {
     isActive: slot.isActive,
     sortOrder: slot.sortOrder,
     price: typeof slot.price === "number" ? slot.price : undefined,
+    dayOfWeek: typeof slot.dayOfWeek === "string" ? slot.dayOfWeek : undefined,
   }));
 }
 
@@ -122,7 +144,10 @@ export function buildTimeSlots(
     return defaultSlots.map((s) => ({ ...s, price: undefined }));
   }
 
-  return scheduleSlots.map((slot) => ({
+  // Only slots configured for this weekday are offered.
+  const applicableSlots = filterSlotsByDate(scheduleSlots, date);
+
+  return applicableSlots.map((slot) => ({
     id: `${date}-${slot.startTime}-${slot.endTime}`,
     startTime: slot.startTime,
     endTime: slot.endTime,
@@ -134,7 +159,8 @@ export function buildTimeSlots(
 export function getRequestedScheduleBlocks(
   startTime: string,
   endTime: string,
-  scheduleSlots: ScheduleSlotRecord[] = []
+  scheduleSlots: ScheduleSlotRecord[] = [],
+  date?: string | Date
 ) {
   const startMinutes = parseTimeToMinutes(startTime);
   const endMinutes = parseTimeToMinutes(endTime);
@@ -143,7 +169,9 @@ export function getRequestedScheduleBlocks(
     return [];
   }
 
-  if (!scheduleSlots || scheduleSlots.length === 0) {
+  const applicableSlots = date ? filterSlotsByDate(scheduleSlots, date) : scheduleSlots;
+
+  if (!applicableSlots || applicableSlots.length === 0) {
     const blocks: Array<{ start: string; end: string }> = [];
     for (let cursor = startMinutes; cursor < endMinutes; cursor += 60) {
       const nextCursor = Math.min(cursor + 60, endMinutes);
@@ -152,7 +180,7 @@ export function getRequestedScheduleBlocks(
     return blocks;
   }
 
-  const scheduleByStart = new Map(scheduleSlots.map((slot) => [slot.startTime, slot]));
+  const scheduleByStart = new Map(applicableSlots.map((slot) => [slot.startTime, slot]));
   const blocks: Array<{ start: string; end: string }> = [];
   let cursor = startTime;
 

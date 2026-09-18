@@ -1,6 +1,7 @@
 "use client";
 
 import { fetchJson } from "@/lib/fetch-json";
+import { LoadingOverlay, Spinner } from "@/components/ui/spinner";
 
 import { useEffect, useState } from "react";
 
@@ -166,7 +167,7 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
               {walkInError ? <div className="mt-4 text-sm text-rose-200">{walkInError}</div> : null}
               {walkInSuccess ? <div className="mt-4 text-sm text-emerald-200">{walkInSuccess}</div> : null}
               <div className="mt-6 flex gap-3">
-                <button onClick={handleWalkIn} disabled={walkInLoading} className="rounded-full bg-[color:var(--accent)] px-6 py-3 font-semibold text-black disabled:opacity-60">{walkInLoading ? "Memproses..." : "Buat Booking"}</button>
+                <button onClick={handleWalkIn} disabled={walkInLoading} className="flex items-center gap-2 rounded-full bg-[color:var(--accent)] px-6 py-3 font-semibold text-black disabled:opacity-60">{walkInLoading ? <Spinner size={18} /> : null}{walkInLoading ? "Memproses..." : "Buat Booking"}</button>
                 <button onClick={() => setShowWalkIn(false)} className="rounded-full border border-white/10 px-6 py-3 font-semibold text-white">Batal</button>
               </div>
             </div>
@@ -242,5 +243,12 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
     </div>
   );
 
-  return useMain ? <main className="flex-1 px-6 py-16 lg:px-8">{content}</main> : content;
+  const wrapped = (
+    <>
+      {content}
+      <LoadingOverlay show={loading || walkInLoading} label={walkInLoading ? "Membuat booking + payment + invoice..." : "Memuat booking..."} />
+    </>
+  );
+
+  return useMain ? <main className="flex-1 px-6 py-16 lg:px-8">{wrapped}</main> : wrapped;
 }

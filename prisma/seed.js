@@ -65,6 +65,7 @@ async function main() {
         end_time VARCHAR(10) NOT NULL,
         is_active BOOLEAN DEFAULT true,
         sort_order INTEGER DEFAULT 0,
+        day_of_week VARCHAR(50) DEFAULT 'mon,tue,wed,thu,fri,sat,sun',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );

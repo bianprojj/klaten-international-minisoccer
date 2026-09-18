@@ -148,6 +148,7 @@ model ScheduleSlot {
   startTime String   @map("start_time")
   endTime   String   @map("end_time")
   price     Int      @default(0) @map("price")
+  dayOfWeek String   @default("mon,tue,wed,thu,fri,sat,sun") @map("day_of_week")
   isActive  Boolean  @default(true) @map("is_active")
   sortOrder Int      @default(0) @map("sort_order")
   createdAt DateTime @default(now()) @map("created_at")

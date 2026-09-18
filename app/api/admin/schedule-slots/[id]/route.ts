@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { EVERYDAY_VALUE, normalizeDayOfWeek } from "@/lib/booking-engine";
 import { getAuthenticatedAdminFromToken, hasAdminPermission } from "@/lib/admin-auth";
 
 function tokenFrom(request: Request) {
@@ -25,6 +26,8 @@ function parseTimeToMinutes(timeValue: string) {
 function validateScheduleSlotData(data: Record<string, unknown>) {
   const startTime = typeof data.startTime === "string" ? data.startTime.trim() : "";
   const endTime = typeof data.endTime === "string" ? data.endTime.trim() : "";
+  const dayOfWeek = normalizeDayOfWeek(data.dayOfWeek) ?? EVERYDAY_VALUE;
+  const price = Number(data.price ?? 0);
   const isActive = typeof data.isActive === "boolean" ? data.isActive : true;
   const sortOrder = Number.isInteger(Number(data.sortOrder)) ? Number(data.sortOrder) : 0;
 
@@ -38,7 +41,11 @@ function validateScheduleSlotData(data: Record<string, unknown>) {
     return { valid: false, message: "startTime and endTime must be valid times with endTime after startTime." };
   }
 
-  return { valid: true, startTime, endTime, isActive, sortOrder };
+  if (Number.isNaN(price) || price < 0) {
+    return { valid: false as const, message: "price must be a non-negative number." };
+  }
+
+  return { valid: true as const, startTime, endTime, dayOfWeek, price, isActive, sortOrder };
 }
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -77,6 +84,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       data: {
         startTime: result.startTime,
         endTime: result.endTime,
+        dayOfWeek: result.dayOfWeek,
+        price: result.price,
         isActive: result.isActive,
         sortOrder: result.sortOrder,
       },

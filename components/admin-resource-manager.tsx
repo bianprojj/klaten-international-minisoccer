@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { fetchJson } from "@/lib/fetch-json";
+import { LoadingOverlay } from "@/components/ui/spinner";
 
 type Resource = "invoices" | "reviews" | "users" | "settings" | "audit-logs" | "features" | "gallery";
 
@@ -18,6 +19,7 @@ const labels: Record<Resource, string> = {
 export default function AdminResourceManager({ resource, canManage, adminName }: { resource: Resource; canManage: boolean; adminName: string }) {
   const [rows, setRows] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [form, setForm] = useState<Record<string, string>>({});
   const endpoint = `/api/admin/${resource}`;
@@ -36,6 +38,7 @@ export default function AdminResourceManager({ resource, canManage, adminName }:
 
   async function create() {
     setMessage("");
+    setBusy(true);
     try {
       const payload: Record<string, unknown> = { ...form };
       if (resource === "reviews") payload.rating = Number(form.rating || 5);
@@ -47,18 +50,24 @@ export default function AdminResourceManager({ resource, canManage, adminName }:
       if (!response.ok) throw new Error(String(body.message ?? "") || "Unable to create record.");
       setForm({}); setMessage("Record created successfully."); await load();
     } catch (error) { setMessage(error instanceof Error ? error.message : "Unable to create record."); }
+    finally { setBusy(false); }
   }
 
   async function remove(id: string) {
     if (!confirm("Delete this record?")) return;
-    const { res: response, data: __body } = await fetchJson(`${endpoint}/${id}`, { method: "DELETE" });
-    const body = __body;
-    setMessage(String(body.message ?? "") || (response.ok ? "Deleted." : "Unable to delete record."));
-    if (response.ok) await load();
+    setBusy(true);
+    try {
+      const { res: response, data: __body } = await fetchJson(`${endpoint}/${id}`, { method: "DELETE" });
+      const body = __body;
+      setMessage(String(body.message ?? "") || (response.ok ? "Deleted." : "Unable to delete record."));
+      if (response.ok) await load();
+    } finally { setBusy(false); }
   }
 
   async function update(row: Record<string, unknown>) {
     if (!canManage || resource === "audit-logs") return;
+    setBusy(true);
+    try {
     const id = String(row.id);
     const payload: Record<string, unknown> = {};
     if (resource === "reviews") {
@@ -95,10 +104,12 @@ export default function AdminResourceManager({ resource, canManage, adminName }:
     const body = __body;
     setMessage(String(body.message ?? "") || (response.ok ? "Updated." : "Unable to update record."));
     if (response.ok) await load();
+    } finally { setBusy(false); }
   }
 
   const title = labels[resource];
   return <section className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
+    <LoadingOverlay show={busy || loading} label={busy ? "Memproses..." : "Memuat data..."} />
     <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
       <div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--accent-strong)]">Admin workspace</p><h1 className="mt-2 text-balance text-2xl font-semibold leading-tight text-[color:var(--foreground)] sm:text-3xl">{title}</h1><p className="mt-2 text-sm text-[color:var(--muted)]">Signed in as {adminName}</p></div>
       <button onClick={() => void load()} className="btn-secondary">Refresh</button>

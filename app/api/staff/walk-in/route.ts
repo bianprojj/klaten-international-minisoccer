@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     const durationHours = Math.max(Math.ceil((endMinutes - startMinutes) / 60), 1);
 
     const scheduleSlots = await getScheduleSlots();
-    const requestedBlocks = getRequestedScheduleBlocks(startTime, endTime, scheduleSlots);
+    const requestedBlocks = getRequestedScheduleBlocks(startTime, endTime, scheduleSlots, bookingDate);
     let totalPrice = 0;
     if (requestedBlocks.length > 0) {
       const slotTimes = requestedBlocks.map((b) => b.start);

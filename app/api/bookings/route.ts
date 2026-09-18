@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     }
 
     const scheduleSlots = await getScheduleSlots();
-    const requestedBlocks = getRequestedScheduleBlocks(startTime, endTime, scheduleSlots);
+    const requestedBlocks = getRequestedScheduleBlocks(startTime, endTime, scheduleSlots, bookingDate);
     if (requestedBlocks.length === 0) {
       const response = NextResponse.json({ success: false, message: "Invalid booking time range." }, { status: 400 });
       response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");

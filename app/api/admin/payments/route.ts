@@ -58,13 +58,15 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const bookingId = typeof body.bookingId === "string" ? body.bookingId : "";
-    const transactionId = typeof body.transactionId === "string" ? body.transactionId : "";
+    const rawTransactionId = typeof body.transactionId === "string" ? body.transactionId.trim() : "";
+    // transactionId auto-generated when left empty (cash/manual reconciliation).
+    const transactionId = rawTransactionId || `CASH-${bookingId.substring(0, 8)}-${Date.now()}`;
     const amount = typeof body.amount === "number" ? body.amount : Number(body.amount ?? 0);
     const status = typeof body.status === "string" ? body.status : "pending";
     const paymentMethod = typeof body.paymentMethod === "string" ? body.paymentMethod : "Midtrans";
     const provider = typeof body.provider === "string" ? body.provider : "Midtrans";
 
-    if (!bookingId || !transactionId || amount <= 0) {
+    if (!bookingId || amount <= 0) {
       return NextResponse.json({ success: false, message: "Missing required payment details." }, { status: 400 });
     }
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedAdminFromToken, hasAdminPermission } from "@/lib/admin-auth";
+import { getRequestedScheduleBlocks, getScheduleSlots } from "@/lib/booking-engine";
 import { DEFAULT_FIELD_ID } from "@/lib/venue";
 
 function getCookieToken(request: Request) {
@@ -23,25 +24,6 @@ function parseTimeToMinutes(timeValue: string) {
   const minute = Number(minuteText ?? "0");
   if (Number.isNaN(hour) || Number.isNaN(minute)) return NaN;
   return hour * 60 + minute;
-}
-
-function formatMinutesToTime(totalMinutes: number) {
-  const safeMinutes = Math.max(0, totalMinutes);
-  const hour = Math.floor(safeMinutes / 60);
-  const minute = safeMinutes % 60;
-  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
-}
-
-function getRequestedScheduleBlocks(startTime: string, endTime: string) {
-  const startMinutes = parseTimeToMinutes(startTime);
-  const endMinutes = parseTimeToMinutes(endTime);
-  if (Number.isNaN(startMinutes) || Number.isNaN(endMinutes) || endMinutes <= startMinutes) return [];
-  const blocks: Array<{ start: string; end: string }> = [];
-  for (let cursor = startMinutes; cursor < endMinutes; cursor += 60) {
-    const nextCursor = Math.min(cursor + 60, endMinutes);
-    blocks.push({ start: formatMinutesToTime(cursor), end: formatMinutesToTime(nextCursor) });
-  }
-  return blocks;
 }
 
 export async function GET(request: Request) {
@@ -115,6 +97,7 @@ export async function POST(request: Request) {
     const customerPhone = typeof body.customerPhone === "string" ? body.customerPhone.trim() : "";
     const customerEmail = typeof body.customerEmail === "string" ? body.customerEmail.trim() : "";
     const notes = typeof body.notes === "string" ? body.notes.trim() : null;
+    const paymentMethod = typeof body.paymentMethod === "string" && body.paymentMethod.trim() ? body.paymentMethod.trim() : "Offline";
 
     if (!bookingDate || !startTime || !endTime || !customerName || !customerPhone) {
       return NextResponse.json({ success: false, message: "Missing required booking details." }, { status: 400 });
@@ -150,8 +133,21 @@ export async function POST(request: Request) {
     }
 
     const durationHours = Math.max(Math.ceil((parseTimeToMinutes(endTime) - parseTimeToMinutes(startTime)) / 60), 1);
-    const totalPrice = 110000 * durationHours;
 
+    // Price follows the schedule slots configured for this weekday (day-aware), fallback 110rb/jam.
+    const scheduleSlots = await getScheduleSlots();
+    const requestedBlocks = getRequestedScheduleBlocks(startTime, endTime, scheduleSlots, bookingDate);
+    let totalPrice = 0;
+    if (requestedBlocks.length > 0) {
+      const slotTimes = requestedBlocks.map((b) => b.start);
+      const slotRecords = await prisma.scheduleSlot.findMany({ where: { startTime: { in: slotTimes } } });
+      totalPrice = slotRecords.reduce((sum, s) => sum + (s.price ?? 0), 0);
+    }
+    if (totalPrice <= 0) {
+      totalPrice = 110000 * durationHours;
+    }
+
+    // Atomic: booking (confirmed) + payment (cash success) + invoice (paid). No Midtrans involved.
     const booking = await prisma.booking.create({
       data: {
         bookingDate: range.start,
@@ -161,13 +157,44 @@ export async function POST(request: Request) {
         totalPrice,
         customerName,
         customerPhone,
-        customerEmail,
+        customerEmail: customerEmail || null,
         status: "confirmed",
-        notes,
+        notes: notes ?? `Booking manual oleh ${admin.name} (${paymentMethod})`,
       },
     });
 
-    return NextResponse.json({ success: true, data: booking }, { status: 201 });
+    const transactionId = `CASH-${booking.id.substring(0, 8)}-${Date.now()}`;
+    const payment = await prisma.payment.create({
+      data: {
+        bookingId: booking.id,
+        transactionId,
+        amount: totalPrice,
+        paymentMethod,
+        provider: "Offline",
+        status: "success",
+        paidAt: new Date(),
+      },
+    });
+
+    const invoice = await prisma.invoice.create({
+      data: {
+        invoiceNumber: `INV-${booking.id.substring(0, 8).toUpperCase()}`,
+        bookingId: booking.id,
+        paymentId: payment.id,
+        customerName,
+        customerEmail: customerEmail || null,
+        customerPhone,
+        subtotal: totalPrice,
+        tax: 0,
+        discount: 0,
+        total: totalPrice,
+        status: "paid",
+        issuedAt: new Date(),
+        paidAt: new Date(),
+      },
+    });
+
+    return NextResponse.json({ success: true, data: { booking, payment, invoice } }, { status: 201 });
   } catch (error) {
     console.error("[ADMIN] Create booking error:", error);
     return NextResponse.json({ success: false, message: "Unable to create booking." }, { status: 500 });

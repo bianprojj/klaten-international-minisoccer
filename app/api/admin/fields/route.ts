@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAuthenticatedAdminFromToken, hasAdminPermission } from "@/lib/admin-auth";
 import { DEFAULT_FIELD } from "@/lib/venue";
+import { EVERYDAY_VALUE, normalizeDayOfWeek } from "@/lib/booking-engine";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(request: Request) {
@@ -19,10 +20,13 @@ export async function GET(request: Request) {
       orderBy: { sortOrder: "asc" },
     });
 
-    const fields = slots.map((slot, index) => ({
+    const fields = slots.map((slot) => ({
       ...DEFAULT_FIELD,
       id: slot.id,
       name: `Slot ${slot.startTime} - ${slot.endTime}`,
+      startTime: slot.startTime,
+      endTime: slot.endTime,
+      dayOfWeek: slot.dayOfWeek,
       price: slot.price,
       sortOrder: slot.sortOrder,
       isActive: slot.isActive,
@@ -58,6 +62,7 @@ export async function POST(request: Request) {
     const startTime = typeof body.startTime === "string" ? body.startTime.trim() : "";
     const endTime = typeof body.endTime === "string" ? body.endTime.trim() : "";
     const price = Number(body.price);
+    const dayOfWeek = normalizeDayOfWeek(body.dayOfWeek) ?? EVERYDAY_VALUE;
     const isActive = body.isActive !== false;
     const sortOrder = Number(body.sortOrder ?? 0);
 
@@ -66,7 +71,7 @@ export async function POST(request: Request) {
     }
 
     const slot = await prisma.scheduleSlot.create({
-      data: { startTime, endTime, price, isActive, sortOrder },
+      data: { startTime, endTime, price, dayOfWeek, isActive, sortOrder },
     });
 
     return NextResponse.json({ success: true, data: slot }, { status: 201 });

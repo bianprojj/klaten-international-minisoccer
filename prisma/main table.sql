@@ -73,30 +73,35 @@ CREATE TABLE schedule_slot (
   is_active BOOLEAN DEFAULT true,
   sort_order INTEGER DEFAULT 0,
   price INTEGER DEFAULT 0,
+  day_of_week VARCHAR(50) DEFAULT 'mon,tue,wed,thu,fri,sat,sun',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS idx_schedule_slot_sort_order ON schedule_slot(sort_order);
 
-INSERT INTO schedule_slot (id, start_time, end_time, is_active, sort_order, price, created_at, updated_at)
+-- Untuk DB yang sudah ada (JANGAN run ulang file ini): jalankan blok ini saja
+-- ALTER TABLE schedule_slot ADD COLUMN IF NOT EXISTS day_of_week VARCHAR(50) DEFAULT 'mon,tue,wed,thu,fri,sat,sun';
+-- UPDATE schedule_slot SET day_of_week = 'mon,tue,wed,thu,fri,sat,sun' WHERE day_of_week IS NULL;
+
+INSERT INTO schedule_slot (id, start_time, end_time, is_active, sort_order, price, day_of_week, created_at, updated_at)
 VALUES
-  (gen_random_uuid(), '07:00', '08:00', true, 0, 110000, NOW(), NOW()),
-  (gen_random_uuid(), '08:00', '09:00', true, 1, 110000, NOW(), NOW()),
-  (gen_random_uuid(), '09:00', '10:00', true, 2, 110000, NOW(), NOW()),
-  (gen_random_uuid(), '10:00', '11:00', true, 3, 110000, NOW(), NOW()),
-  (gen_random_uuid(), '11:00', '12:00', true, 4, 110000, NOW(), NOW()),
-  (gen_random_uuid(), '12:00', '13:00', true, 5, 110000, NOW(), NOW()),
-  (gen_random_uuid(), '13:00', '14:00', true, 6, 110000, NOW(), NOW()),
-  (gen_random_uuid(), '14:00', '15:00', true, 7, 110000, NOW(), NOW()),
-  (gen_random_uuid(), '15:00', '16:00', true, 8, 110000, NOW(), NOW()),
-  (gen_random_uuid(), '16:00', '17:00', true, 9, 110000, NOW(), NOW()),
-  (gen_random_uuid(), '17:00', '18:00', true, 10, 110000, NOW(), NOW()),
-  (gen_random_uuid(), '18:00', '19:00', true, 11, 150000, NOW(), NOW()),
-  (gen_random_uuid(), '19:00', '20:00', true, 12, 150000, NOW(), NOW()),
-  (gen_random_uuid(), '20:00', '21:00', true, 13, 150000, NOW(), NOW()),
-  (gen_random_uuid(), '21:00', '22:00', true, 14, 120000, NOW(), NOW()),
-  (gen_random_uuid(), '22:00', '23:00', true, 15, 120000, NOW(), NOW());
+  (gen_random_uuid(), '07:00', '08:00', true, 0, 110000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '08:00', '09:00', true, 1, 110000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '09:00', '10:00', true, 2, 110000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '10:00', '11:00', true, 3, 110000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '11:00', '12:00', true, 4, 110000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '12:00', '13:00', true, 5, 110000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '13:00', '14:00', true, 6, 110000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '14:00', '15:00', true, 7, 110000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '15:00', '16:00', true, 8, 110000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '16:00', '17:00', true, 9, 110000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '17:00', '18:00', true, 10, 110000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '18:00', '19:00', true, 11, 150000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '19:00', '20:00', true, 12, 150000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '20:00', '21:00', true, 13, 150000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '21:00', '22:00', true, 14, 120000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '22:00', '23:00', true, 15, 120000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW());
 
 -- ==================== PAYMENT & TRANSACTION (MIDTRANS) ====================
 CREATE TABLE payment (

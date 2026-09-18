@@ -1,6 +1,16 @@
 "use client";
 
 import { fetchJson } from "@/lib/fetch-json";
+import {
+  DAY_KEYS,
+  DAY_LABELS,
+  EVERYDAY_VALUE,
+  WEEKDAYS_VALUE,
+  WEEKEND_VALUE,
+  formatDayOfWeek,
+  normalizeDayOfWeek,
+} from "@/lib/schedule-days";
+import { LoadingOverlay, Spinner } from "@/components/ui/spinner";
 
 import { useEffect, useState } from "react";
 
@@ -8,6 +18,8 @@ type ScheduleSlotItem = {
   id: string;
   startTime: string;
   endTime: string;
+  dayOfWeek?: string;
+  price?: number;
   isActive: boolean;
   sortOrder: number;
 };
@@ -15,6 +27,8 @@ type ScheduleSlotItem = {
 interface ScheduleSlotFormState {
   startTime: string;
   endTime: string;
+  dayOfWeek: string;
+  price: number;
   isActive: boolean;
   sortOrder: number;
 }
@@ -28,6 +42,8 @@ export default function ScheduleSlotManagerClient({ adminName }: { adminName: st
   const [formState, setFormState] = useState<ScheduleSlotFormState>({
     startTime: "",
     endTime: "",
+    dayOfWeek: EVERYDAY_VALUE,
+    price: 0,
     isActive: true,
     sortOrder: 0,
   });
@@ -53,7 +69,7 @@ export default function ScheduleSlotManagerClient({ adminName }: { adminName: st
   const resetForm = () => {
     setEditing(null);
     setShowForm(false);
-    setFormState({ startTime: "", endTime: "", isActive: true, sortOrder: 0 });
+    setFormState({ startTime: "", endTime: "", dayOfWeek: EVERYDAY_VALUE, price: 0, isActive: true, sortOrder: 0 });
   };
 
   const handleChange = (field: keyof ScheduleSlotFormState, value: string | boolean | number) => {
@@ -89,9 +105,22 @@ export default function ScheduleSlotManagerClient({ adminName }: { adminName: st
     setFormState({
       startTime: slot.startTime,
       endTime: slot.endTime,
+      dayOfWeek: normalizeDayOfWeek(slot.dayOfWeek) ?? EVERYDAY_VALUE,
+      price: slot.price ?? 0,
       isActive: slot.isActive,
       sortOrder: slot.sortOrder,
     });
+  };
+
+  const toggleDay = (day: string) => {
+    const current = new Set(formState.dayOfWeek.split(",").filter(Boolean));
+    if (current.has(day)) {
+      current.delete(day);
+    } else {
+      current.add(day);
+    }
+    const ordered = DAY_KEYS.filter((d) => current.has(d));
+    setFormState((prev) => ({ ...prev, dayOfWeek: ordered.length > 0 ? ordered.join(",") : EVERYDAY_VALUE }));
   };
 
   const handleDelete = async (id: string) => {
@@ -114,6 +143,7 @@ export default function ScheduleSlotManagerClient({ adminName }: { adminName: st
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8" id="schedule-slots">
+      <LoadingOverlay show={loading} label={editing || showForm ? "Menyimpan slot..." : "Memuat jadwal..."} />
       <div className="glass-panel rounded-[2rem] p-6 sm:p-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
@@ -148,6 +178,8 @@ export default function ScheduleSlotManagerClient({ adminName }: { adminName: st
                     <th className="px-4 py-3">Order</th>
                     <th className="px-4 py-3">Start</th>
                     <th className="px-4 py-3">End</th>
+                    <th className="px-4 py-3">Day</th>
+                    <th className="px-4 py-3">Price</th>
                     <th className="px-4 py-3">Active</th>
                     <th className="px-4 py-3">Actions</th>
                   </tr>
@@ -158,6 +190,8 @@ export default function ScheduleSlotManagerClient({ adminName }: { adminName: st
                       <td className="px-4 py-3 text-white">{slot.sortOrder}</td>
                       <td className="px-4 py-3">{slot.startTime}</td>
                       <td className="px-4 py-3">{slot.endTime}</td>
+                      <td className="px-4 py-3">{formatDayOfWeek(slot.dayOfWeek)}</td>
+                      <td className="px-4 py-3">Rp {Number(slot.price ?? 0).toLocaleString("id-ID")}</td>
                       <td className="px-4 py-3">{slot.isActive ? "Yes" : "No"}</td>
                       <td className="px-4 py-3 space-x-2">
                         <button onClick={() => handleEdit(slot)} className="rounded-full border border-[color:rgba(56,189,248,0.24)] px-3 py-2 text-sm text-[color:var(--accent)] hover:bg-[color:rgba(56,189,248,0.06)]">Edit</button>
@@ -188,6 +222,37 @@ export default function ScheduleSlotManagerClient({ adminName }: { adminName: st
                 <label className="text-sm text-[color:var(--muted)]">End time</label>
                 <input value={formState.endTime} onChange={(e) => handleChange("endTime", e.target.value)} placeholder="HH:MM" className="mt-2 w-full rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white outline-none" />
               </div>
+              <div>
+                <label className="text-sm text-[color:var(--muted)]">Active days</label>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {DAY_KEYS.map((day) => {
+                    const active = formState.dayOfWeek.split(",").includes(day);
+                    return (
+                      <button
+                        key={day}
+                        type="button"
+                        onClick={() => toggleDay(day)}
+                        className={`rounded-full border px-3 py-2 text-xs font-medium transition ${
+                          active
+                            ? "border-[color:var(--accent)] bg-[color:rgba(56,189,248,0.12)] text-white"
+                            : "border-white/10 bg-[color:var(--background)] text-[color:var(--muted)]"
+                        }`}
+                      >
+                        {DAY_LABELS[day]}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <button type="button" onClick={() => handleChange("dayOfWeek", EVERYDAY_VALUE)} className="rounded-full border border-white/10 px-3 py-1 text-xs text-[color:var(--muted)]">Setiap hari</button>
+                  <button type="button" onClick={() => handleChange("dayOfWeek", WEEKDAYS_VALUE)} className="rounded-full border border-white/10 px-3 py-1 text-xs text-[color:var(--muted)]">Senin–Jumat</button>
+                  <button type="button" onClick={() => handleChange("dayOfWeek", WEEKEND_VALUE)} className="rounded-full border border-white/10 px-3 py-1 text-xs text-[color:var(--muted)]">Sabtu–Minggu</button>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm text-[color:var(--muted)]">Price (IDR)</label>
+                <input type="number" value={formState.price} onChange={(e) => handleChange("price", Number(e.target.value))} className="mt-2 w-full rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white outline-none" />
+              </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <label className="text-sm text-[color:var(--muted)]">Sort order</label>
@@ -199,7 +264,8 @@ export default function ScheduleSlotManagerClient({ adminName }: { adminName: st
                 </div>
               </div>
               <div className="flex gap-3">
-                <button onClick={handleSave} disabled={loading} className="btn-primary px-6 py-3 disabled:opacity-60">
+                <button onClick={handleSave} disabled={loading} className="btn-primary flex items-center gap-2 px-6 py-3 disabled:opacity-60">
+                  {loading ? <Spinner size={18} /> : null}
                   {editing ? "Update slot" : "Create slot"}
                 </button>
                 <button onClick={resetForm} type="button" className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-6 py-3 text-sm text-white">

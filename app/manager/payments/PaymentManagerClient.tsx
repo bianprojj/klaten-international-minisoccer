@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { fetchJson } from "@/lib/fetch-json";
+import { LoadingOverlay, Spinner } from "@/components/ui/spinner";
 
 interface PaymentItem {
   id: string;
@@ -271,8 +272,8 @@ export default function PaymentManagerClient({ adminName, useMain = true }: { ad
                 <input value={formState.bookingId} onChange={(e) => handleChange("bookingId", e.target.value)} className="mt-2 w-full rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white outline-none" />
               </div>
               <div>
-                <label className="text-sm text-[color:var(--muted)]">Transaction ID</label>
-                <input value={formState.transactionId} onChange={(e) => handleChange("transactionId", e.target.value)} className="mt-2 w-full rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white outline-none" />
+                <label className="text-sm text-[color:var(--muted)]">Transaction ID (kosongkan = otomatis)</label>
+                <input value={formState.transactionId} onChange={(e) => handleChange("transactionId", e.target.value)} placeholder="Auto: CASH-..." className="mt-2 w-full rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white outline-none" />
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
@@ -317,7 +318,8 @@ export default function PaymentManagerClient({ adminName, useMain = true }: { ad
                 </div>
               </div>
               <div className="flex gap-3">
-                <button onClick={handleSave} disabled={loading} className="btn-primary px-6 py-3 disabled:opacity-60">
+                <button onClick={handleSave} disabled={loading} className="btn-primary flex items-center gap-2 px-6 py-3 disabled:opacity-60">
+                  {loading ? <Spinner size={18} /> : null}
                   {editing ? "Update payment" : "Create payment"}
                 </button>
                 <button onClick={resetForm} type="button" className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-6 py-3 text-sm text-white">
@@ -331,5 +333,12 @@ export default function PaymentManagerClient({ adminName, useMain = true }: { ad
     </div>
   );
 
-  return useMain ? <main className="flex-1 px-6 py-16 lg:px-8">{content}</main> : content;
+  const wrapped = (
+    <>
+      {content}
+      <LoadingOverlay show={loading} label={editing ? "Menyimpan payment..." : "Memuat payment..."} />
+    </>
+  );
+
+  return useMain ? <main className="flex-1 px-6 py-16 lg:px-8">{wrapped}</main> : wrapped;
 }

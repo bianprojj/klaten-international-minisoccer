@@ -448,3 +448,20 @@ If you want, I can open a PR with these changes, run `npm run lint -- --fix`, or
   - Password kembali ke SHA256 (64-hex) pasca fresh seed → login tetap bisa via fallback legacy + auto-upgrade bcrypt (fix #51).
 - `npx prisma db push` (tanpa --accept-data-loss, read-only check): satu-satunya diff adalah penamaan/ekspresi PK (`gen_random_uuid()` SQL vs ekspektasi Prisma) — kosmetik, data & kolom 100% sinkron. TIDAK di-push ulang (tak perlu, berisiko tanpa manfaat).
 - Koreksi: jumlah slot seed = 16 (bukan 20 seperti disebut di #44).
+
+### 53. Slot day-of-week + auto booking/payment/invoice + loading overlay
+- **Fix time "-"**: `GET /api/admin/fields` kini sertakan `startTime`, `endTime`, `dayOfWeek` (sebelumnya hanya di string `name`) → kolom Time tampil "07:00 - 08:00".
+- **Kolom `day_of_week`** (VARCHAR, default everyday): Prisma schema + live DB (ALTER) + `main table.sql` + `seed.js`. Format kanonis "mon,tue,wed,thu,fri,sat,sun".
+- **Helper client-safe baru** `lib/schedule-days.ts` (DAY_KEYS/LABELS/SHORT, EVERYDAY/WEEKDAYS/WEEKEND, normalizeDayOfWeek, slotAppliesOnDate, formatDayOfWeek); `lib/booking-engine.ts` re-export (booking-engine import prisma → tidak boleh di client).
+- **Filter hari jalan di semua jalur**: `buildTimeSlots` (availability customer), `getRequestedScheduleBlocks` + param date opsional (public booking, admin booking, walk-in pricing/validasi).
+- **Form slot**: checkbox Senin–Minggu + shortcut Setiap hari / Senin–Jumat / Sabtu–Minggu, kolom Day ("Setiap hari", "Senin–Jumat", dst) di FieldManagerClient + ScheduleSlotManagerClient. ScheduleSlotManagerClient juga dapat kolom Price (API terima `price`).
+- **Admin booking atomik** (`POST /api/admin/bookings`): booking confirmed + payment success/Offline + invoice paid, harga ikut slot hari itu (fallback 110rb/jam). `POST /api/admin/payments`: transactionId auto `CASH-...` bila kosong (invoiceNumber memang sudah auto).
+- **Loading**: `components/ui/spinner.tsx` (Spinner + LoadingOverlay fullscreen) dipakai di Field/Booking/Payment/ScheduleSlot manager, StaffBookingViewer, AdminResourceManager (busy state baru), venue feature/gallery manager.
+- **E2E via API lolos semua**: login 200 → fields GET ada time+day → create slot weekday-only 201 → availability Sabtu 2026-09-19 TIDAK tampil, Senin 2026-09-21 tampil → admin booking 201 (confirmed/success/Offline/paid, INV-...) → cleanup OK.
+- **Temuan data**: DB user punya DUPLIKAT slot 07:00 (110rb + 130rb) dan 08:00 hilang — total 240rb itu benar sesuai data, bukan bug. User hapus sendiri via dashboard.
+- Build 57/57 sukses. Belum di-push.
+
+### 54. Verifikasi DB pasca run ulang main table.sql + push
+- 13 tabel lengkap; `schedule_slot` sudah ada `day_of_week` + seed 16 slot bersih (duplikat 07:00 hilang, 08:00 kembali, semua everyday).
+- Seed sesuai file: 6 admin aktif, 3 booking/payment/invoice/review/audit, 9 settings, 4 feature/gallery.
+- Password kembali SHA256 → login tetap bisa via fallback + auto-upgrade bcrypt.
