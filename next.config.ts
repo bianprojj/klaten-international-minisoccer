@@ -9,6 +9,20 @@ const nextConfig: NextConfig = {
         headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
       },
       {
+        source: "/favicon.ico",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=86400, must-revalidate" },
+          { key: "x-content-type-options", value: "nosniff" },
+        ],
+      },
+      {
+        source: "/:path(favicon-16x16.png|favicon-32x32.png|favicon-48x48.png|apple-touch-icon.png|android-chrome-192x192.png|android-chrome-512x512.png|kim-logo.png)",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=86400, must-revalidate" },
+          { key: "x-content-type-options", value: "nosniff" },
+        ],
+      },
+      {
         source: "/:path*",
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
