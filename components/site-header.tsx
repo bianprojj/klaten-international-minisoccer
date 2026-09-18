@@ -15,7 +15,11 @@ export function SiteHeader() {
           <Link href="/" className="inline-flex items-center" aria-label={`Beranda ${siteConfig.name}`}>
             <div className="flex items-center gap-2">
               <Image src="/kim-logo.png" alt="Klaten International Minisoccer" width={48} height={48} className="object-contain" />
-              <span className="self-center text-[color:var(--foreground)] font-bold text-lg sm:text-xl">KLATEN INTERNATIONAL MINISOCCER</span>
+              <span className="self-center text-[color:var(--foreground)] font-bold text-lg sm:text-xl">
+                KLATEN<br />
+                INTERNATIONAL<br />
+                MINISOCCER
+              </span>
             </div>
             <Image src="/kim-logo.png" alt="Klaten International Minisoccer logo" width={360} height={86} priority className="h-28 w-auto max-w-none object-contain object-center md:h-36" />
           </Link>
