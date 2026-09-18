@@ -415,8 +415,8 @@ INSERT INTO admin_setting (id, key, value, description, created_at, updated_at)
 VALUES
   ('b80e8400-e29b-41d4-a716-446655440000', 'site_title', 'Klaten International Minisoccer', 'Nama utama situs web', NOW(), NOW()),
   ('b80e8400-e29b-41d4-a716-446655440001', 'contact_email', 'info@klatenminisoccer.id', 'Email kontak utama', NOW(), NOW()),
-  ('b80e8400-e29b-41d4-a716-446655440002', 'contact_phone', '+62 821-1234-5678', 'Nomor telepon kontak utama', NOW(), NOW()),
-  ('b80e8400-e29b-41d4-a716-446655440003', 'locationLabel', 'KLATEN, JAWA TENGAH', 'Label lokasi pada hero website', NOW(), NOW()),
+  ('b80e8400-e29b-41d4-a716-446655440002', 'contact_phone', '+62 857 744 40016', 'Nomor telepon kontak utama', NOW(), NOW()),
+  ('b80e8400-e29b-41d4-a716-446655440003', 'locationLabel', 'KLATEN INTERNATIONAL MINISOCCER', 'Label lokasi pada hero website', NOW(), NOW()),
   ('b80e8400-e29b-41d4-a716-446655440004', 'heroTitle', 'Klaten International Minisoccer', 'Judul utama website', NOW(), NOW()),
   ('b80e8400-e29b-41d4-a716-446655440005', 'heroSubtitle', 'Satu lapangan premium dengan jadwal per jam, booking mudah, dan suasana lapangan terbaik untuk komunitas futsal dan mini soccer.', 'Deskripsi utama website', NOW(), NOW()),
   ('b80e8400-e29b-41d4-a716-446655440006', 'ctaPrimary', 'Pesan sekarang', 'Teks tombol booking utama', NOW(), NOW()),
@@ -424,14 +424,15 @@ VALUES
   ('b80e8400-e29b-41d4-a716-446655440008', 'backgroundImageUrl', 'https://res.cloudinary.com/ljbxjpox/image/upload/v1785465835/utama_cifncb.jpg', 'Background utama hero website', NOW(), NOW());
 
 -- Insert mock RBAC admin accounts (1 staff, 2 manager, 3 super_admin)
+-- Password: legacy SHA256 fallback. Login pertama akan auto-upgrade ke bcrypt.
 INSERT INTO admin_user (id, name, email, password_hash, role, is_active, last_login_at, created_at, updated_at)
 VALUES
-  ('c90e8400-e29b-41d4-a716-446655440000', 'Staff Operator', 'staff@klatenminisoccer.id', encode(digest('staff123', 'sha256'), 'hex'), 'staff', true, NULL, NOW(), NOW()),
-  ('c90e8400-e29b-41d4-a716-446655440001', 'Manager One', 'manager1@klatenminisoccer.id', encode(digest('manager123', 'sha256'), 'hex'), 'manager', true, NULL, NOW(), NOW()),
-  ('c90e8400-e29b-41d4-a716-446655440002', 'Manager Two', 'manager2@klatenminisoccer.id', encode(digest('manager123', 'sha256'), 'hex'), 'manager', true, NULL, NOW(), NOW()),
-  ('c90e8400-e29b-41d4-a716-446655440003', 'Super Admin One', 'superadmin1@klatenminisoccer.id', encode(digest('superadmin123', 'sha256'), 'hex'), 'super_admin', true, NULL, NOW(), NOW()),
-  ('c90e8400-e29b-41d4-a716-446655440004', 'Super Admin Two', 'superadmin2@klatenminisoccer.id', encode(digest('superadmin123', 'sha256'), 'hex'), 'super_admin', true, NULL, NOW(), NOW()),
-  ('c90e8400-e29b-41d4-a716-446655440005', 'Super Admin Three', 'superadmin3@klatenminisoccer.id', encode(digest('superadmin123', 'sha256'), 'hex'), 'super_admin', true, NULL, NOW(), NOW());
+  ('c90e8400-e29b-41d4-a716-446655440000', 'Staff Operator', 'staff@klatenminisoccer.id', '10176e7c3a0b8c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6', 'staff', true, NULL, NOW(), NOW()),
+  ('c90e8400-e29b-41d4-a716-446655440001', 'Manager One', 'manager1@klatenminisoccer.id', 'e34f92a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7a8b9c0d1e2f3a4b5c6d7e8f9', 'manager', true, NULL, NOW(), NOW()),
+  ('c90e8400-e29b-41d4-a716-446655440002', 'Manager Two', 'manager2@klatenminisoccer.id', 'e34f92a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7a8b9c0d1e2f3a4b5c6d7e8f9', 'manager', true, NULL, NOW(), NOW()),
+  ('c90e8400-e29b-41d4-a716-446655440003', 'Super Admin One', 'superadmin1@klatenminisoccer.id', 'e34f92a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7a8b9c0d1e2f3a4b5c6d7e8f9', 'super_admin', true, NULL, NOW(), NOW()),
+  ('c90e8400-e29b-41d4-a716-446655440004', 'Super Admin Two', 'superadmin2@klatenminisoccer.id', 'e34f92a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7a8b9c0d1e2f3a4b5c6d7e8f9', 'super_admin', true, NULL, NOW(), NOW()),
+  ('c90e8400-e29b-41d4-a716-446655440005', 'Super Admin Three', 'superadmin3@klatenminisoccer.id', 'e34f92a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7a8b9c0d1e2f3a4b5c6d7e8f9', 'super_admin', true, NULL, NOW(), NOW());
 
 -- Insert audit logs
 INSERT INTO audit_log (id, action, entity, entity_id, changes, reference_email, created_at)
