@@ -253,10 +253,10 @@ CREATE INDEX IF NOT EXISTS idx_venue_gallery_active_order ON venue_gallery(is_ac
 
 INSERT INTO venue_gallery (title, image_url, image_public_id, sort_order, is_active)
 VALUES
-  ('Lapangan premium', 'https://res.cloudinary.com/ljbxjpox/image/upload/v1785465834/lapangan_premium_aqejyy.jpg', 'lapangan_premium_aqejyy', 0, true),
-  ('Lampu malam', 'https://res.cloudinary.com/ljbxjpox/image/upload/v1785465837/lampu_malam_xntenr.jpg', 'lampu_malam_xntenr', 1, true),
-  ('Fasilitas sewa', 'https://res.cloudinary.com/ljbxjpox/image/upload/v1785465837/fasilitas_sewa_o0uptk.jpg', 'fasilitas_sewa_o0uptk', 2, true),
-  ('Citarasa komunitas', 'https://res.cloudinary.com/ljbxjpox/image/upload/v1785465837/citarasa_komunitas_ey2pmm.jpg', 'citarasa_komunitas_ey2pmm', 3, true);
+  ('Lapangan premium', 'https://res.cloudinary.com/l2qucbfo/image/upload/v1789718224/Lapangan_premium.webp', 'lapangan_premium_aqejyy', 0, true),
+  ('Lampu malam', 'https://res.cloudinary.com/l2qucbfo/image/upload/v1789195023/Lampu_Malam.webp', 'lampu_malam_xntenr', 1, true),
+  ('Fasilitas sewa', 'https://res.cloudinary.com/l2qucbfo/image/upload/v1789195023/Fasilitas.webp', 'fasilitas_sewa_o0uptk', 2, true),
+  ('Citarasa komunitas', 'https://res.cloudinary.com/l2qucbfo/image/upload/v1789195024/Komunitas.webp', 'citarasa_komunitas_ey2pmm', 3, true);
 
 -- Initial venue features. Images are stored in Cloudinary; only URLs and IDs are stored here.
 INSERT INTO venue_feature
@@ -265,7 +265,7 @@ VALUES
   (
     'Lapangan premium',
     'Surface terbaik untuk 5v5 dan mini soccer.',
-    'https://res.cloudinary.com/ljbxjpox/image/upload/v1785465834/lapangan_premium_aqejyy.jpg',
+    'https://res.cloudinary.com/l2qucbfo/image/upload/v1789718224/Lapangan_premium.webp',
     'lapangan_premium_aqejyy',
     0,
     true
@@ -273,7 +273,7 @@ VALUES
   (
     'Lampu malam',
     'Jadwal per jam hingga malam hari.',
-    'https://res.cloudinary.com/ljbxjpox/image/upload/v1785465837/lampu_malam_xntenr.jpg',
+    'https://res.cloudinary.com/l2qucbfo/image/upload/v1789195023/Lampu_Malam.webp',
     'lampu_malam_xntenr',
     1,
     true
@@ -281,7 +281,7 @@ VALUES
   (
     'Fasilitas sewa',
     'Loker, sepatu, bola, dan ruang ganti yang tertata rapi.',
-    'https://res.cloudinary.com/ljbxjpox/image/upload/v1785465837/fasilitas_sewa_o0uptk.jpg',
+    'https://res.cloudinary.com/l2qucbfo/image/upload/v1789195023/Fasilitas.webp',
     'fasilitas_sewa_o0uptk',
     2,
     true
@@ -289,7 +289,7 @@ VALUES
   (
     'Citarasa komunitas',
     'Tempat berkumpul dan pertandingan seru.',
-    'https://res.cloudinary.com/ljbxjpox/image/upload/v1785465837/citarasa_komunitas_ey2pmm.jpg',
+    'https://res.cloudinary.com/l2qucbfo/image/upload/v1789195024/Komunitas.webp',
     'citarasa_komunitas_ey2pmm',
     3,
     true
@@ -421,7 +421,7 @@ VALUES
   ('b80e8400-e29b-41d4-a716-446655440005', 'heroSubtitle', 'Satu lapangan premium dengan jadwal per jam, booking mudah, dan suasana lapangan terbaik untuk komunitas futsal dan mini soccer.', 'Deskripsi utama website', NOW(), NOW()),
   ('b80e8400-e29b-41d4-a716-446655440006', 'ctaPrimary', 'Pesan sekarang', 'Teks tombol booking utama', NOW(), NOW()),
   ('b80e8400-e29b-41d4-a716-446655440007', 'ctaSecondary', 'Lihat riwayat booking', 'Teks tombol riwayat booking', NOW(), NOW()),
-  ('b80e8400-e29b-41d4-a716-446655440008', 'backgroundImageUrl', 'https://res.cloudinary.com/ljbxjpox/image/upload/v1785465835/utama_cifncb.jpg', 'Background utama hero website', NOW(), NOW());
+  ('b80e8400-e29b-41d4-a716-446655440008', 'backgroundImageUrl', 'https://res.cloudinary.com/l2qucbfo/image/upload/v1789195023/Utama.webp', 'Background utama hero website', NOW(), NOW());
 
 -- Insert mock RBAC admin accounts (1 staff, 2 manager, 3 super_admin)
 -- Password: legacy SHA256 fallback. Login pertama akan auto-upgrade ke bcrypt.

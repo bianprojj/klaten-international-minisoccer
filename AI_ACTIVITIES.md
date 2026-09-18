@@ -465,3 +465,9 @@ If you want, I can open a PR with these changes, run `npm run lint -- --fix`, or
 - 13 tabel lengkap; `schedule_slot` sudah ada `day_of_week` + seed 16 slot bersih (duplikat 07:00 hilang, 08:00 kembali, semua everyday).
 - Seed sesuai file: 6 admin aktif, 3 booking/payment/invoice/review/audit, 9 settings, 4 feature/gallery.
 - Password kembali SHA256 → login tetap bisa via fallback + auto-upgrade bcrypt.
+
+### 55. Update data kontak & media sosial
+- `lib/site-config.ts`: phone diganti +62 857 744 40016, address lengkap dengan kode pos 57438, hours diformat 06.00–23.00 Setiap hari, instagram baru `https://www.instagram.com/kim.soccerfield/`
+- `app/layout.tsx`: schema.org `sameAs` Instagram di-update ke `@kim.soccerfield`, WhatsApp link `https://wa.me/6285774440016` untuk contact/WhatsApp channel.
+- Data tetap konsisten ke seluruh halaman (footer, header alt, OpenGraph) dan siap ditampilkan di search engine.
+- Build 57/57 sukses. Push ke main.
