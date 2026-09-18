@@ -479,6 +479,19 @@ If you want, I can open a PR with these changes, run `npm run lint -- --fix`, or
 - Catatan: hasil Google di screenshot user = cache lama (title/deskripsi/footer lama). Akan berubah sendiri setelah deploy + Google crawl ulang; percepat via Search Console → URL Inspection → Request Indexing.
 - Build 57/57 sukses.
 
+### 59. Audit keamanan: SQL encode(digest) vs kode + temuan live DB
+- Hasil audit KODE: AMAN. `encode(digest(pw,'sha256'),'hex')` Postgres = 64-hex lowercase = persis format yang diharapkan fallback legacy `lib/admin-auth.ts:366-370` (regex 64-hex + timingSafeEqual) → login + auto-upgrade bcrypt jalan. Jalur dashboard admin-user (GET tanpa hash, PUT/CREATE bcrypt + validatePasswordComplexity) tidak tergantung format seed.
+- TEMUAN LIVE DB (kritis): 6 hash di live BUKAN dari file HEAD — melainkan placeholder karangan saya di commit bc12baf (`e34f92a1b2c3...`, staff 65 char). Tidak ada password yang cocok → LOGIN SEMUA ADMIN RUSAK saat ini (staff gagal regex; sisanya gagal compare).
+- Penyebab: run SQL terakhir user tidak me-reseed admin_user (file lama / run sebagian / error di tengah).
+- Perbaikan saya: kembalikan file lokal ke versi HEAD (milik user, encode+digest benar) agar tidak regresi. TIDAK ubah live DB tanpa instruksi.
+- Opsi fix: (A) user run ulang file HEAD penuh → staff123/manager123/superadmin123; (B) saya patch hash live langsung via UPDATE encode(digest).
+
+### 60. Fix login: patch hash live + verifikasi (opsi B)
+- User klaim sudah run SQL, tapi cek ulang live masih placeholder lama; setting lain (contact/email/hero) ternyata SUDAH baru → run user hanya sebagian / file beda versi saat run.
+- Eksekusi opsi B: UPDATE 6 admin_user SET password_hash=encode(digest(...)) sesuai password di file HEAD (staff123/manager123/superadmin123). 6 row updated.
+- Verifikasi: semua hash 64-hex & cocok SHA256 Node; login superadmin1 200 + staff 200 via API (legacy path, auto-upgrade bcrypt jalan, mustChangePassword=true wajar untuk seed fresh).
+- Login dashboard kembali normal. Password seed TETAP staff123/manager123/superadmin123.
+
 ### 58. Header final: 1 icon besar + teks gradient
 - Logo besar 360x86 di kanan DIBUANG — tinggal 1 icon di pojok kiri, diperbesar 48→56/64px.
 - Penyebab teks terpotong: container `h-14 overflow-hidden` — diganti `min-h-16/md:min-h-20` tanpa overflow-hidden; ukuran teks disesuaikan (text-sm/base, leading-tight) agar 3 baris muat.
