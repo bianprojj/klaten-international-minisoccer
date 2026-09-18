@@ -151,9 +151,9 @@ export default function RootLayout({
                 "worstRating": "1"
               },
               "sameAs": [
-                "https://www.instagram.com/klatenminisoccer",
+                "https://www.instagram.com/kim.soccerfield/",
                 "https://www.facebook.com/klatenminisoccer",
-                "https://wa.me/6281234567890"
+                "https://wa.me/6285774440016"
               ]
             })
           }}
