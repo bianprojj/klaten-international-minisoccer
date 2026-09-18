@@ -414,7 +414,7 @@ VALUES
 INSERT INTO admin_setting (id, key, value, description, created_at, updated_at)
 VALUES
   ('b80e8400-e29b-41d4-a716-446655440000', 'site_title', 'Klaten International Minisoccer', 'Nama utama situs web', NOW(), NOW()),
-  ('b80e8400-e29b-41d4-a716-446655440001', 'contact_email', 'info@klatenminisoccer.id', 'Email kontak utama', NOW(), NOW()),
+  ('b80e8400-e29b-41d4-a716-446655440001', 'contact_email', 'admin@dev.klatenminisoccer.web.id', 'Email kontak utama', NOW(), NOW()),
   ('b80e8400-e29b-41d4-a716-446655440002', 'contact_phone', '+62 857 744 40016', 'Nomor telepon kontak utama', NOW(), NOW()),
   ('b80e8400-e29b-41d4-a716-446655440003', 'locationLabel', 'KLATEN INTERNATIONAL MINISOCCER', 'Label lokasi pada hero website', NOW(), NOW()),
   ('b80e8400-e29b-41d4-a716-446655440004', 'heroTitle', 'Klaten International Minisoccer', 'Judul utama website', NOW(), NOW()),
