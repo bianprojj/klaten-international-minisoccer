@@ -16,7 +16,7 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: "/:path(favicon-16x16.png|favicon-32x32.png|favicon-48x48.png|apple-touch-icon.png|android-chrome-192x192.png|android-chrome-512x512.png|kim-logo.png)",
+        source: "/:path(favicon-16x16.png|favicon-32x32.png|apple-touch-icon.png|android-chrome-192x192.png|android-chrome-512x512.png)",
         headers: [
           { key: "Cache-Control", value: "public, max-age=86400, must-revalidate" },
           { key: "x-content-type-options", value: "nosniff" },

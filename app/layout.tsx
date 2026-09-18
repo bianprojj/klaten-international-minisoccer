@@ -27,14 +27,12 @@ export async function generateMetadata(): Promise<Metadata> {
   formatDetection: { email: false, address: false, telephone: false },
   manifest: "/site.webmanifest",
   icons: [
-    { rel: "icon", url: "/favicon.ico" },
-    { rel: "icon", type: "image/png", sizes: "32x32", url: "/favicon-32x32.png" },
+    { rel: "icon", url: "/favicon.ico", sizes: "any" },
     { rel: "icon", type: "image/png", sizes: "16x16", url: "/favicon-16x16.png" },
+    { rel: "icon", type: "image/png", sizes: "32x32", url: "/favicon-32x32.png" },
     { rel: "apple-touch-icon", sizes: "180x180", url: "/apple-touch-icon.png" },
     { rel: "icon", type: "image/png", sizes: "192x192", url: "/android-chrome-192x192.png" },
     { rel: "icon", type: "image/png", sizes: "512x512", url: "/android-chrome-512x512.png" },
-    { rel: "icon", type: "image/png", sizes: "48x48", url: "/kim-logo.png" },
-    { rel: "icon", type: "image/png", sizes: "64x64", url: "/kim-logo.png" },
   ],
   robots: { index: true, follow: true },
   openGraph: {
@@ -141,7 +139,7 @@ export default function RootLayout({
               },
               "image": [
                 siteConfig.openGraphImage,
-                `${siteConfig.url}/kim-logo.png`
+                `${siteConfig.url}/android-chrome-512x512.png`
               ],
               "aggregateRating": {
                 "@type": "AggregateRating",
