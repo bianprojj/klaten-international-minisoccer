@@ -26,14 +26,6 @@ export async function generateMetadata(): Promise<Metadata> {
   publisher: siteConfig.name,
   formatDetection: { email: false, address: false, telephone: false },
   manifest: "/site.webmanifest",
-  icons: [
-    { rel: "icon", url: "/favicon.ico", sizes: "any" },
-    { rel: "icon", type: "image/png", sizes: "16x16", url: "/favicon-16x16.png" },
-    { rel: "icon", type: "image/png", sizes: "32x32", url: "/favicon-32x32.png" },
-    { rel: "apple-touch-icon", sizes: "180x180", url: "/apple-touch-icon.png" },
-    { rel: "icon", type: "image/png", sizes: "192x192", url: "/android-chrome-192x192.png" },
-    { rel: "icon", type: "image/png", sizes: "512x512", url: "/android-chrome-512x512.png" },
-  ],
   robots: { index: true, follow: true },
   openGraph: {
     title: siteConfig.title,
@@ -65,6 +57,11 @@ export default function RootLayout({
     >
       <head>
         <meta name="google-site-verification" content="BsXuXOKxwt6fAebllkzGcfGD91W6OLjAY9YHcVoIYvw" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png" />
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-S9EYH0K5Z9"></script>
         <script
           dangerouslySetInnerHTML={{
