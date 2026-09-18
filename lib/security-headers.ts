@@ -29,6 +29,18 @@ export const MIDTRANS_CSP_HOSTS = [
   ...MIDTRANS_API_DOMAINS,
 ];
 
+// Google Tag Manager + GA4 measurement hosts (wajib ada agar tag tidak diblokir CSP).
+export const GOOGLE_MEASUREMENT_CSP_HOSTS = [
+  "https://www.googletagmanager.com",
+  "https://tagmanager.google.com",
+  "https://www.google-analytics.com",
+  "https://*.google-analytics.com",
+  "https://analytics.google.com",
+  "https://*.analytics.google.com",
+  "https://stats.g.doubleclick.net",
+  "https://www.google.com",
+];
+
 function getEnv(name: string, fallback: string) {
   return process.env[name] ?? fallback;
 }
@@ -83,12 +95,12 @@ export function applySecurityHeaders(response: NextResponse, request?: NextReque
 
   const defaultCsp = [
     "default-src 'self'",
-    `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${MIDTRANS_CSP_HOSTS.join(" ")} https://pay.google.com https://gwk.gopayapi.com/sdk/stable/gp-container.min.js https://www.googletagmanager.com https://o.alicdn.com https://g.alicdn.com`,
-    `script-src-elem 'self' 'unsafe-inline' ${MIDTRANS_CSP_HOSTS.join(" ")} https://pay.google.com https://gwk.gopayapi.com/sdk/stable/gp-container.min.js https://www.googletagmanager.com https://o.alicdn.com https://g.alicdn.com`,
+    `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${MIDTRANS_CSP_HOSTS.join(" ")} ${GOOGLE_MEASUREMENT_CSP_HOSTS.join(" ")} https://pay.google.com https://gwk.gopayapi.com/sdk/stable/gp-container.min.js https://o.alicdn.com https://g.alicdn.com`,
+    `script-src-elem 'self' 'unsafe-inline' ${MIDTRANS_CSP_HOSTS.join(" ")} ${GOOGLE_MEASUREMENT_CSP_HOSTS.join(" ")} https://pay.google.com https://gwk.gopayapi.com/sdk/stable/gp-container.min.js https://o.alicdn.com https://g.alicdn.com`,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com",
     "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com",
-    "img-src 'self' data: https://res.cloudinary.com",
-    "connect-src 'self' https://*.midtrans.com https://*.gopayapi.com",
+    `img-src 'self' data: ${GOOGLE_MEASUREMENT_CSP_HOSTS.join(" ")} https://res.cloudinary.com`,
+    `connect-src 'self' ${MIDTRANS_CSP_HOSTS.join(" ")} ${GOOGLE_MEASUREMENT_CSP_HOSTS.join(" ")} https://*.midtrans.com https://*.gopayapi.com`,
     "frame-src 'self' https://www.google.com https://maps.google.com https://www.openstreetmap.org https://*.midtrans.com",
     "child-src 'none'",
     "frame-ancestors 'none'",
@@ -98,12 +110,12 @@ export function applySecurityHeaders(response: NextResponse, request?: NextReque
 
   const paymentCsp = [
     "default-src 'self'",
-    `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${MIDTRANS_CSP_HOSTS.join(" ")} https://pay.google.com https://gwk.gopayapi.com/sdk/stable/gp-container.min.js https://www.googletagmanager.com https://o.alicdn.com https://g.alicdn.com`,
-    `script-src-elem 'self' 'unsafe-inline' ${MIDTRANS_CSP_HOSTS.join(" ")} https://pay.google.com https://gwk.gopayapi.com/sdk/stable/gp-container.min.js https://www.googletagmanager.com https://o.alicdn.com https://g.alicdn.com`,
+    `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${MIDTRANS_CSP_HOSTS.join(" ")} ${GOOGLE_MEASUREMENT_CSP_HOSTS.join(" ")} https://pay.google.com https://gwk.gopayapi.com/sdk/stable/gp-container.min.js https://o.alicdn.com https://g.alicdn.com`,
+    `script-src-elem 'self' 'unsafe-inline' ${MIDTRANS_CSP_HOSTS.join(" ")} ${GOOGLE_MEASUREMENT_CSP_HOSTS.join(" ")} https://pay.google.com https://gwk.gopayapi.com/sdk/stable/gp-container.min.js https://o.alicdn.com https://g.alicdn.com`,
     `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com ${MIDTRANS_SNAP_ASSETS_DOMAINS.join(" ")} ${MIDTRANS_APP_DOMAINS.join(" ")}`,
     `style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com ${MIDTRANS_SNAP_ASSETS_DOMAINS.join(" ")} ${MIDTRANS_APP_DOMAINS.join(" ")}`,
-    `img-src 'self' data: ${MIDTRANS_SNAP_ASSETS_DOMAINS.join(" ")} ${MIDTRANS_APP_DOMAINS.join(" ")} https://pay.google.com https://g.alicdn.com https://res.cloudinary.com`,
-    `connect-src 'self' ${MIDTRANS_CSP_HOSTS.join(" ")} https://pay.google.com`,
+    `img-src 'self' data: ${MIDTRANS_SNAP_ASSETS_DOMAINS.join(" ")} ${MIDTRANS_APP_DOMAINS.join(" ")} ${GOOGLE_MEASUREMENT_CSP_HOSTS.join(" ")} https://pay.google.com https://g.alicdn.com https://res.cloudinary.com`,
+    `connect-src 'self' ${MIDTRANS_CSP_HOSTS.join(" ")} ${GOOGLE_MEASUREMENT_CSP_HOSTS.join(" ")} https://pay.google.com`,
     `frame-src ${MIDTRANS_CSP_HOSTS.join(" ")} https://www.google.com https://maps.google.com https://www.openstreetmap.org`,
     `child-src ${MIDTRANS_CSP_HOSTS.join(" ")}`,
     "frame-ancestors 'none'",

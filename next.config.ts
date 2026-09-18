@@ -34,11 +34,11 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://vercel.live",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://tagmanager.google.com https://www.google-analytics.com https://*.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net https://vercel.live",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
               "img-src 'self' data: https: blob:",
-              "connect-src 'self' https://www.google-analytics.com https://api.stripe.com https://api.midtrans.com https://app.sandbox.midtrans.com https://app.midtrans.com https://api.cloudinary.com https://*.supabase.co wss://*.supabase.co",
+              "connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://stats.g.doubleclick.net https://www.google.com https://api.stripe.com https://api.midtrans.com https://app.sandbox.midtrans.com https://app.midtrans.com https://api.cloudinary.com https://*.supabase.co wss://*.supabase.co",
               "frame-src https://www.google.com https://www.openstreetmap.org",
               "form-action 'self'",
               "base-uri 'self'",

@@ -492,6 +492,11 @@ If you want, I can open a PR with these changes, run `npm run lint -- --fix`, or
 - Verifikasi: semua hash 64-hex & cocok SHA256 Node; login superadmin1 200 + staff 200 via API (legacy path, auto-upgrade bcrypt jalan, mustChangePassword=true wajar untuk seed fresh).
 - Login dashboard kembali normal. Password seed TETAP staff123/manager123/superadmin123.
 
+### 61. Fix CSP blokir Google Tag Manager / GA4
+- Penyebab: CSP efektif dari middleware (`applySecurityHeaders`, lib/security-headers.ts:118 overwrite next.config) — connect-src & img-src tidak memuat domain Google, persis 4 URL di warning Diagnostik GTM.
+- Fix: konstanta baru `GOOGLE_MEASUREMENT_CSP_HOSTS` (googletagmanager, tagmanager.google, google-analytics + wildcard, analytics.google + wildcard, stats.g.doubleclick, www.google) → dimasukkan ke script-src, script-src-elem, img-src, connect-src di defaultCsp & paymentCsp; next.config.ts disinkronkan.
+- Verifikasi: jest tests/security-headers 7/7 pass; npm run build OK; header CSP aktual via dev server memuat semua domain (5/5 checks OK).
+
 ### 58. Header final: 1 icon besar + teks gradient
 - Logo besar 360x86 di kanan DIBUANG — tinggal 1 icon di pojok kiri, diperbesar 48→56/64px.
 - Penyebab teks terpotong: container `h-14 overflow-hidden` — diganti `min-h-16/md:min-h-20` tanpa overflow-hidden; ukuran teks disesuaikan (text-sm/base, leading-tight) agar 3 baris muat.
