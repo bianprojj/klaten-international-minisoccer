@@ -31,9 +31,9 @@ export function SiteFooter() {
           <div>
             <p className="mb-3 font-semibold text-[#FFFFFF]">Support</p>
             <ul className="space-y-2 text-[#F1EED9]">
-              <li>Contact: +62 812 3456 7890</li>
-              <li>Email: <a href="mailto:hello@klatenminisoccer.web.id" className="text-[#C9D651]">hello@klatenminisoccer.web.id</a></li>
-              <li>Office: Klaten, Jawa Tengah, Indonesia</li>
+              <li>Contact: +62 857 744 40016</li>
+              <li>Email: <a href="mailto:admin@dev.klatenminisoccer.web.id" className="text-[#C9D651]">admin@dev.klatenminisoccer.web.id</a></li>
+              <li>Office: Jl. Desan Karanganom, Karanganom, Kec. Klaten Utara, Kabupaten Klaten, Jawa Tengah 57438</li>
             </ul>
           </div>
         </div>
