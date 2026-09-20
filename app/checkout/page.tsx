@@ -47,12 +47,17 @@ export default function CheckoutPage() {
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [customerNotes, setCustomerNotes] = useState("");
 
   const fieldName = getSearchParam(searchParams.get("fieldName"), DEFAULT_FIELD_NAME);
   const bookingDate = getSearchParam(searchParams.get("bookingDate"));
   const startTime = getSearchParam(searchParams.get("startTime"));
   const endTime = getSearchParam(searchParams.get("endTime"));
   const amount = Number(getSearchParam(searchParams.get("amount"), "0"));
+  const subtotal = Number(getSearchParam(searchParams.get("subtotal"), "")) || amount;
+  const discount = Number(getSearchParam(searchParams.get("discount"), "")) || 0;
+  const adminFee = Number(getSearchParam(searchParams.get("adminFee"), "")) || 0;
+  const referralCode = getSearchParam(searchParams.get("referralCode"));
 
   const hasValidBookingDetails = Boolean(fieldName && bookingDate && startTime && endTime && amount > 0);
   const hasValidCustomerInfo = Boolean(customerName.trim() && customerEmail.trim() && customerPhone.trim());
@@ -97,6 +102,7 @@ export default function CheckoutPage() {
           customerName,
           customerEmail,
           customerPhone,
+          notes: customerNotes.trim(),
         }),
       });
 
@@ -143,15 +149,10 @@ export default function CheckoutPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--accent-strong)]">Secure checkout</p>
           <h1 className="mt-3 text-balance text-3xl font-semibold leading-tight text-[color:var(--foreground)] sm:text-4xl">Review your booking details</h1>
           <p className="mt-4 max-w-2xl text-lg text-[color:var(--muted)]">
-            Confirm the field, date, and time, then enter your contact information to proceed to payment.
+            Confirm the date and time, then enter your contact information to proceed to payment.
           </p>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="rounded-2xl border border-white/10 card-surface p-6">
-              <p className="text-xs uppercase tracking-[0.2em] text-[color:var(--muted)]">Field</p>
-              <p className="mt-2 text-xl font-semibold text-[color:var(--foreground)]">{fieldName || "Field not selected"}</p>
-              <p className="mt-2 text-sm text-[color:var(--muted)]">Review the selected slot before continuing.</p>
-            </div>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
             <div className="rounded-2xl border border-white/10 card-surface p-6">
               <p className="text-xs uppercase tracking-[0.2em] text-[color:var(--muted)]">Date</p>
               <p className="mt-2 text-xl font-semibold text-[color:var(--foreground)]">{bookingDate ? formatJakartaDate(bookingDate) : "—"}</p>
@@ -205,10 +206,29 @@ export default function CheckoutPage() {
                 className="mt-2 w-full rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-white outline-none focus:border-[color:var(--accent)] placeholder:text-[color:var(--muted)]"
               />
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[color:var(--muted)]">Notes (optional)</label>
+              <textarea
+                value={customerNotes}
+                onChange={(e) => setCustomerNotes(e.target.value)}
+                onInput={(e) => setCustomerNotes((e.target as HTMLTextAreaElement).value)}
+                placeholder="Any additional notes for your booking (optional)"
+                rows={3}
+                className="mt-2 w-full rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-white outline-none focus:border-[color:var(--accent)] placeholder:text-[color:var(--muted)]"
+              />
+            </div>
           </div>
 
-          <div className="mt-8 space-y-4 border-t border-white/10 pt-8 text-sm text-[color:var(--muted)]">
-            <div className="flex justify-between"><span>Field booking</span><span>Rp {amount.toLocaleString("id-ID")}</span></div>
+          <div className="mt-8 space-y-2 border-t border-white/10 pt-8 text-sm text-[color:var(--muted)]">
+            <div className="flex justify-between"><span>Subtotal</span><span>Rp {subtotal.toLocaleString("id-ID")}</span></div>
+            {discount > 0 ? (
+              <div className="flex justify-between"><span>Diskon referral{referralCode ? ` (${referralCode})` : ""}</span><span>-Rp {discount.toLocaleString("id-ID")}</span></div>
+            ) : null}
+            {adminFee > 0 ? (
+              <div className="flex justify-between"><span>Admin fee (2%)</span><span>Rp {adminFee.toLocaleString("id-ID")}</span></div>
+            ) : null}
+            <div className="flex justify-between font-semibold text-[color:var(--foreground)]"><span>Total</span><span>Rp {amount.toLocaleString("id-ID")}</span></div>
           </div>
 
           {error ? (

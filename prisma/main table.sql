@@ -18,6 +18,7 @@ DROP TABLE IF EXISTS venue_feature CASCADE;
 DROP TABLE IF EXISTS venue_gallery CASCADE;
 DROP TABLE IF EXISTS schedule_slot CASCADE;
 DROP TABLE IF EXISTS webhook_event CASCADE;
+DROP TABLE IF EXISTS referral_code CASCADE;
 
 -- NOTE: `field` table removed per request — application will treat the system
 -- as a single-venue setup. Bookings no longer reference `field_id`.
@@ -169,6 +170,43 @@ CREATE TABLE invoice (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ==================== REFERRAL CODE (DISKON %) ====================
+-- Kode referral memberi diskon persen dari subtotal, lalu admin fee +2%
+-- dihitung dari (subtotal - diskon). Dikelola manual via DB.
+CREATE TABLE referral_code (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  code VARCHAR(50) UNIQUE NOT NULL, -- disimpan UPPERCASE, mis. HEMAT10
+  percent INTEGER NOT NULL DEFAULT 0, -- besaran diskon dalam persen
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_referral_code_code ON referral_code(code);
+CREATE INDEX IF NOT EXISTS idx_referral_code_active ON referral_code(is_active);
+
+-- Untuk DB yang sudah ada (JANGAN run ulang file ini): jalankan blok ini saja
+-- CREATE TABLE IF NOT EXISTS referral_code (
+--   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+--   code VARCHAR(50) UNIQUE NOT NULL,
+--   percent INTEGER NOT NULL DEFAULT 0,
+--   is_active BOOLEAN DEFAULT true,
+--   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );
+-- CREATE INDEX IF NOT EXISTS idx_referral_code_code ON referral_code(code);
+-- CREATE INDEX IF NOT EXISTS idx_referral_code_active ON referral_code(is_active);
+
+-- Mockup sementara untuk testing (HEMAT10 = 10%, MEMBER15 = 15%, KIM20 = 20%)
+-- EXPIRED10 sengaja non-aktif untuk testing kode invalid.
+INSERT INTO referral_code (code, percent, is_active)
+VALUES
+  ('HEMAT10', 10, true),
+  ('MEMBER15', 15, true),
+  ('KIM20', 20, true),
+  ('EXPIRED10', 10, false)
+ON CONFLICT (code) DO UPDATE SET percent = EXCLUDED.percent, is_active = EXCLUDED.is_active, updated_at = NOW();
 
 -- ==================== REVIEW & RATING ====================
 CREATE TABLE review (

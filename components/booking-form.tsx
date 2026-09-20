@@ -59,6 +59,10 @@ export function BookingForm({ fields }: { fields: Field[] }) {
   const [validating, setValidating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [referralCode, setReferralCode] = useState("");
+  const [referralState, setReferralState] = useState<"idle" | "checking" | "applied" | "invalid">("idle");
+  const [referralPercent, setReferralPercent] = useState(0);
+  const [referralMessage, setReferralMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!selectedDate || !selectedField?.id) {
@@ -117,6 +121,13 @@ export function BookingForm({ fields }: { fields: Field[] }) {
   const selectedDuration = selectedRange ? getDurationHours(selectedRange.startTime, selectedRange.endTime) : 0;
   const selectedAmount = selectedSlots.length > 0 ? selectedSlots.reduce((sum, s) => sum + (s.price ?? 0), 0) : 0;
 
+  // Rincian harga: subtotal - diskon referral (%) + admin fee 2% dari (subtotal - diskon)
+  const ADMIN_FEE_PERCENT = 2;
+  const subtotal = selectedAmount;
+  const discount = referralState === "applied" && subtotal > 0 ? Math.round((subtotal * referralPercent) / 100) : 0;
+  const adminFee = subtotal > 0 ? Math.round(((subtotal - discount) * ADMIN_FEE_PERCENT) / 100) : 0;
+  const finalTotal = subtotal - discount + adminFee;
+
   const selectedLabel = selectedRange
     ? `${selectedRange.startTime} - ${selectedRange.endTime}`
     : "Not selected";
@@ -131,6 +142,46 @@ export function BookingForm({ fields }: { fields: Field[] }) {
       }
       return [...current, slot];
     });
+  };
+
+  const handleApplyReferral = async () => {
+    const code = referralCode.trim().toUpperCase();
+    if (!code) {
+      setReferralState("invalid");
+      setReferralMessage("Masukkan kode referral dulu.");
+      return;
+    }
+    setReferralState("checking");
+    setReferralMessage(null);
+    try {
+      const resp = await fetch("/api/referrals/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, subtotal }),
+      });
+      const data = await resp.json().catch(() => null);
+      if (resp.ok && data?.success && data?.valid) {
+        setReferralCode(code);
+        setReferralPercent(Number(data.percent) || 0);
+        setReferralState("applied");
+        setReferralMessage(null);
+      } else {
+        setReferralState("invalid");
+        setReferralPercent(0);
+        setReferralMessage(data?.message || "Kode referral tidak valid.");
+      }
+    } catch {
+      setReferralState("invalid");
+      setReferralPercent(0);
+      setReferralMessage("Gagal memeriksa kode. Coba lagi.");
+    }
+  };
+
+  const handleRemoveReferral = () => {
+    setReferralCode("");
+    setReferralPercent(0);
+    setReferralState("idle");
+    setReferralMessage(null);
   };
 
   const handleContinue = async () => {
@@ -156,7 +207,11 @@ export function BookingForm({ fields }: { fields: Field[] }) {
       bookingDate: selectedDate,
       startTime: selectedRange.startTime,
       endTime: selectedRange.endTime,
-      amount: selectedAmount.toString(),
+      amount: finalTotal.toString(),
+      subtotal: subtotal.toString(),
+      discount: discount.toString(),
+      adminFee: adminFee.toString(),
+      referralCode: referralState === "applied" ? referralCode : "",
     }).toString();
 
     setValidating(true);
@@ -253,9 +308,9 @@ export function BookingForm({ fields }: { fields: Field[] }) {
                     }`}
                     disabled={!slot.isAvailable}
                     >
-                    <div className="flex min-w-0 flex-col gap-2">
-                      <p className="text-sm font-semibold">{label}</p>
-                      <p className="text-sm font-semibold">{typeof slot.price === "number" && slot.price > 0 ? formatCurrency(slot.price) : "—"}</p>
+                    <div className="flex min-w-0 flex-col gap-1">
+                      <p className="text-lg font-bold">{label}</p>
+                      <p className="text-xs font-normal opacity-70">{typeof slot.price === "number" && slot.price > 0 ? formatCurrency(slot.price) : "—"}</p>
                       <div className="flex items-center justify-between gap-2">
                         <p className="text-sm opacity-70">
                           {slot.isAvailable ? "Available" : "Booked"}
@@ -305,9 +360,79 @@ export function BookingForm({ fields }: { fields: Field[] }) {
           </div>
         </div>
 
-        <div className="mt-6 flex flex-col gap-3 border-t border-[rgba(0,81,54,0.16)] pt-4 text-[#1A1F4D] sm:flex-row sm:items-center sm:justify-between">
-          <span className="font-[Manrope] text-sm text-[rgba(26,31,77,0.62)]">Estimated total</span>
-          <span className="font-[Archivo] text-2xl font-extrabold">{formatCurrency(selectedAmount)}</span>
+        <div className="mt-6 space-y-2 border-t border-[rgba(0,81,54,0.16)] pt-4 text-[#1A1F4D]">
+          <div className="flex items-center justify-between font-[Manrope] text-sm">
+            <span className="text-[rgba(26,31,77,0.62)]">Subtotal</span>
+            <span className="font-semibold">{formatCurrency(subtotal)}</span>
+          </div>
+          {discount > 0 ? (
+            <div className="flex items-center justify-between font-[Manrope] text-sm text-[#005136]">
+              <span>Diskon referral {referralCode} ({referralPercent}%)</span>
+              <span className="font-semibold">-{formatCurrency(discount)}</span>
+            </div>
+          ) : null}
+          <div className="flex items-center justify-between font-[Manrope] text-sm">
+            <span className="text-[rgba(26,31,77,0.62)]">Admin fee ({ADMIN_FEE_PERCENT}%)</span>
+            <span className="font-semibold">{formatCurrency(adminFee)}</span>
+          </div>
+          <div className="flex flex-col gap-1 pt-1 sm:flex-row sm:items-center sm:justify-between">
+            <span className="font-[Manrope] text-sm text-[rgba(26,31,77,0.62)]">Estimated total</span>
+            <span className="font-[Archivo] text-2xl font-extrabold">{formatCurrency(finalTotal)}</span>
+          </div>
+          <p className="font-[Manrope] text-xs text-[rgba(26,31,77,0.62)]">Harga sudah termasuk admin fee {ADMIN_FEE_PERCENT}%.</p>
+        </div>
+
+        <div className="mt-4">
+          {referralState === "applied" ? (
+            <div className="flex items-center justify-between gap-3 rounded-[12px] border border-[#005136]/30 bg-[#005136]/5 px-4 py-3">
+              <p className="font-[Manrope] text-sm font-semibold text-[#005136]">
+                {referralCode} dipakai — hemat {referralPercent}%
+              </p>
+              <button
+                type="button"
+                onClick={handleRemoveReferral}
+                className="font-[Manrope] text-sm font-semibold text-[#1A1F4D] underline-offset-2 hover:underline"
+              >
+                Hapus
+              </button>
+            </div>
+          ) : (
+            <>
+              <label className="block font-[Manrope] text-sm font-medium text-[rgba(26,31,77,0.62)]">Kode referral (opsional)</label>
+              <div className="mt-2 flex gap-2">
+                <input
+                  type="text"
+                  value={referralCode}
+                  onChange={(event) => {
+                    setReferralCode(event.target.value.toUpperCase());
+                    if (referralState === "invalid") {
+                      setReferralState("idle");
+                      setReferralMessage(null);
+                    }
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      void handleApplyReferral();
+                    }
+                  }}
+                  placeholder="cth: HEMAT10"
+                  className="min-w-0 flex-1 rounded-[12px] border border-[rgba(0,81,54,0.16)] bg-[#FFFFFF] px-4 py-3 font-[Manrope] text-[#1A1F4D] uppercase outline-none focus:border-[#005136] placeholder:normal-case placeholder:text-[rgba(26,31,77,0.45)]"
+                />
+                <button
+                  type="button"
+                  onClick={() => void handleApplyReferral()}
+                  disabled={referralState === "checking"}
+                  className="btn-secondary shrink-0 px-5 py-3 disabled:opacity-60"
+                >
+                  {referralState === "checking" ? "Cek..." : "Pakai"}
+                </button>
+              </div>
+              {referralMessage ? (
+                <p className="mt-2 font-[Manrope] text-sm text-rose-700">{referralMessage}</p>
+              ) : null}
+            </>
+          )}
         </div>
 
         {submitError ? (

@@ -42,6 +42,7 @@ export async function POST(request: NextRequest) {
     const customerName = typeof safeBody?.customerName === "string" ? safeBody.customerName.trim() : "";
     const customerPhone = typeof safeBody?.customerPhone === "string" ? safeBody.customerPhone.trim() : "";
     const customerEmail = typeof safeBody?.customerEmail === "string" ? safeBody.customerEmail.trim() : "";
+    const notes = typeof safeBody?.notes === "string" ? safeBody.notes.trim().slice(0, 500) : "";
     const validateOnly = safeBody?.validateOnly === true;
     const clientIp = request.headers.get("x-forwarded-for") ?? "unknown";
 
@@ -138,6 +139,7 @@ export async function POST(request: NextRequest) {
         customerName,
         customerPhone,
         customerEmail,
+        notes: notes || undefined,
         status: "pending",
       },
       select: {
