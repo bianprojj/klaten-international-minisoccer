@@ -4,17 +4,16 @@ import { expirePendingPayments, syncBookingStatusesFromPayments } from "@/lib/pa
 import { getRateLimitResult, sanitizeObject, applySecurityHeaders } from "@/lib/security-headers";
 import { prisma } from "@/lib/prisma";
 import { BLOCKING_BOOKING_STATUSES, getRequestedScheduleBlocks, getScheduleSlots, reclaimExpiredSlotBookings } from "@/lib/booking-engine";
-import { DEFAULT_FIELD_ID, DEFAULT_FIELD_NAME, DEFAULT_FIELD_PRICE } from "@/lib/venue";
+import { DEFAULT_FIELD_ID, DEFAULT_FIELD_NAME, normalizeFieldId, getDefaultFieldPrice } from "@/lib/venue";
 
 export const dynamic = "force-dynamic";
-
-const TAX_RATE = 0.02; // 2% PPN
 
 function getDateRange(dateString: string) {
   const start = new Date(`${dateString}T00:00:00.000Z`);
   if (Number.isNaN(start.getTime())) {
     return null;
   }
+
   const end = new Date(start);
   end.setUTCDate(end.getUTCDate() + 1);
   return { start, end };
@@ -24,62 +23,37 @@ function parseTimeToMinutes(timeValue: string) {
   const [hourText, minuteText] = timeValue.split(":");
   const hour = Number(hourText);
   const minute = Number(minuteText ?? "0");
-  if (Number.isNaN(hour) || Number.isNaN(minute)) return NaN;
-  return hour * 60 + minute;
-}
 
-async function validateReferralCode(code: string, subtotal: number, bookingDate: string) {
-  if (!code) return { valid: false, discount: 0, adminFee: 0, message: "" };
-  
-  const upperCode = code.toUpperCase().trim();
-  const referral = await prisma.referralCode.findUnique({ where: { code: upperCode } });
-  
-  if (!referral) return { valid: false, discount: 0, adminFee: 0, message: "Kode referral tidak ditemukan" };
-  if (!referral.isActive) return { valid: false, discount: 0, adminFee: 0, message: "Kode referral tidak aktif" };
-  if (referral.validUntil && new Date(referral.validUntil) < new Date()) {
-    return { valid: false, discount: 0, adminFee: 0, message: "Kode referral sudah kadaluarsa" };
+  if (Number.isNaN(hour) || Number.isNaN(minute)) {
+    return NaN;
   }
-  if (referral.maxUses !== null && referral.usedCount >= referral.maxUses) {
-    return { valid: false, discount: 0, adminFee: 0, message: "Kode referral sudah habis dipakai" };
-  }
-  
-  let discount = 0;
-  if (referral.type === "percent") {
-    discount = Math.round(subtotal * referral.value / 100);
-  } else {
-    discount = referral.value;
-  }
-  discount = Math.min(discount, subtotal); // max discount = subtotal
-  
-  return {
-    valid: true,
-    discount,
-    adminFee: referral.adminFee,
-    discountType: referral.type,
-    discountValue: referral.value,
-    referralCode: referral.code,
-    message: `Kode "${referral.code}" valid! Diskon ${referral.type === "percent" ? referral.value + "%" : "Rp " + referral.value.toLocaleString("id-ID")}`
-  };
+
+  return hour * 60 + minute;
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const safeBody = sanitizeObject(body as Record<string, unknown>);
-    
+    const fieldId = normalizeFieldId(typeof safeBody?.fieldId === "string" ? safeBody.fieldId : "");
     const bookingDate = typeof safeBody?.bookingDate === "string" ? safeBody.bookingDate : "";
     const startTime = typeof safeBody?.startTime === "string" ? safeBody.startTime : "";
     const endTime = typeof safeBody?.endTime === "string" ? safeBody.endTime : "";
     const customerName = typeof safeBody?.customerName === "string" ? safeBody.customerName.trim() : "";
     const customerPhone = typeof safeBody?.customerPhone === "string" ? safeBody.customerPhone.trim() : "";
     const customerEmail = typeof safeBody?.customerEmail === "string" ? safeBody.customerEmail.trim() : "";
-    const referralCode = typeof safeBody?.referralCode === "string" ? safeBody.referralCode.trim().toUpperCase() : "";
     const validateOnly = safeBody?.validateOnly === true;
     const clientIp = request.headers.get("x-forwarded-for") ?? "unknown";
 
     const rateLimit = getRateLimitResult(`booking:${clientIp}`);
     if (!rateLimit.allowed) {
       const response = NextResponse.json({ success: false, message: "Too many booking attempts. Please try again later." }, { status: 429 });
+      response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+      return response;
+    }
+
+    if (fieldId && fieldId !== DEFAULT_FIELD_ID) {
+      const response = NextResponse.json({ success: false, message: "The selected field is not available." }, { status: 404 });
       response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
       return response;
     }
@@ -112,7 +86,9 @@ export async function POST(request: NextRequest) {
     const overlappingBooking = await prisma.booking.findFirst({
       where: {
         bookingDate: range.start,
-        status: { in: BLOCKING_BOOKING_STATUSES },
+        status: {
+          in: BLOCKING_BOOKING_STATUSES,
+        },
         startTime: { lt: endTime },
         endTime: { gt: startTime },
       },
@@ -140,44 +116,25 @@ export async function POST(request: NextRequest) {
     const endMinutes = parseTimeToMinutes(endTime);
     const durationHours = Math.max(Math.ceil((endMinutes - startMinutes) / 60), 1);
 
-    // Calculate subtotal from schedule slot prices
+    // Calculate totalPrice by summing schedule slot prices for the requested blocks
     const requestedSlotTimes = requestedBlocks.map((b) => b.start);
     const slotRecords = await prisma.scheduleSlot.findMany({ where: { startTime: { in: requestedSlotTimes } } });
-    let subtotal = 0;
+    let totalPrice = 0;
     if (slotRecords && slotRecords.length > 0) {
-      subtotal = slotRecords.reduce((sum, s) => sum + (s.price ?? 0), 0);
+      totalPrice = slotRecords.reduce((sum, s) => sum + (s.price ?? 0), 0);
     } else {
-      subtotal = DEFAULT_FIELD_PRICE * durationHours;
+      // fallback: use default field price per hour if schedule slots are not configured
+      const defaultPrice = getDefaultFieldPrice();
+      totalPrice = defaultPrice * durationHours;
     }
 
-    // Validate referral code and calculate discount
-    let discount = 0;
-    let adminFee = 0;
-    let referralResult = { valid: false, discount: 0, adminFee: 0, message: "" };
-    
-    if (referralCode) {
-      referralResult = await validateReferralCode(referralCode, subtotal, bookingDate);
-      if (referralResult.valid) {
-        discount = referralResult.discount;
-        adminFee = referralResult.adminFee;
-      }
-    }
-
-    // Calculate tax (2% of subtotal - discount)
-    const taxableAmount = subtotal - discount;
-    const tax = Math.round(taxableAmount * TAX_RATE);
-    
-    // Total = subtotal - discount + tax + adminFee
-    const total = subtotal - discount + tax + adminFee;
-
-    // Create booking with totalPrice = total (for backward compatibility)
     const booking = await prisma.booking.create({
       data: {
         bookingDate: range.start,
         startTime,
         endTime,
         durationHours,
-        totalPrice: total, // Store final total for backward compatibility
+        totalPrice,
         customerName,
         customerPhone,
         customerEmail,
@@ -194,50 +151,26 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Record referral usage if valid
-    if (referralResult.valid) {
-      await prisma.$transaction([
-        prisma.referralUsage.create({
-          data: {
-            referralCodeId: (await prisma.referralCode.findUnique({ where: { code: referralCode } }))!.id,
-            bookingId: booking.id,
-            discountAmount: discount,
-          },
-        }),
-        prisma.referralCode.update({
-          where: { code: referralCode },
-          data: { usedCount: { increment: 1 } },
-        }),
-      ]);
-    }
-
     auditLog("booking-created", `Booking ${booking.id} created for ${DEFAULT_FIELD_NAME}`, customerEmail, clientIp);
 
     const response = NextResponse.json({
       success: true,
       message: "Booking created successfully.",
-      booking: {
-        ...booking,
-        breakdown: {
-          subtotal,
-          discount,
-          discountType: referralResult.discountType,
-          discountValue: referralResult.discountValue,
-          referralCode: referralResult.referralCode,
-          tax,
-          taxRate: TAX_RATE * 100,
-          adminFee,
-          total,
-        },
-      },
+      booking,
     });
     response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+
     return applySecurityHeaders(response);
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     const errorStack = error instanceof Error ? error.stack : undefined;
-    console.error("[API] Booking creation error:", { message: errorMsg, stack: errorStack, timestamp: new Date().toISOString() });
+    console.error("[API] Booking creation error:", {
+      message: errorMsg,
+      stack: errorStack,
+      timestamp: new Date().toISOString(),
+    });
 
+    // Return more specific error messages for known scenarios
     if (errorMsg.includes("Unique constraint failed")) {
       return NextResponse.json(
         { success: false, message: "This time slot is no longer available. Please select another slot.", error: errorMsg },
@@ -245,13 +178,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (errorMsg.includes("Field not found")) {
+      return NextResponse.json(
+        { success: false, message: "The selected field is no longer available.", error: errorMsg },
+        { status: 404 }
+      );
+    }
+
     if (errorMsg.includes("invalid character") || errorMsg.includes("P2023")) {
       return NextResponse.json(
-        { success: false, message: "Invalid booking details. Please return to the booking page and select a valid slot.", error: errorMsg },
+        {
+          success: false,
+          message: "Invalid booking details. Please return to the booking page and select a valid slot.",
+          error: errorMsg,
+        },
         { status: 400 }
       );
     }
 
+    // Fallback: return the actual error message to help debugging in production.
     return NextResponse.json(
       { success: false, message: "Unable to create booking. Please try again or contact support.", error: errorMsg, stack: errorStack },
       { status: 500 }
@@ -276,15 +221,25 @@ export async function GET(request: NextRequest) {
     if (phone) conditions.push({ customerPhone: phone });
 
     const bookings = await prisma.booking.findMany({
-      where: { OR: conditions },
+      where: {
+        OR: conditions,
+      },
       include: {
         payments: {
           orderBy: { createdAt: "desc" },
           take: 1,
           select: {
-            id: true, transactionId: true, status: true, amount: true,
-            provider: true, paymentMethod: true, snapUrl: true,
-            createdAt: true, updatedAt: true, paidAt: true, expiredAt: true,
+            id: true,
+            transactionId: true,
+            status: true,
+            amount: true,
+            provider: true,
+            paymentMethod: true,
+            snapUrl: true,
+            createdAt: true,
+            updatedAt: true,
+            paidAt: true,
+            expiredAt: true,
           },
         },
       },
@@ -296,10 +251,21 @@ export async function GET(request: NextRequest) {
       fieldName: DEFAULT_FIELD_NAME,
     }));
 
-    return NextResponse.json({ success: true, bookings: normalizedBookings });
+    return NextResponse.json({
+      success: true,
+      bookings: normalizedBookings,
+    });
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    console.error("[API] Booking retrieval error:", { message: errorMsg, stack: error instanceof Error ? error.stack : undefined, timestamp: new Date().toISOString() });
-    return NextResponse.json({ success: false, message: "Unable to fetch bookings. Please try again." }, { status: 500 });
+    console.error("[API] Booking retrieval error:", {
+      message: errorMsg,
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString(),
+    });
+
+    return NextResponse.json(
+      { success: false, message: "Unable to fetch bookings. Please try again." },
+      { status: 500 }
+    );
   }
 }

@@ -96,41 +96,12 @@ async function main() {
         subtotal INTEGER NOT NULL,
         tax INTEGER DEFAULT 0,
         discount INTEGER DEFAULT 0,
-        admin_fee INTEGER DEFAULT 0,
         total INTEGER NOT NULL,
         status VARCHAR(50) DEFAULT 'issued',
         issued_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         paid_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
-
-    await prisma.$queryRawUnsafe(`
-      CREATE TABLE referral_code (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        code VARCHAR(50) UNIQUE NOT NULL,
-        name VARCHAR(100) NOT NULL,
-        type VARCHAR(20) DEFAULT 'percent',
-        value INTEGER NOT NULL,
-        max_uses INTEGER,
-        used_count INTEGER DEFAULT 0,
-        valid_from TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        valid_until TIMESTAMP,
-        is_active BOOLEAN DEFAULT true,
-        admin_fee INTEGER DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
-
-    await prisma.$queryRawUnsafe(`
-      CREATE TABLE referral_usage (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        referral_code_id UUID NOT NULL REFERENCES referral_code(id) ON DELETE CASCADE,
-        booking_id UUID UNIQUE NOT NULL REFERENCES booking(id) ON DELETE CASCADE,
-        discount_amount INTEGER NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
     
@@ -368,20 +339,6 @@ async function main() {
         { key: 'ctaPrimary', value: 'Pesan sekarang', description: 'Teks tombol booking utama' },
         { key: 'ctaSecondary', value: 'Lihat riwayat booking', description: 'Teks tombol riwayat booking' },
         { key: 'backgroundImageUrl', value: '', description: 'Background utama hero website' },
-      ],
-    });
-  }
-
-  // Create sample referral codes
-  const existingReferrals = await prisma.referralCode.findMany();
-  if (existingReferrals.length === 0) {
-    console.log('Creating sample referral codes...');
-    await prisma.referralCode.createMany({
-      data: [
-        { code: 'KIM10', name: 'Promo 10%', type: 'percent', value: 10, maxUses: 100, usedCount: 0, isActive: true, adminFee: 0 },
-        { code: 'KIM20', name: 'Promo 20%', type: 'percent', value: 20, maxUses: 50, usedCount: 0, isActive: true, adminFee: 0 },
-        { code: 'DISKON20K', name: 'Potongan Rp20k', type: 'fixed', value: 20000, maxUses: 200, usedCount: 0, isActive: true, adminFee: 0 },
-        { code: 'ADMIN5K', name: 'Promo + Admin Fee', type: 'percent', value: 15, maxUses: 100, usedCount: 0, isActive: true, adminFee: 5000 },
       ],
     });
   }

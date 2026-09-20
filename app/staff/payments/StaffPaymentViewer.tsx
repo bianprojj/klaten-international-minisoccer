@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { fetchJson } from "@/lib/fetch-json";
-import { TableResponsive } from "@/components/ui/table-responsive";
-import { EditableBadge, InlineEditCell } from "@/components/ui/inline-edit";
 
 interface StaffPaymentItem {
   id: string;
@@ -18,13 +16,6 @@ interface StaffPaymentItem {
     bookingDate: string;
   };
 }
-
-const STATUS_OPTIONS = [
-  { value: "pending", label: "Pending", variant: "warning" as const },
-  { value: "success", label: "Success", variant: "success" as const },
-  { value: "failed", label: "Failed", variant: "danger" as const },
-  { value: "refunded", label: "Refunded", variant: "info" as const },
-];
 
 export default function StaffPaymentViewer({ adminName, useMain = true }: { adminName: string; useMain?: boolean }) {
   const [payments, setPayments] = useState<StaffPaymentItem[]>([]);
@@ -44,7 +35,7 @@ export default function StaffPaymentViewer({ adminName, useMain = true }: { admi
     try {
       const params = new URLSearchParams();
       params.set("page", String(pageParam));
-      params.set("limit", String(25));
+      params.set("limit", String(6));
       if (q) params.set("q", q);
       if (status) params.set("status", status);
       const { res: response, data: raw } = await fetchJson(`/api/admin/payments?${params.toString()}`, { cache: "no-store" });
@@ -100,147 +91,9 @@ export default function StaffPaymentViewer({ adminName, useMain = true }: { admi
     }
   };
 
-  const columns = [
-    {
-      key: "transactionId",
-      header: "Transaksi",
-      render: (p: StaffPaymentItem) => (
-        <span className="font-mono text-xs text-muted" title={p.transactionId}>
-          {p.transactionId.slice(0, 12)}...
-        </span>
-      ),
-      className: "w-36",
-    },
-    {
-      key: "customer",
-      header: "Pelanggan",
-      render: (p: StaffPaymentItem) => (
-        <div className="flex flex-col">
-          <span className="font-medium">{p.booking.customerName}</span>
-          <span className="text-xs text-muted">{p.booking.bookingDate.split("T")[0]}</span>
-        </div>
-      ),
-    },
-    {
-      key: "amount",
-      header: "Jumlah",
-      render: (p: StaffPaymentItem) => (
-        editingId === p.id ? (
-          <InlineEditCell
-            value={String(editAmount)}
-            type="number"
-            onSave={(v) => setEditAmount(Number(v))}
-            onCancel={() => { setEditAmount(p.amount); setEditingId(null); }}
-            className="w-28"
-          />
-        ) : (
-          <span className="font-semibold">Rp {Number(p.amount).toLocaleString("id-ID")}</span>
-        )
-      ),
-      className: "text-right w-36",
-    },
-    {
-      key: "status",
-      header: "Status",
-      render: (p: StaffPaymentItem) => (
-        editingId === p.id ? (
-          <select
-            value={editStatus}
-            onChange={(e) => setEditStatus(e.target.value)}
-            onBlur={() => handleUpdatePayment(p.id)}
-            className="rounded border border-white/10 bg-[color:var(--background)] px-2 py-1 text-sm text-white w-28"
-          >
-            <option value="pending">pending</option>
-            <option value="success">success</option>
-            <option value="failed">failed</option>
-            <option value="refunded">refunded</option>
-          </select>
-        ) : (
-          <EditableBadge
-            value={p.status}
-            options={[
-              { value: "pending", label: "Pending", variant: "warning" },
-              { value: "success", label: "Success", variant: "success" },
-              { value: "failed", label: "Failed", variant: "danger" },
-              { value: "refunded", label: "Refunded", variant: "info" },
-            ]}
-            onSave={(newStatus) => { setEditStatus(newStatus); setEditingId(p.id); handleUpdatePayment(p.id); }}
-            className="w-auto"
-          />
-        )
-      ),
-      className: "w-32",
-    },
-    {
-      key: "method",
-      header: "Metode",
-      render: (p: StaffPaymentItem) => <span>{p.paymentMethod}</span>,
-      className: "w-24",
-    },
-    {
-      key: "provider",
-      header: "Provider",
-      render: (p: StaffPaymentItem) => <span className="text-muted text-sm">{p.provider}</span>,
-      className: "w-24",
-      hideOnMobile: true,
-    },
-    {
-      key: "actions",
-      header: "Aksi",
-      render: (p: StaffPaymentItem) => (
-        editingId === p.id ? (
-          <div className="flex items-center gap-2">
-            <button onClick={() => handleUpdatePayment(p.id)} className="rounded bg-emerald-600 px-2 py-1 text-xs text-white">Simpan</button>
-            <button onClick={() => setEditingId(null)} className="ml-1 rounded bg-gray-600 px-2 py-1 text-xs text-white">Batal</button>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2">
-            <button onClick={() => { setEditingId(p.id); setEditStatus(p.status); setEditAmount(p.amount); }} className="rounded bg-blue-600 px-2 py-1 text-xs text-white">Edit</button>
-            <button onClick={() => handleDeletePayment(p.id)} className="ml-1 rounded bg-rose-600 px-2 py-1 text-xs text-white">Hapus</button>
-          </div>
-        )
-      ),
-      className: "w-28 text-center",
-      hideOnMobile: true,
-    },
-  ];
-
-  const cardRender = (p: StaffPaymentItem) => (
-    <div className="space-y-2">
-      <div className="flex justify-between items-start">
-        <div>
-          <span className="font-medium">{p.booking.customerName}</span>
-          <span className="ml-2 text-xs text-muted">{p.booking.bookingDate.split("T")[0]}</span>
-        </div>
-        <EditableBadge
-          value={p.status}
-          options={[
-            { value: "pending", label: "Pending", variant: "warning" },
-            { value: "success", label: "Success", variant: "success" },
-            { value: "failed", label: "Failed", variant: "danger" },
-            { value: "refunded", label: "Refunded", variant: "info" },
-          ]}
-          onSave={(s) => { setEditingId(p.id); setEditStatus(s); handleUpdatePayment(p.id); }}
-        />
-      </div>
-      <div className="flex justify-between text-sm">
-        <span className="text-muted">Transaksi: {p.transactionId.slice(0, 12)}...</span>
-        <span className="font-semibold">Rp {Number(p.amount).toLocaleString("id-ID")}</span>
-      </div>
-      <div className="flex justify-between text-sm text-muted">
-        <span>{p.paymentMethod}</span>
-        <span>{p.provider}</span>
-      </div>
-      <div className="pt-2 border-t border-border flex justify-between">
-        <button onClick={() => { setEditingId(p.id); setEditStatus(p.status); setEditAmount(p.amount); }} className="text-xs text-blue-400 hover:underline">Edit</button>
-        <button onClick={() => handleDeletePayment(p.id)} className="text-xs text-rose-400 hover:underline">Hapus</button>
-      </div>
-    </div>
-  );
-
   const content = (
     <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8" id="staff-payments">
-      <div className="space-y-6">
+      <div className="mx-auto max-w-7xl space-y-6">
         <div className="glass-panel rounded-[2rem] p-6 sm:p-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
@@ -258,22 +111,12 @@ export default function StaffPaymentViewer({ adminName, useMain = true }: { admi
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-xl font-semibold text-white sm:text-2xl">Payment records</h2>
             <div className="flex items-center gap-2">
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search transaction"
-                className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-3 py-2 text-sm text-white"
-              />
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-3 py-2 text-sm text-white"
-              >
+              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search transaction" className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-3 py-2 text-sm text-white" />
+              <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-3 py-2 text-sm text-white">
                 <option value="">All</option>
                 <option value="pending">pending</option>
                 <option value="success">success</option>
                 <option value="failed">failed</option>
-                <option value="refunded">refunded</option>
               </select>
               <button onClick={handleSearch} className="btn-secondary px-3 py-1">Filter</button>
             </div>
@@ -281,41 +124,70 @@ export default function StaffPaymentViewer({ adminName, useMain = true }: { admi
           {error ? (
             <div className="mt-4 rounded-3xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</div>
           ) : null}
-
-          <TableResponsive
-            data={payments}
-            columns={columns}
-            keyExtractor={(p) => p.id}
-            cardRender={cardRender}
-            emptyMessage={loading ? "Loading payments..." : "No payments found."}
-          />
-
-          <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <select
-              value={String(25)}
-              onChange={(e) => { setPage(1); fetchPayments(1, query, filterStatus); }}
-              className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-3 py-2 text-sm text-white w-auto"
-            >
-              <option value="10">10 per halaman</option>
-              <option value="25" selected>25 per halaman</option>
-              <option value="50">50 per halaman</option>
-              <option value="100">100 per halaman</option>
-            </select>
-            <div className="flex items-center justify-end gap-2">
-              <button onClick={() => goToPage(page - 1)} disabled={page <= 1} className="rounded px-3 py-1 bg-white/5">Prev</button>
-              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                let p = i + 1;
-                if (totalPages > 5) {
-                  if (page <= 3) p = i + 1;
-                  else if (page >= totalPages - 2) p = totalPages - 4 + i;
-                  else p = page - 2 + i;
-                }
-                return (
-                  <button key={p} onClick={() => goToPage(p)} className={`rounded px-3 py-1 ${p === page ? 'bg-[color:var(--accent)] text-black' : 'bg-white/5'}`}>{p}</button>
-                );
-              })}
-              <button onClick={() => goToPage(page + 1)} disabled={page >= totalPages} className="rounded px-3 py-1 bg-white/5">Next</button>
-            </div>
+          <div className="mt-6 overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)]">
+            <table className="w-full min-w-[860px] divide-y divide-white/10 text-left text-sm">
+              <thead className="bg-[color:rgba(255,255,255,0.03)] text-[color:var(--muted)]">
+                <tr>
+                  <th className="px-4 py-3">Transaction</th>
+                  <th className="px-4 py-3">Booking</th>
+                  <th className="px-4 py-3">Amount</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Method</th>
+                  <th className="px-4 py-3">Provider</th>
+                  <th className="px-4 py-3">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/10">
+                {payments.map((payment) => (
+                  <tr key={payment.id} className="bg-[color:rgba(255,255,255,0.02)]">
+                    <td className="px-4 py-3 text-white">{payment.transactionId}</td>
+                    <td className="px-4 py-3">{payment.booking.customerName}</td>
+                    <td className="px-4 py-3">Rp {Number(payment.amount).toLocaleString("id-ID")}</td>
+                    <td className="px-4 py-3">
+                      {editingId === payment.id ? (
+                        <select value={editStatus} onChange={(e) => setEditStatus(e.target.value)} className="rounded border border-white/10 bg-[color:var(--background)] px-2 py-1 text-sm text-white">
+                          <option value="pending">pending</option>
+                          <option value="success">success</option>
+                          <option value="failed">failed</option>
+                          <option value="refunded">refunded</option>
+                        </select>
+                      ) : (
+                        payment.status
+                      )}
+                    </td>
+                    <td className="px-4 py-3">{payment.paymentMethod}</td>
+                    <td className="px-4 py-3">{payment.provider}</td>
+                    <td className="px-4 py-3">
+                      {editingId === payment.id ? (
+                        <>
+                          <button onClick={() => handleUpdatePayment(payment.id)} className="rounded bg-emerald-600 px-3 py-1 text-sm text-white">Simpan</button>
+                          <button onClick={() => setEditingId(null)} className="ml-2 rounded bg-gray-600 px-3 py-1 text-sm text-white">Batal</button>
+                        </>
+                      ) : (
+                        <>
+                          <button onClick={() => { setEditingId(payment.id); setEditStatus(payment.status); setEditAmount(payment.amount); }} className="rounded bg-blue-600 px-3 py-1 text-sm text-white">Edit</button>
+                          <button onClick={() => handleDeletePayment(payment.id)} className="ml-2 rounded bg-rose-600 px-3 py-1 text-sm text-white">Hapus</button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+                {payments.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-6 text-center text-sm text-[color:var(--muted)]">
+                      {loading ? "Loading payments..." : "No payments found."}
+                    </td>
+                  </tr>
+                ) : null}
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-4 flex items-center justify-end gap-2">
+            <button onClick={() => goToPage(page - 1)} disabled={page <= 1} className="rounded px-3 py-1 bg-white/5">Prev</button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+              <button key={p} onClick={() => goToPage(p)} className={`rounded px-3 py-1 ${p === page ? 'bg-[color:var(--accent)] text-black' : 'bg-white/5'}`}>{p}</button>
+            ))}
+            <button onClick={() => goToPage(page + 1)} disabled={page >= totalPages} className="rounded px-3 py-1 bg-white/5">Next</button>
           </div>
         </section>
       </div>

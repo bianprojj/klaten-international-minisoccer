@@ -2,9 +2,6 @@
 
 import { fetchJson } from "@/lib/fetch-json";
 import { LoadingOverlay, Spinner } from "@/components/ui/spinner";
-import { TableResponsive } from "@/components/ui/table-responsive";
-import { EditableBadge } from "@/components/ui/inline-edit";
-import { Switch } from "@/components/ui/switch";
 
 import { useEffect, useState } from "react";
 
@@ -21,13 +18,6 @@ interface StaffBookingItem {
   fieldName: string;
 }
 
-const STATUS_OPTIONS = [
-  { value: "pending", label: "Pending", variant: "warning" as const },
-  { value: "confirmed", label: "Confirmed", variant: "success" as const },
-  { value: "cancelled", label: "Cancelled", variant: "danger" as const },
-  { value: "completed", label: "Completed", variant: "info" as const },
-];
-
 export default function StaffBookingViewer({ adminName, useMain = true }: { adminName: string; useMain?: boolean }) {
   const [bookings, setBookings] = useState<StaffBookingItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,6 +31,8 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
   const [walkInError, setWalkInError] = useState<string | null>(null);
   const [walkInSuccess, setWalkInSuccess] = useState<string | null>(null);
   const [walkInLoading, setWalkInLoading] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editStatus, setEditStatus] = useState("");
 
   const fetchBookings = async (pageParam = 1, q = "", date = "") => {
     setLoading(true);
@@ -48,7 +40,7 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
     try {
       const params = new URLSearchParams();
       params.set("page", String(pageParam));
-      params.set("limit", String(25));
+      params.set("limit", String(6));
       if (q) params.set("q", q);
       if (date) params.set("date", date);
       const { res: response, data: __body } = await fetchJson(`/api/admin/bookings?${params.toString()}`, { cache: "no-store" });
@@ -103,11 +95,12 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
     }
   };
 
-  const handleUpdateStatus = async (id: string, newStatus: string) => {
+  const handleUpdateStatus = async (id: string) => {
     try {
-      const { res, data: __body } = await fetchJson(`/api/admin/bookings/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: newStatus }) });
+      const { res, data: __body } = await fetchJson(`/api/admin/bookings/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: editStatus }) });
       const data = __body;
       if (!res.ok) throw new Error(String(data.message ?? "") || "Gagal update");
+      setEditingId(null);
       await fetchBookings(page, query, filterDate);
     } catch (e) {
       setError((e as Error).message);
@@ -126,100 +119,9 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
     }
   };
 
-  const columns = [
-    {
-      key: "id",
-      header: "ID",
-      render: (b: StaffBookingItem) => <span className="font-mono text-xs text-muted">{b.id.slice(0, 8)}</span>,
-      className: "w-24",
-    },
-    {
-      key: "customer",
-      header: "Pelanggan",
-      render: (b: StaffBookingItem) => (
-        <div className="flex flex-col">
-          <span className="font-medium">{b.customerName}</span>
-          <span className="text-xs text-muted">{b.customerPhone}</span>
-        </div>
-      ),
-    },
-    {
-      key: "datetime",
-      header: "Tanggal / Waktu",
-      render: (b: StaffBookingItem) => (
-        <div className="flex flex-col">
-          <span>{b.bookingDate.split("T")[0]}</span>
-          <span className="text-xs text-muted">{b.startTime}–{b.endTime}</span>
-        </div>
-      ),
-    },
-    {
-      key: "price",
-      header: "Total",
-      render: (b: StaffBookingItem) => <span className="font-semibold">Rp {Number(b.totalPrice).toLocaleString("id-ID")}</span>,
-      className: "text-right w-36",
-    },
-    {
-      key: "status",
-      header: "Status",
-      render: (b: StaffBookingItem) => (
-        <EditableBadge
-          value={b.status}
-          options={STATUS_OPTIONS}
-          onSave={(newStatus) => handleUpdateStatus(b.id, newStatus)}
-          className="w-auto"
-        />
-      ),
-      className: "w-32",
-    },
-    {
-      key: "actions",
-      header: "Aksi",
-      render: (b: StaffBookingItem) => (
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => handleDelete(b.id)}
-            className="rounded p-1.5 text-muted hover:text-red-400 hover:bg-red-500/10 transition-colors"
-            title="Hapus"
-          >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v12m-6 0h12m-6 0h.01M6 7H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v2m-4 0h.01M8 7h8" /></svg>
-          </button>
-        </div>
-      ),
-      className: "w-16 text-center",
-      hideOnMobile: true,
-    },
-  ];
-
-  const cardRender = (b: StaffBookingItem) => (
-    <div className="space-y-2">
-      <div className="flex justify-between items-start">
-        <div>
-          <span className="font-medium">{b.customerName}</span>
-          <span className="ml-2 text-xs text-muted">{b.customerPhone}</span>
-        </div>
-        <EditableBadge value={b.status} options={STATUS_OPTIONS} onSave={(s) => handleUpdateStatus(b.id, s)} />
-      </div>
-      <div className="text-sm text-muted">
-        <span>{b.bookingDate.split("T")[0]}</span>
-        <span className="mx-2">•</span>
-        <span>{b.startTime}–{b.endTime}</span>
-      </div>
-      <div className="flex justify-between items-center border-t border-border pt-2">
-        <span className="font-semibold">Rp {Number(b.totalPrice).toLocaleString("id-ID")}</span>
-        <button
-          onClick={() => handleDelete(b.id)}
-          className="text-xs text-muted hover:text-red-400"
-        >
-          Hapus
-        </button>
-      </div>
-    </div>
-  );
-
   const content = (
     <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8" id="staff-bookings">
-      <div className="space-y-6">
+      <div className="mx-auto max-w-7xl space-y-6">
         <div className="glass-panel rounded-[2rem] p-6 sm:p-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
@@ -237,59 +139,104 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-xl font-semibold text-white sm:text-2xl">Bookings</h2>
             <div className="flex flex-wrap items-center gap-2">
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search customer or phone"
-                className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-3 py-2 text-sm text-white"
-              />
-              <input
-                type="date"
-                value={filterDate}
-                onChange={(e) => setFilterDate(e.target.value)}
-                className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-3 py-2 text-sm text-white"
-              />
+              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search customer or phone" className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-3 py-2 text-sm text-white" />
+              <input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-3 py-2 text-sm text-white" />
               <button onClick={handleSearch} className="btn-secondary px-3 py-1">Filter</button>
+              <button onClick={() => setShowWalkIn(true)} className="rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-black">+ Walk-in</button>
             </div>
           </div>
           {error ? (
             <div className="mt-4 rounded-3xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</div>
           ) : null}
 
-          <TableResponsive
-            data={bookings}
-            columns={columns}
-            keyExtractor={(b) => b.id}
-            cardRender={cardRender}
-            emptyMessage={loading ? "Loading bookings..." : "No bookings found."}
-          />
-
-          <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <select
-              value={String(25)}
-              onChange={(e) => { setPage(1); fetchBookings(1, query, filterDate); }}
-              className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-3 py-2 text-sm text-white w-auto"
-            >
-              <option value="10">10 per halaman</option>
-              <option value="25" selected>25 per halaman</option>
-              <option value="50">50 per halaman</option>
-              <option value="100">100 per halaman</option>
-            </select>
-            <div className="flex items-center justify-end gap-2">
-              <button onClick={() => goToPage(page - 1)} disabled={page <= 1} className="rounded px-3 py-1 bg-white/5">Prev</button>
-              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                let p = i + 1;
-                if (totalPages > 5) {
-                  if (page <= 3) p = i + 1;
-                  else if (page >= totalPages - 2) p = totalPages - 4 + i;
-                  else p = page - 2 + i;
-                }
-                return (
-                  <button key={p} onClick={() => goToPage(p)} className={`rounded px-3 py-1 ${p === page ? 'bg-[color:var(--accent)] text-black' : 'bg-white/5'}`}>{p}</button>
-                );
-              })}
-              <button onClick={() => goToPage(page + 1)} disabled={page >= totalPages} className="rounded px-3 py-1 bg-white/5">Next</button>
+          {showWalkIn && (
+            <div className="mt-6 glass-panel rounded-3xl p-6">
+              <h3 className="text-xl font-semibold text-white">Walk-in Booking</h3>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <input placeholder="Nama" value={walkInForm.customerName} onChange={(e) => setWalkInForm(f => ({ ...f, customerName: e.target.value }))} className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white" />
+                <input placeholder="No HP" value={walkInForm.customerPhone} onChange={(e) => setWalkInForm(f => ({ ...f, customerPhone: e.target.value }))} className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white" />
+                <input type="email" placeholder="Email" value={walkInForm.customerEmail} onChange={(e) => setWalkInForm(f => ({ ...f, customerEmail: e.target.value }))} className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white" />
+                <input type="date" placeholder="Tanggal" value={walkInForm.bookingDate} onChange={(e) => setWalkInForm(f => ({ ...f, bookingDate: e.target.value }))} className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white" />
+                <input type="time" placeholder="Mulai" value={walkInForm.startTime} onChange={(e) => setWalkInForm(f => ({ ...f, startTime: e.target.value }))} className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white" />
+                <input type="time" placeholder="Selesai" value={walkInForm.endTime} onChange={(e) => setWalkInForm(f => ({ ...f, endTime: e.target.value }))} className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white" />
+                <select value={walkInForm.paymentMethod} onChange={(e) => setWalkInForm(f => ({ ...f, paymentMethod: e.target.value }))} className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white">
+                  <option value="Offline">Cash</option>
+                  <option value="Midtrans">Midtrans</option>
+                </select>
+              </div>
+              {walkInError ? <div className="mt-4 text-sm text-rose-200">{walkInError}</div> : null}
+              {walkInSuccess ? <div className="mt-4 text-sm text-emerald-200">{walkInSuccess}</div> : null}
+              <div className="mt-6 flex gap-3">
+                <button onClick={handleWalkIn} disabled={walkInLoading} className="flex items-center gap-2 rounded-full bg-[color:var(--accent)] px-6 py-3 font-semibold text-black disabled:opacity-60">{walkInLoading ? <Spinner size={18} /> : null}{walkInLoading ? "Memproses..." : "Buat Booking"}</button>
+                <button onClick={() => setShowWalkIn(false)} className="rounded-full border border-white/10 px-6 py-3 font-semibold text-white">Batal</button>
+              </div>
             </div>
+          )}
+
+          <div className="mt-6 overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)]">
+            <table className="w-full min-w-[860px] divide-y divide-white/10 text-left text-sm">
+              <thead className="bg-[color:rgba(255,255,255,0.03)] text-[color:var(--muted)]">
+                <tr>
+                  <th className="px-4 py-3">Booking ID</th>
+                  <th className="px-4 py-3">Field</th>
+                  <th className="px-4 py-3">Customer</th>
+                  <th className="px-4 py-3">Date / Time</th>
+                  <th className="px-4 py-3">Price</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/10">
+                {bookings.map((booking) => (
+                  <tr key={booking.id} className="bg-[color:rgba(255,255,255,0.02)]">
+                    <td className="px-4 py-3 text-white">{booking.id.slice(0, 8)}</td>
+                    <td className="px-4 py-3">{booking.fieldName}</td>
+                    <td className="px-4 py-3">{booking.customerName}</td>
+                    <td className="px-4 py-3">{booking.bookingDate.split("T")[0]} {booking.startTime}–{booking.endTime}</td>
+                    <td className="px-4 py-3">Rp {Number(booking.totalPrice).toLocaleString("id-ID")}</td>
+                    <td className="px-4 py-3">
+                      {editingId === booking.id ? (
+                        <select value={editStatus} onChange={(e) => setEditStatus(e.target.value)} className="rounded border border-white/10 bg-[color:var(--background)] px-2 py-1 text-sm text-white">
+                          <option value="pending">pending</option>
+                          <option value="confirmed">confirmed</option>
+                          <option value="cancelled">cancelled</option>
+                          <option value="completed">completed</option>
+                        </select>
+                      ) : (
+                        booking.status
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      {editingId === booking.id ? (
+                        <>
+                          <button onClick={() => handleUpdateStatus(booking.id)} className="rounded bg-emerald-600 px-3 py-1 text-sm text-white">Simpan</button>
+                          <button onClick={() => setEditingId(null)} className="ml-2 rounded bg-gray-600 px-3 py-1 text-sm text-white">Batal</button>
+                        </>
+                      ) : (
+                        <>
+                          <button onClick={() => { setEditingId(booking.id); setEditStatus(booking.status); }} className="rounded bg-blue-600 px-3 py-1 text-sm text-white">Edit</button>
+                          <button onClick={() => handleDelete(booking.id)} className="ml-2 rounded bg-rose-600 px-3 py-1 text-sm text-white">Hapus</button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+                {bookings.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-6 text-center text-sm text-[color:var(--muted)]">
+                    {loading ? "Loading bookings..." : "No bookings found."}
+                  </td>
+                  </tr>
+                ) : null}
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-4 flex items-center justify-end gap-2">
+            <button onClick={() => goToPage(page - 1)} disabled={page <= 1} className="rounded px-3 py-1 bg-white/5">Prev</button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+              <button key={p} onClick={() => goToPage(p)} className={`rounded px-3 py-1 ${p === page ? 'bg-[color:var(--accent)] text-black' : 'bg-white/5'}`}>{p}</button>
+            ))}
+            <button onClick={() => goToPage(page + 1)} disabled={page >= totalPages} className="rounded px-3 py-1 bg-white/5">Next</button>
           </div>
         </section>
       </div>
@@ -299,7 +246,7 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
   const wrapped = (
     <>
       {content}
-      <LoadingOverlay show={loading} label="Memuat booking..." />
+      <LoadingOverlay show={loading || walkInLoading} label={walkInLoading ? "Membuat booking + payment + invoice..." : "Memuat booking..."} />
     </>
   );
 

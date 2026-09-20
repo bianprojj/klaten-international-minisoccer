@@ -158,7 +158,6 @@ CREATE TABLE invoice (
   subtotal INTEGER NOT NULL,
   tax INTEGER DEFAULT 0,
   discount INTEGER DEFAULT 0,
-  admin_fee INTEGER DEFAULT 0,
   total INTEGER NOT NULL,
   
   -- Status
@@ -169,31 +168,6 @@ CREATE TABLE invoice (
   paid_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- ==================== REFERRAL CODES ====================
-CREATE TABLE referral_code (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  code VARCHAR(50) UNIQUE NOT NULL,
-  name VARCHAR(100) NOT NULL,
-  type VARCHAR(20) DEFAULT 'percent', -- percent | fixed
-  value INTEGER NOT NULL, -- persen (10 = 10%) atau nominal (20000 = Rp20k)
-  max_uses INTEGER,
-  used_count INTEGER DEFAULT 0,
-  valid_from TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  valid_until TIMESTAMP,
-  is_active BOOLEAN DEFAULT true,
-  admin_fee INTEGER DEFAULT 0,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE referral_usage (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  referral_code_id UUID NOT NULL REFERENCES referral_code(id) ON DELETE CASCADE,
-  booking_id UUID UNIQUE NOT NULL REFERENCES booking(id) ON DELETE CASCADE,
-  discount_amount INTEGER NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==================== REVIEW & RATING ====================
@@ -423,11 +397,11 @@ VALUES
   ('770e8400-e29b-41d4-a716-446655440002', '660e8400-e29b-41d4-a716-446655440002', '660e8400-e29b-41d4-a716-446655440002', 500000, 'Midtrans', 'Midtrans', 'success', NOW(), NOW());
 
 -- Insert sample invoices
-INSERT INTO invoice (id, invoice_number, booking_id, payment_id, subtotal, tax, discount, admin_fee, total, status, paid_at, created_at)
+INSERT INTO invoice (id, invoice_number, booking_id, payment_id, subtotal, tax, discount, total, status, paid_at, created_at)
 VALUES
-  ('880e8400-e29b-41d4-a716-446655440000', 'INV-20260720-001', '660e8400-e29b-41d4-a716-446655440000', '770e8400-e29b-41d4-a716-446655440000', 500000, 0, 0, 0, 500000, 'paid', NOW(), NOW()),
-  ('880e8400-e29b-41d4-a716-446655440001', 'INV-20260720-002', '660e8400-e29b-41d4-a716-446655440001', '770e8400-e29b-41d4-a716-446655440001', 400000, 0, 0, 0, 400000, 'issued', NULL, NOW()),
-  ('880e8400-e29b-41d4-a716-446655440002', 'INV-20260720-003', '660e8400-e29b-41d4-a716-446655440002', '770e8400-e29b-41d4-a716-446655440002', 500000, 0, 0, 0, 500000, 'paid', NOW(), NOW());
+  ('880e8400-e29b-41d4-a716-446655440000', 'INV-20260720-001', '660e8400-e29b-41d4-a716-446655440000', '770e8400-e29b-41d4-a716-446655440000', 500000, 0, 0, 500000, 'paid', NOW(), NOW()),
+  ('880e8400-e29b-41d4-a716-446655440001', 'INV-20260720-002', '660e8400-e29b-41d4-a716-446655440001', '770e8400-e29b-41d4-a716-446655440001', 400000, 0, 0, 400000, 'issued', NULL, NOW()),
+  ('880e8400-e29b-41d4-a716-446655440002', 'INV-20260720-003', '660e8400-e29b-41d4-a716-446655440002', '770e8400-e29b-41d4-a716-446655440002', 500000, 0, 0, 500000, 'paid', NOW(), NOW());
 
 -- Insert review data
 INSERT INTO review (id, booking_id, customer_name, rating, comment, created_at, updated_at)
