@@ -8,24 +8,9 @@
    - Environments: .env.local, .env
 
  ✓ Starting...
- ✓ Ready in 1961ms
- ✓ Compiled /middleware in 275ms (116 modules)
- ○ Compiling /api/admin/csrf ...
- ✓ Compiled /api/admin/csrf in 563ms (303 modules)
- GET /api/admin/csrf 200 in 743ms
- GET /api/admin/csrf 200 in 41ms
- ✓ Compiled /api/admin/login in 328ms (309 modules)
- POST /api/admin/login 200 in 1434ms
- ✓ Compiled /api/admin/fields in 480ms (315 modules)
- GET /api/admin/fields 200 in 925ms
- POST /api/admin/fields 201 in 459ms
- ○ Compiling /api/fields/[fieldId]/availability ...
- ✓ Compiled /api/fields/[fieldId]/availability in 559ms (389 modules)
- GET /api/fields/klaten-field-1/availability?date=2026-09-19 200 in 3008ms
- GET /api/fields/klaten-field-1/availability?date=2026-09-21 200 in 1517ms
- ✓ Compiled /api/admin/bookings in 464ms (391 modules)
- POST /api/admin/bookings 201 in 1897ms
- ✓ Compiled /api/admin/bookings/[id] in 182ms (393 modules)
- DELETE /api/admin/bookings/6233e825-a173-4c9f-9990-13a860c318e8 200 in 1231ms
- ✓ Compiled /api/admin/fields/[id] in 152ms (395 modules)
- DELETE /api/admin/fields/de9402db-c92a-4a1a-b73f-c1ea14c1535e 200 in 1189ms
+ ✓ Ready in 2.2s
+ ✓ Compiled /middleware in 351ms (116 modules)
+ ○ Compiling / ...
+ ✓ Compiled / in 1921ms (733 modules)
+ HEAD / 200 in 2540ms
+ ✓ Compiled in 306ms (278 modules)

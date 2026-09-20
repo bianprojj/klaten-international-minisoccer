@@ -120,6 +120,7 @@ model Invoice {
   subtotal      Int          @map("subtotal")
   tax           Int          @default(0) @map("tax")
   discount      Int          @default(0) @map("discount")
+  adminFee      Int          @default(0) @map("admin_fee")
   total         Int          @map("total")
   status        String       @default("issued") @map("status")
   issuedAt      DateTime     @default(now()) @map("issued_at")
@@ -128,6 +129,37 @@ model Invoice {
   updatedAt     DateTime     @updatedAt @map("updated_at")
 
   @@map("invoice")
+}
+
+model ReferralCode {
+  id          String   @id @default(uuid()) @map("id")
+  code        String   @unique @map("code")
+  name        String   @map("name")
+  type        String   @default("percent") @map("type") // "percent" | "fixed"
+  value       Int      @map("value")                  // persen (10 = 10%) atau nominal (20000 = Rp20k)
+  maxUses     Int?     @map("max_uses")               // null = unlimited
+  usedCount   Int      @default(0) @map("used_count")
+  validFrom   DateTime @default(now()) @map("valid_from")
+  validUntil  DateTime? @map("valid_until")           // null = no expiry
+  isActive    Boolean  @default(true) @map("is_active")
+  adminFee    Int      @default(0) @map("admin_fee")  // biaya admin tambahan jika pakai kode ini
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  usages      ReferralUsage[]
+
+  @@map("referral_code")
+}
+
+model ReferralUsage {
+  id              String       @id @default(uuid()) @map("id")
+  referralCodeId  String       @map("referral_code_id")
+  referralCode    ReferralCode @relation(fields: [referralCodeId], references: [id], onDelete: Cascade)
+  bookingId       String       @unique @map("booking_id")
+  discountAmount  Int          @map("discount_amount")
+  createdAt       DateTime     @default(now()) @map("created_at")
+
+  @@map("referral_usage")
 }
 
 model Review {

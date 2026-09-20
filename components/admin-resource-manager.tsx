@@ -68,43 +68,44 @@ export default function AdminResourceManager({ resource, canManage, adminName }:
     if (!canManage || resource === "audit-logs") return;
     setBusy(true);
     try {
-    const id = String(row.id);
-    const payload: Record<string, unknown> = {};
-    if (resource === "reviews") {
-      payload.customerName = window.prompt("Customer name", String(row.customerName ?? "")) ?? String(row.customerName ?? "");
-      payload.comment = window.prompt("Comment", String(row.comment ?? "")) ?? String(row.comment ?? "");
-      payload.rating = Number(window.prompt("Rating 1-5", String(row.rating ?? 5)) ?? row.rating ?? 5);
-    } else if (resource === "users") {
-      payload.name = window.prompt("Name", String(row.name ?? "")) ?? String(row.name ?? "");
-      payload.email = window.prompt("Email", String(row.email ?? "")) ?? String(row.email ?? "");
-      payload.role = window.prompt("Role: staff, manager, super_admin", String(row.role ?? "staff")) ?? String(row.role ?? "staff");
-      payload.isActive = window.confirm("Keep this admin active?");
-      const newPassword = window.prompt("Password baru (min 8 karakter, huruf besar+kecil, angka, simbol). Kosongkan jika tidak ingin mengganti.");
-      if (newPassword) { payload.password = newPassword; }
-    } else if (resource === "settings") {
-      payload.key = window.prompt("Setting key", String(row.key ?? "")) ?? String(row.key ?? "");
-      payload.value = window.prompt("Setting value", String(row.value ?? "")) ?? String(row.value ?? "");
-      payload.description = window.prompt("Description", String(row.description ?? "")) ?? String(row.description ?? "");
-    } else if (resource === "features") {
-      payload.name = window.prompt("Feature name", String(row.name ?? "")) ?? String(row.name ?? "");
-      payload.description = window.prompt("Description", String(row.description ?? "")) ?? String(row.description ?? "");
-      payload.imageUrl = window.prompt("Image URL", String(row.imageUrl ?? "")) ?? String(row.imageUrl ?? "");
-      payload.sortOrder = Number(window.prompt("Sort order", String(row.sortOrder ?? 0)) ?? row.sortOrder ?? 0);
-      payload.isActive = window.confirm("Keep this feature active?");
-    } else if (resource === "gallery") {
-      payload.title = window.prompt("Title", String(row.title ?? "")) ?? String(row.title ?? "");
-      payload.imageUrl = window.prompt("Image URL", String(row.imageUrl ?? "")) ?? String(row.imageUrl ?? "");
-      payload.sortOrder = Number(window.prompt("Sort order", String(row.sortOrder ?? 0)) ?? row.sortOrder ?? 0);
-      payload.isActive = window.confirm("Keep this gallery item active?");
-    } else {
-      payload.status = window.prompt("Invoice status: issued, paid, cancelled, refunded", String(row.status ?? "issued")) ?? String(row.status ?? "issued");
-      payload.total = Number(window.prompt("Total", String(row.total ?? 0)) ?? row.total ?? 0);
-    }
-    const { res: response, data: __body } = await fetchJson(`${endpoint}/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-    const body = __body;
-    setMessage(String(body.message ?? "") || (response.ok ? "Updated." : "Unable to update record."));
-    if (response.ok) await load();
-    } finally { setBusy(false); }
+      const id = String(row.id);
+      const payload: Record<string, unknown> = {};
+      if (resource === "reviews") {
+        payload.customerName = String(row.customerName ?? "");
+        payload.comment = String(row.comment ?? "");
+        payload.rating = Number(row.rating ?? 5);
+      } else if (resource === "users") {
+        payload.name = String(row.name ?? "");
+        payload.email = String(row.email ?? "");
+        payload.role = String(row.role ?? "staff");
+        payload.isActive = row.isActive !== false;
+        const newPassword = String(row.password ?? "");
+        if (newPassword) payload.password = newPassword;
+      } else if (resource === "settings") {
+        payload.key = String(row.key ?? "");
+        payload.value = String(row.value ?? "");
+        payload.description = String(row.description ?? "");
+      } else if (resource === "features") {
+        payload.name = String(row.name ?? "");
+        payload.description = String(row.description ?? "");
+        payload.imageUrl = String(row.imageUrl ?? "");
+        payload.sortOrder = Number(row.sortOrder ?? 0);
+        payload.isActive = row.isActive !== false;
+      } else if (resource === "gallery") {
+        payload.title = String(row.title ?? "");
+        payload.imageUrl = String(row.imageUrl ?? "");
+        payload.sortOrder = Number(row.sortOrder ?? 0);
+        payload.isActive = row.isActive !== false;
+      } else if (resource === "invoices") {
+        payload.status = String(row.status ?? "issued");
+        payload.total = Number(row.total ?? 0);
+      }
+      const { res: response, data: __body } = await fetchJson(`${endpoint}/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      const body = __body;
+      setMessage(String(body.message ?? "") || (response.ok ? "Updated." : "Unable to update record."));
+      if (response.ok) await load();
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Unable to update record."); }
+    finally { setBusy(false); }
   }
 
   const title = labels[resource];
