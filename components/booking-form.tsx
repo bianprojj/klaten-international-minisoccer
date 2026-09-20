@@ -203,7 +203,6 @@ export function BookingForm({ fields }: { fields: Field[] }) {
     setSubmitError(null);
 
     const query = new URLSearchParams({
-      fieldName: selectedField.name,
       bookingDate: selectedDate,
       startTime: selectedRange.startTime,
       endTime: selectedRange.endTime,
@@ -252,16 +251,11 @@ export function BookingForm({ fields }: { fields: Field[] }) {
           <h2 className="mt-2 text-balance font-[Archivo] text-2xl font-extrabold leading-tight tracking-[-0.015em] text-[#1A1F4D] sm:text-[32px]">Reserve your preferred slot</h2>
         </div>
         <div>
-          <p className="font-[Manrope] text-sm text-[rgba(26,31,77,0.62)]">Choose a field and date, then confirm the available schedule.</p>
+          <p className="font-[Manrope] text-sm text-[rgba(26,31,77,0.62)]">Choose a date, then confirm the available schedule.</p>
         </div>
       </div>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        <div className="rounded-[20px] border border-[rgba(0,81,54,0.16)] bg-[#F1EED9] p-6">
-          <p className="font-[Manrope] text-sm font-medium text-[rgba(26,31,77,0.62)]">Field</p>
-          <p className="mt-2 font-[Archivo] text-base font-bold text-[#1A1F4D]">{selectedField?.name}</p>
-          <p className="font-[Manrope] text-sm text-[rgba(26,31,77,0.62)]">{selectedField?.location}</p>
-        </div>
+      <div className="mt-8">
         <div className="rounded-[20px] border border-[rgba(0,81,54,0.16)] bg-[#F1EED9] p-6">
           <label className="block font-[Manrope] text-sm font-medium text-[rgba(26,31,77,0.62)]">Booking date</label>
           <input
@@ -337,13 +331,9 @@ export function BookingForm({ fields }: { fields: Field[] }) {
       </div>
 
       <div className="mt-8 rounded-[20px] border border-[rgba(0,81,54,0.16)] bg-[#F1EED9] p-6">
-        <div className="grid gap-4 sm:grid-cols-[1.1fr_0.9fr] sm:items-center">
-          <div>
-            <p className="font-[Manrope] text-xs font-semibold text-[#005136]">Booking preview</p>
-            <p className="mt-2 font-[Archivo] text-lg font-bold text-[#1A1F4D]">{selectedField?.name}</p>
-            <p className="font-[Manrope] text-sm text-[rgba(26,31,77,0.62)]">{selectedField?.location}</p>
-          </div>
-          <div className="rounded-[20px] border border-[rgba(0,81,54,0.16)] bg-[#FFFFFF] p-4">
+        <div>
+          <p className="font-[Manrope] text-xs font-semibold text-[#005136]">Booking preview</p>
+          <div className="mt-2 rounded-[20px] border border-[rgba(0,81,54,0.16)] bg-[#FFFFFF] p-4">
             <div className="grid gap-3">
               <div>
                 <p className="font-[Manrope] text-sm text-[rgba(26,31,77,0.62)]">Duration</p>

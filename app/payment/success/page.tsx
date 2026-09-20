@@ -3,7 +3,6 @@ import { AnimatedCard } from "@/components/animated-card";
 import { InvoiceActions } from "@/components/invoice-actions";
 import { getPaymentTransaction, reconcilePaymentStatus } from "@/lib/payment-service";
 import { formatJakartaDateKey } from "@/lib/timezone";
-import { DEFAULT_FIELD_NAME } from "@/lib/venue";
 
 export const dynamic = "force-dynamic";
 
@@ -87,12 +86,9 @@ export default async function PaymentSuccessPage({
               <span className="rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-[color:var(--muted)]">{status}</span>
             </div>
             <div className="mt-6 grid gap-3 text-sm text-[color:var(--muted)] sm:grid-cols-2">
-              <div className="flex justify-between gap-4"><span>Transaction ID</span><span className="text-right font-medium text-[color:var(--foreground)]">{payment?.transactionId ?? transactionId}</span></div>
-              <div className="flex justify-between gap-4"><span>Booking ID</span><span className="text-right font-medium text-[color:var(--foreground)]">{payment?.bookingId ?? "—"}</span></div>
               <div className="flex justify-between gap-4"><span>Method</span><span className="text-right font-medium text-[color:var(--foreground)]">{payment?.paymentMethod ?? "—"}</span></div>
               <div className="flex justify-between gap-4"><span>Amount</span><span className="text-right font-medium text-[color:var(--foreground)]">Rp {payment?.amount?.toLocaleString("id-ID") ?? "0"}</span></div>
               <div className="flex justify-between gap-4"><span>Provider</span><span className="text-right font-medium text-[color:var(--foreground)]">{payment?.provider ?? "—"}</span></div>
-              <div className="flex justify-between gap-4"><span>Field</span><span className="text-right font-medium text-[color:var(--foreground)]">{DEFAULT_FIELD_NAME}</span></div>
             </div>
           </div>
 

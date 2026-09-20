@@ -15,7 +15,6 @@ type BookingHistoryItem = {
   status: string;
   customerName: string;
   customerEmail: string;
-  fieldName: string;
   payments?: Array<{
     status: string;
     transactionId?: string;
@@ -163,9 +162,7 @@ export default function BookingHistoryPage() {
                     <table className="min-w-[640px] w-full table-auto text-left text-sm text-[color:var(--muted)]">
                       <thead className="bg-[color:rgba(0,0,0,0.28)] text-[color:var(--muted)]">
                         <tr>
-                          <th className="px-4 py-3">Booking ID</th>
                           <th className="px-4 py-3">Name</th>
-                          <th className="px-4 py-3">Field</th>
                           <th className="px-4 py-3">Date</th>
                           <th className="px-4 py-3">Amount</th>
                           <th className="px-4 py-3">Status</th>
@@ -174,9 +171,7 @@ export default function BookingHistoryPage() {
                       <tbody>
                         {bookings.map((item) => (
                           <tr key={item.id} className="border-t border-white/10 bg-[color:rgba(15,23,42,0.08)]">
-                            <td className="px-4 py-3 text-[color:var(--foreground)] text-xs">{item.id.slice(0, 8)}</td>
                             <td className="px-4 py-3">{item.customerName}</td>
-                            <td className="px-4 py-3">{item.fieldName}</td>
                             <td className="px-4 py-3">{formatBookingDate(item.bookingDate)}</td>
                             <td className="px-4 py-3">{formatCurrency(item.totalPrice)}</td>
                             <td className="px-4 py-3">
@@ -211,10 +206,6 @@ export default function BookingHistoryPage() {
                           <span className={`rounded-full px-3 py-1 text-sm ${getBadgeClasses(item.status)}`}>{item.status}</span>
                         </div>
                         <div className="mt-3 grid grid-cols-2 gap-2 text-sm text-[color:var(--muted)]">
-                          <div>
-                            <p className="text-xs text-[color:var(--muted)]">Field</p>
-                            <p className="text-sm text-[color:var(--foreground)]">{item.fieldName}</p>
-                          </div>
                           <div>
                             <p className="text-xs text-[color:var(--muted)]">Date</p>
                             <p className="text-sm text-[color:var(--foreground)]">{formatBookingDate(item.bookingDate)}</p>

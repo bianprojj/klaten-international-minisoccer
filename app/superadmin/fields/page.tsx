@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getAuthenticatedAdminFromToken, getAdminPanelPath, isAdminRoleAllowed } from "@/lib/admin-auth";
-import FieldManagerClient from "@/app/manager/fields/FieldManagerClient";
+import ScheduleManagerClient from "@/app/manager/schedule/ScheduleManagerClient";
 
 export const dynamic = "force-dynamic";
 
@@ -18,5 +18,5 @@ export default async function SuperadminFieldsPage() {
     redirect(`${getAdminPanelPath(admin.role)}/login`);
   }
 
-  return <FieldManagerClient adminName={admin.name} />;
+  return <ScheduleManagerClient adminName={admin.name} />;
 }

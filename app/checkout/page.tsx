@@ -7,7 +7,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatedCard } from "@/components/animated-card";
 import { formatJakartaDate } from "@/lib/timezone";
 import { buildDirectPaymentUrl } from "@/lib/payment-utils";
-import { DEFAULT_FIELD_NAME } from "@/lib/venue";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +48,6 @@ export default function CheckoutPage() {
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerNotes, setCustomerNotes] = useState("");
 
-  const fieldName = getSearchParam(searchParams.get("fieldName"), DEFAULT_FIELD_NAME);
   const bookingDate = getSearchParam(searchParams.get("bookingDate"));
   const startTime = getSearchParam(searchParams.get("startTime"));
   const endTime = getSearchParam(searchParams.get("endTime"));
@@ -59,7 +57,7 @@ export default function CheckoutPage() {
   const adminFee = Number(getSearchParam(searchParams.get("adminFee"), "")) || 0;
   const referralCode = getSearchParam(searchParams.get("referralCode"));
 
-  const hasValidBookingDetails = Boolean(fieldName && bookingDate && startTime && endTime && amount > 0);
+  const hasValidBookingDetails = Boolean(bookingDate && startTime && endTime && amount > 0);
   const hasValidCustomerInfo = Boolean(customerName.trim() && customerEmail.trim() && customerPhone.trim());
   const canSubmit = hasValidBookingDetails;
 
@@ -81,7 +79,7 @@ export default function CheckoutPage() {
       const validateResp = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fieldName, bookingDate, startTime, endTime, validateOnly: true }),
+        body: JSON.stringify({ bookingDate, startTime, endTime, validateOnly: true }),
       });
 
       const validateResult = await validateResp.json().catch(() => null);
@@ -95,7 +93,6 @@ export default function CheckoutPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fieldName,
           bookingDate,
           startTime,
           endTime,

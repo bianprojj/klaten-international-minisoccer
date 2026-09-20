@@ -1,8 +1,6 @@
 import type { Field } from "@/types";
 import { prisma } from "@/lib/prisma";
-import { BLOCKING_BOOKING_STATUSES } from "@/lib/booking-engine";
-import { formatJakartaDateKey } from "@/lib/timezone";
-import { DEFAULT_FIELD_NAME, DEFAULT_FIELD } from "@/lib/venue";
+import { DEFAULT_FIELD } from "@/lib/venue";
 import { facilityImages, getFallbackReviews } from "@/lib/mock-data";
 import { FALLBACK_REMOTE_IMAGES, getSafeRemoteImageUrl, normalizeRemoteImageUrl } from "@/lib/remote-image";
 import type { FacilityImage, VenueGalleryImage } from "@/types";
@@ -85,24 +83,6 @@ export async function getVenueGallery(): Promise<VenueGalleryImage[]> {
   }
 }
 
-export async function getUpcomingBookings(limit = 5) {
-  return prisma.booking.findMany({
-    where: {
-      status: {
-        in: BLOCKING_BOOKING_STATUSES,
-      },
-      bookingDate: {
-        gte: new Date(),
-      },
-    },
-    orderBy: [
-      { bookingDate: "asc" },
-      { startTime: "asc" },
-    ],
-    take: limit,
-  });
-}
-
 export async function getReviews(): Promise<import("@/types").Review[]> {
   try {
     const records = await prisma.review.findMany({
@@ -124,18 +104,4 @@ export async function getReviews(): Promise<import("@/types").Review[]> {
   }
 }
 
-export type BookedSlot = {
-  date: string;
-  time: string;
-  field: string;
-  status: string;
-};
 
-export function mapBookingsToSlots(bookings: Array<{ bookingDate: Date; startTime: string; endTime: string; status: string }>): BookedSlot[] {
-  return bookings.map((booking) => ({
-    date: formatJakartaDateKey(booking.bookingDate),
-    time: `${booking.startTime} - ${booking.endTime}`,
-    field: DEFAULT_FIELD_NAME,
-    status: booking.status === "pending" ? "Booked" : booking.status,
-  }));
-}

@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getAdminPanelPath, getAuthenticatedAdminFromToken, isAdminRoleAllowed } from "@/lib/admin-auth";
-import ScheduleSlotManagerClient from "@/app/manager/schedule-slots/ScheduleSlotManagerClient";
+import ScheduleManagerClient from "@/app/manager/schedule/ScheduleManagerClient";
 
 export const dynamic = "force-dynamic";
 
@@ -18,5 +18,5 @@ export default async function SuperadminScheduleSlotsPage() {
     redirect(`${getAdminPanelPath(admin.role)}/login`);
   }
 
-  return <ScheduleSlotManagerClient adminName={admin.name} />;
+  return <ScheduleManagerClient adminName={admin.name} />;
 }

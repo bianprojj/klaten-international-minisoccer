@@ -32,6 +32,22 @@ interface PaymentFormState {
   expiredAt: string;
 }
 
+function statusBadge(status: string) {
+  const styles: Record<string, string> = {
+    pending: "border-amber-500/20 bg-amber-500/15 text-amber-200",
+    success: "border-emerald-500/20 bg-emerald-500/15 text-emerald-200",
+    failed: "border-rose-500/20 bg-rose-500/15 text-rose-200",
+    refunded: "border-sky-500/20 bg-sky-500/15 text-sky-200",
+    expired: "border-white/10 bg-white/10 text-white",
+    cancelled: "border-rose-500/20 bg-rose-500/15 text-rose-200",
+  };
+  return (
+    <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${styles[status] ?? "border-white/10 bg-white/10 text-white"}`}>
+      {status}
+    </span>
+  );
+}
+
 export default function PaymentManagerClient({ adminName, useMain = true }: { adminName: string; useMain?: boolean }) {
   const [payments, setPayments] = useState<PaymentItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -214,7 +230,6 @@ export default function PaymentManagerClient({ adminName, useMain = true }: { ad
               <table className="w-full min-w-[860px] divide-y divide-white/10 text-left text-sm">
                 <thead className="bg-[color:rgba(255,255,255,0.03)] text-[color:var(--muted)]">
                   <tr>
-                    <th className="px-4 py-3">Transaction</th>
                     <th className="px-4 py-3">Booking</th>
                     <th className="px-4 py-3">Amount</th>
                     <th className="px-4 py-3">Status</th>
@@ -226,10 +241,9 @@ export default function PaymentManagerClient({ adminName, useMain = true }: { ad
                 <tbody className="divide-y divide-white/10">
                   {payments.map((payment) => (
                     <tr key={payment.id} className="bg-[color:rgba(255,255,255,0.02)]">
-                      <td className="px-4 py-3 text-white">{payment.transactionId}</td>
                       <td className="px-4 py-3">{payment.booking.customerName}</td>
                       <td className="px-4 py-3">Rp {payment.amount.toLocaleString("id-ID")}</td>
-                      <td className="px-4 py-3">{payment.status}</td>
+                      <td className="px-4 py-3">{statusBadge(payment.status)}</td>
                       <td className="px-4 py-3">{payment.paymentMethod}</td>
                       <td className="px-4 py-3">{payment.provider}</td>
                       <td className="px-4 py-3 space-x-2">
@@ -244,7 +258,7 @@ export default function PaymentManagerClient({ adminName, useMain = true }: { ad
                   ))}
                   {payments.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-6 text-center text-sm text-[color:var(--muted)]">
+                      <td colSpan={6} className="px-4 py-6 text-center text-sm text-[color:var(--muted)]">
                         {loading ? "Loading payments..." : "No payment records found."}
                       </td>
                     </tr>

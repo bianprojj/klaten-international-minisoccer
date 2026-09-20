@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedAdminFromToken, hasAdminPermission } from "@/lib/admin-auth";
-import { DEFAULT_FIELD_NAME } from "@/lib/venue";
 
 function getCookieToken(request: Request) {
   const cookieHeader = request.headers.get("cookie") || "";
@@ -27,7 +26,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     });
 
     if (!booking) return NextResponse.json({ success: false, message: "Booking not found." }, { status: 404 });
-    return NextResponse.json({ success: true, data: { ...booking, fieldName: DEFAULT_FIELD_NAME } });
+    return NextResponse.json({ success: true, data: booking });
   } catch (error) {
     console.error("[ADMIN] Get booking error:", error);
     return NextResponse.json({ success: false, message: "Unable to retrieve booking." }, { status: 500 });

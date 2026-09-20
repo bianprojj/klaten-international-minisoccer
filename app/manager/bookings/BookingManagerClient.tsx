@@ -16,7 +16,6 @@ interface BookingItem {
   customerPhone: string;
   customerEmail: string | null;
   notes: string | null;
-  fieldName: string;
   payments: Array<{ id: string; status: string; amount: number; transactionId: string }>;
 }
 
@@ -28,6 +27,20 @@ interface BookingFormState {
   startTime: string;
   endTime: string;
   notes: string;
+}
+
+function statusBadge(status: string) {
+  const styles: Record<string, string> = {
+    pending: "border-amber-500/20 bg-amber-500/15 text-amber-200",
+    confirmed: "border-emerald-500/20 bg-emerald-500/15 text-emerald-200",
+    completed: "border-sky-500/20 bg-sky-500/15 text-sky-200",
+    cancelled: "border-rose-500/20 bg-rose-500/15 text-rose-200",
+  };
+  return (
+    <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${styles[status] ?? "border-white/10 bg-white/10 text-white"}`}>
+      {status}
+    </span>
+  );
 }
 
 export default function BookingManagerClient({ adminName, useMain = true }: { adminName: string; useMain?: boolean }) {
@@ -205,8 +218,6 @@ export default function BookingManagerClient({ adminName, useMain = true }: { ad
               <table className="w-full min-w-[860px] divide-y divide-white/10 text-left text-sm">
                 <thead className="bg-[color:rgba(255,255,255,0.03)] text-[color:var(--muted)]">
                   <tr>
-                    <th className="px-4 py-3">Booking ID</th>
-                    <th className="px-4 py-3">Field</th>
                     <th className="px-4 py-3">Customer</th>
                     <th className="px-4 py-3">Date / Time</th>
                     <th className="px-4 py-3">Price</th>
@@ -217,12 +228,10 @@ export default function BookingManagerClient({ adminName, useMain = true }: { ad
                 <tbody className="divide-y divide-white/10">
                   {bookings.map((booking) => (
                     <tr key={booking.id} className="bg-[color:rgba(255,255,255,0.02)]">
-                      <td className="px-4 py-3 text-white">{booking.id.slice(0, 8)}</td>
-                      <td className="px-4 py-3">{booking.fieldName}</td>
                       <td className="px-4 py-3">{booking.customerName}</td>
                       <td className="px-4 py-3">{booking.bookingDate.split("T")[0]} {booking.startTime}–{booking.endTime}</td>
                       <td className="px-4 py-3">Rp {Number(booking.totalPrice).toLocaleString("id-ID")}</td>
-                      <td className="px-4 py-3">{booking.status}</td>
+                      <td className="px-4 py-3">{statusBadge(booking.status)}</td>
                       <td className="px-4 py-3 space-x-2">
                         <button onClick={() => handleEdit(booking)} className="rounded-full border border-[color:rgba(56,189,248,0.24)] px-3 py-2 text-sm text-[color:var(--accent)] hover:bg-[color:rgba(56,189,248,0.06)]">
                           Edit
@@ -235,7 +244,7 @@ export default function BookingManagerClient({ adminName, useMain = true }: { ad
                   ))}
                   {bookings.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-6 text-center text-sm text-[color:var(--muted)]">
+                      <td colSpan={5} className="px-4 py-6 text-center text-sm text-[color:var(--muted)]">
                         {loading ? "Loading bookings..." : "No bookings found."}
                       </td>
                     </tr>
@@ -258,12 +267,6 @@ export default function BookingManagerClient({ adminName, useMain = true }: { ad
           {showForm ? <section className="glass-panel rounded-[1.5rem] p-5 sm:p-6">
             <h2 className="text-xl font-semibold text-white sm:text-2xl">Create / update booking</h2>
             <div className="mt-6 space-y-4">
-              <div>
-                <label className="text-sm text-[color:var(--muted)]">Field</label>
-                <div className="mt-2 rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white">
-                  Lapangan Klaten International
-                </div>
-              </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <label className="text-sm text-[color:var(--muted)]">Booking date</label>

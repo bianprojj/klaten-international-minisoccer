@@ -6,10 +6,9 @@ import AdminDashboard from "@/components/admin-dashboard";
 import AdminResourceManager from "@/components/admin-resource-manager";
 import VenueFeatureManager from "@/components/venue-feature-manager";
 import VenueGalleryManager from "@/components/venue-gallery-manager";
-import FieldManagerClient from "@/app/manager/fields/FieldManagerClient";
+import ScheduleManagerClient from "@/app/manager/schedule/ScheduleManagerClient";
 import BookingManagerClient from "@/app/manager/bookings/BookingManagerClient";
 import PaymentManagerClient from "@/app/manager/payments/PaymentManagerClient";
-import ScheduleSlotManagerClient from "@/app/manager/schedule-slots/ScheduleSlotManagerClient";
 
 export const dynamic = "force-dynamic";
 
@@ -42,10 +41,9 @@ export default async function ManagerPage() {
     return (
       <>
         <AdminDashboard admin={admin} summary={summary} />
-        <FieldManagerClient adminName={admin.name} useMain={false} />
-        <BookingManagerClient adminName={admin.name} useMain={false} />
-        <PaymentManagerClient adminName={admin.name} useMain={false} />
-        <ScheduleSlotManagerClient adminName={admin.name} />
+<BookingManagerClient adminName={admin.name} useMain={false} />
+<PaymentManagerClient adminName={admin.name} useMain={false} />
+<ScheduleManagerClient adminName={admin.name} />
         <AdminResourceManager resource="invoices" canManage={admin.permissions.canManageInvoices} adminName={admin.name} />
         <AdminResourceManager resource="reviews" canManage={admin.permissions.canManageReviews} adminName={admin.name} />
         <AdminResourceManager resource="settings" canManage={admin.permissions.canManageSettings} adminName={admin.name} />

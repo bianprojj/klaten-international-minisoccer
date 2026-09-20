@@ -15,7 +15,20 @@ interface StaffBookingItem {
   customerName: string;
   customerPhone: string;
   customerEmail: string | null;
-  fieldName: string;
+}
+
+function statusBadge(status: string) {
+  const styles: Record<string, string> = {
+    pending: "border-amber-500/20 bg-amber-500/15 text-amber-200",
+    confirmed: "border-emerald-500/20 bg-emerald-500/15 text-emerald-200",
+    completed: "border-sky-500/20 bg-sky-500/15 text-sky-200",
+    cancelled: "border-rose-500/20 bg-rose-500/15 text-rose-200",
+  };
+  return (
+    <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${styles[status] ?? "border-white/10 bg-white/10 text-white"}`}>
+      {status}
+    </span>
+  );
 }
 
 export default function StaffBookingViewer({ adminName, useMain = true }: { adminName: string; useMain?: boolean }) {
@@ -177,8 +190,6 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
             <table className="w-full min-w-[860px] divide-y divide-white/10 text-left text-sm">
               <thead className="bg-[color:rgba(255,255,255,0.03)] text-[color:var(--muted)]">
                 <tr>
-                  <th className="px-4 py-3">Booking ID</th>
-                  <th className="px-4 py-3">Field</th>
                   <th className="px-4 py-3">Customer</th>
                   <th className="px-4 py-3">Date / Time</th>
                   <th className="px-4 py-3">Price</th>
@@ -189,8 +200,6 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
               <tbody className="divide-y divide-white/10">
                 {bookings.map((booking) => (
                   <tr key={booking.id} className="bg-[color:rgba(255,255,255,0.02)]">
-                    <td className="px-4 py-3 text-white">{booking.id.slice(0, 8)}</td>
-                    <td className="px-4 py-3">{booking.fieldName}</td>
                     <td className="px-4 py-3">{booking.customerName}</td>
                     <td className="px-4 py-3">{booking.bookingDate.split("T")[0]} {booking.startTime}–{booking.endTime}</td>
                     <td className="px-4 py-3">Rp {Number(booking.totalPrice).toLocaleString("id-ID")}</td>
@@ -203,7 +212,7 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
                           <option value="completed">completed</option>
                         </select>
                       ) : (
-                        booking.status
+                        statusBadge(booking.status)
                       )}
                     </td>
                     <td className="px-4 py-3">
@@ -223,7 +232,7 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
                 ))}
                 {bookings.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-6 text-center text-sm text-[color:var(--muted)]">
+                    <td colSpan={5} className="px-4 py-6 text-center text-sm text-[color:var(--muted)]">
                     {loading ? "Loading bookings..." : "No bookings found."}
                   </td>
                   </tr>

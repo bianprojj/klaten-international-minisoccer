@@ -66,13 +66,8 @@ export async function GET(request: Request) {
       take: limit,
     });
 
-    const normalizedBookings = bookings.map((booking) => ({
-      ...booking,
-      fieldName: "Lapangan Klaten International",
-    }));
-
     const totalPages = Math.max(Math.ceil(total / limit), 1);
-    return NextResponse.json({ success: true, data: normalizedBookings, total, page, limit, totalPages });
+    return NextResponse.json({ success: true, data: bookings, total, page, limit, totalPages });
   } catch (error) {
     console.error("[ADMIN] Booking list error:", error);
     return NextResponse.json({ success: false, message: "Unable to list bookings." }, { status: 500 });

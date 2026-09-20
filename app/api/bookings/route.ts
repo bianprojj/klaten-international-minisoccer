@@ -4,7 +4,7 @@ import { expirePendingPayments, syncBookingStatusesFromPayments } from "@/lib/pa
 import { getRateLimitResult, sanitizeObject, applySecurityHeaders } from "@/lib/security-headers";
 import { prisma } from "@/lib/prisma";
 import { BLOCKING_BOOKING_STATUSES, getRequestedScheduleBlocks, getScheduleSlots, reclaimExpiredSlotBookings } from "@/lib/booking-engine";
-import { DEFAULT_FIELD_ID, DEFAULT_FIELD_NAME, normalizeFieldId, getDefaultFieldPrice } from "@/lib/venue";
+import { DEFAULT_FIELD_ID, normalizeFieldId, getDefaultFieldPrice } from "@/lib/venue";
 
 export const dynamic = "force-dynamic";
 
@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    auditLog("booking-created", `Booking ${booking.id} created for ${DEFAULT_FIELD_NAME}`, customerEmail, clientIp);
+    auditLog("booking-created", `Booking ${booking.id} created`, customerEmail, clientIp);
 
     const response = NextResponse.json({
       success: true,
@@ -248,14 +248,9 @@ export async function GET(request: NextRequest) {
       orderBy: { bookingDate: "desc" },
     });
 
-    const normalizedBookings = bookings.map((booking) => ({
-      ...booking,
-      fieldName: DEFAULT_FIELD_NAME,
-    }));
-
     return NextResponse.json({
       success: true,
-      bookings: normalizedBookings,
+      bookings,
     });
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);

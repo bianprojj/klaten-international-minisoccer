@@ -5,7 +5,7 @@ import { getAdminSummary, getDefaultAdminSummary } from "@/lib/admin-dashboard";
 import AdminDashboard from "@/components/admin-dashboard";
 import AdminResourceManager from "@/components/admin-resource-manager";
 import FinancialReport from "@/components/financial-report";
-import FieldManagerClient from "@/app/manager/fields/FieldManagerClient";
+import ScheduleManagerClient from "@/app/manager/schedule/ScheduleManagerClient";
 import BookingManagerClient from "@/app/manager/bookings/BookingManagerClient";
 import PaymentManagerClient from "@/app/manager/payments/PaymentManagerClient";
 import VenueFeatureManager from "@/components/venue-feature-manager";
@@ -44,7 +44,7 @@ export default async function SuperadminPage() {
       <>
         <AdminDashboard admin={admin} summary={summary} />
         <FinancialReport adminName={admin.name} />
-        <FieldManagerClient adminName={admin.name} useMain={false} />
+        <ScheduleManagerClient adminName={admin.name} />
         <BookingManagerClient adminName={admin.name} useMain={false} />
         <PaymentManagerClient adminName={admin.name} useMain={false} />
         <AdminResourceManager resource="invoices" canManage={admin.permissions.canManageInvoices} adminName={admin.name} />
