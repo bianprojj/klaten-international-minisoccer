@@ -193,7 +193,7 @@ export default function ScheduleManagerClient({ adminName }: { adminName: string
           </div>
 
           <div className="mt-6 overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)]">
-            <table className="w-full min-w-[680px] text-left text-sm">
+            <table className="hidden md:table w-full min-w-[680px] text-left text-sm">
               <thead className="bg-[color:rgba(255,255,255,0.03)] text-[color:var(--muted)]">
                 <tr>
                   <th className="px-4 py-3">Time</th>
@@ -229,6 +229,60 @@ export default function ScheduleManagerClient({ adminName }: { adminName: string
                 ) : null}
               </tbody>
             </table>
+
+            <div className="md:hidden space-y-3 p-3">
+              {slots.map((slot) => (
+                <div key={slot.id} className="rounded-2xl border border-white/10 bg-[color:rgba(255,255,255,0.02)] p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <div className="text-sm font-medium text-white mb-1">
+                        {slot.startTime} - {slot.endTime}
+                      </div>
+                      <div className="text-xs text-[color:var(--muted)]">
+                        {formatDayOfWeek(slot.dayOfWeek)}
+                      </div>
+                    </div>
+                    <Switch
+                      small
+                      checked={slot.isActive}
+                      onChange={() => void handleToggleActive(slot)}
+                      label="Active"
+                    />
+                  </div>
+
+                  <div className="space-y-2 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-[color:var(--muted)]">Price</span>
+                      <span className="text-white">Rp {Number(slot.price ?? 0).toLocaleString("id-ID")}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[color:var(--muted)]">Sort Order</span>
+                      <span className="text-white">{slot.sortOrder}</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex gap-2">
+                    <button
+                      onClick={() => handleEdit(slot)}
+                      className="flex-1 rounded-full border border-[color:rgba(56,189,248,0.24)] px-3 py-2 text-xs text-[color:var(--accent)] hover:bg-[color:rgba(56,189,248,0.06)]"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => void handleDelete(slot.id)}
+                      className="flex-1 rounded-full border border-rose-500/20 px-3 py-2 text-xs text-rose-300 hover:bg-rose-500/10"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {slots.length === 0 && !loading && (
+                <div className="py-8 text-center text-sm text-[color:var(--muted)]">
+                  No schedule slots found.
+                </div>
+              )}
+            </div>
           </div>
         </section>
 
