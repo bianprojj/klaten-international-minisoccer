@@ -55,7 +55,7 @@ export default function FinancialReport({ adminName }: { adminName: string }) {
   const maxRevenue = data?.buckets.reduce((max, b) => Math.max(max, b.revenue), 0) ?? 0;
 
   return (
-    <section className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8" id="financial-report">
+      <section className="mx-auto max-w-7xl space-y-6 overflow-x-clip px-4 sm:px-6 lg:px-8" id="financial-report">
       <div className="glass-panel rounded-[2rem] p-6 sm:p-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
@@ -82,7 +82,7 @@ export default function FinancialReport({ adminName }: { adminName: string }) {
               {p === "daily" ? "Harian" : p === "weekly" ? "Mingguan" : "Bulanan"}
             </button>
           ))}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <input
               type="date"
               value={startDate}

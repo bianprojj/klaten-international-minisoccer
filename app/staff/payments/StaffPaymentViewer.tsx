@@ -189,7 +189,7 @@ export default function StaffPaymentViewer({ adminName, useMain = true }: { admi
   const providers = useMemo(() => ["Midtrans", "QRIS", "GoPay", "Dana", "ShopeePay", "OVO", "BCA", "BNI", "Mandiri", "Offline"], []);
 
   const content = (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8" id="staff-payments">
+    <div className="mx-auto max-w-7xl space-y-6 overflow-x-clip px-4 sm:px-6 lg:px-8" id="staff-payments">
       <div className="mx-auto max-w-7xl space-y-6">
         <div className="glass-panel rounded-[2rem] p-6 sm:p-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -263,9 +263,9 @@ export default function StaffPaymentViewer({ adminName, useMain = true }: { admi
                 </tbody>
               </table>
             </div>
-            <div className="mt-4 flex items-center justify-between px-4">
+            <div className="mt-4 flex flex-col gap-3 px-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="text-sm text-[color:var(--muted)]">Total: {loading ? "..." : `${payments.length} items on this page`}</div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <button onClick={() => goToPage(page - 1)} disabled={page <= 1} className="rounded px-3 py-1 bg-white/5">Prev</button>
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                   <button key={p} onClick={() => goToPage(p)} className={`rounded px-3 py-1 ${p === page ? 'bg-[color:var(--accent)] text-black' : 'bg-white/5'}`}>{p}</button>

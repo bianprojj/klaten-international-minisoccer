@@ -38,7 +38,7 @@ export default function StaffFieldViewer({ adminName }: { adminName: string }) {
   useEffect(() => { void fetchSlots(); }, []);
 
   return (
-    <main className="flex-1 px-6 py-16 lg:px-8">
+    <main className="flex-1 overflow-x-clip px-6 py-16 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-8">
         <div className="glass-panel rounded-[2rem] p-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">

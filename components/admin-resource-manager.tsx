@@ -125,7 +125,7 @@ export default function AdminResourceManager({ resource, canManage, adminName }:
   const title = labels[resource];
   return (
     <>
-      <section className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-7xl space-y-6 overflow-x-clip px-4 sm:px-6 lg:px-8">
     <LoadingOverlay show={busy || loading} label={busy ? "Memproses..." : "Memuat data..."} />
     <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
       <div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--accent-strong)]">Admin workspace</p><h1 className="mt-2 text-balance text-2xl font-semibold leading-tight text-[color:var(--foreground)] sm:text-3xl">{title}</h1></div>

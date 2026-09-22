@@ -160,7 +160,7 @@ export default function ScheduleManagerClient({ adminName }: { adminName: string
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8" id="schedule-slots">
+    <div className="mx-auto max-w-7xl space-y-6 overflow-x-clip px-4 sm:px-6 lg:px-8" id="schedule-slots">
       <LoadingOverlay show={loading} label={editing || showForm ? "Menyimpan slot..." : "Memuat jadwal..."} />
       <div className="glass-panel rounded-[2rem] p-6 sm:p-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -181,7 +181,7 @@ export default function ScheduleManagerClient({ adminName }: { adminName: string
 
       <div className="grid gap-6 lg:grid-cols-[1.4fr_0.6fr]">
         <section className="glass-panel rounded-[1.5rem] p-5 sm:p-6">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-xl font-semibold text-white sm:text-2xl">Schedule slots</h2>
               <p className="mt-2 text-sm text-[color:var(--muted)]">Slots are rendered in booking availability and validated on checkout.</p>

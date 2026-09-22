@@ -12,7 +12,7 @@ export default function AdminDashboard({
   // Quick access removed: RBAC provides in-page CRUD/viewer access for each role.
 
   return (
-    <main className="flex-1 px-4 py-12 sm:px-6 lg:px-8">
+    <main className="flex-1 overflow-x-clip px-4 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-6 sm:space-y-8">
         <div className="rounded-2xl border border-white/10 bg-[color:var(--surface-strong)] p-6 sm:p-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">

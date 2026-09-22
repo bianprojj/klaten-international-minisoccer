@@ -191,7 +191,7 @@ export default function PaymentManagerClient({ adminName, useMain = true }: { ad
   const providers = useMemo(() => ["Midtrans", "QRIS", "GoPay", "Dana", "ShopeePay", "OVO", "BCA", "BNI", "Mandiri", "Offline"], []);
 
   const content = (
-    <div className="mx-auto max-w-7xl space-y-8" id="payments">
+    <div className="mx-auto max-w-7xl space-y-8 overflow-x-clip" id="payments">
       <div className="mx-auto max-w-7xl space-y-8">
         <div className="glass-panel rounded-[2rem] p-6 sm:p-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -208,12 +208,12 @@ export default function PaymentManagerClient({ adminName, useMain = true }: { ad
 
         <div className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
           <section className="glass-panel rounded-[1.5rem] p-5 sm:p-6">
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-xl font-semibold text-white sm:text-2xl">Payment records</h2>
                 <p className="mt-2 text-sm text-[color:var(--muted)]">Create, edit, and delete payment entries.</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search transaction" className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-3 py-2 text-sm text-white" />
                 <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-3 py-2 text-sm text-white">
                   <option value="">All</option>
@@ -266,9 +266,9 @@ export default function PaymentManagerClient({ adminName, useMain = true }: { ad
                 </tbody>
               </table>
             </div>
-            <div className="mt-4 flex items-center justify-between px-4">
+            <div className="mt-4 flex flex-col gap-3 px-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="text-sm text-[color:var(--muted)]">Total: {loading ? "..." : `${payments.length} items on this page`}</div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <button onClick={() => goToPage(page - 1)} disabled={page <= 1} className="rounded px-3 py-1 bg-white/5">Prev</button>
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                   <button key={p} onClick={() => goToPage(p)} className={`rounded px-3 py-1 ${p === page ? 'bg-[color:var(--accent)] text-black' : 'bg-white/5'}`}>{p}</button>
