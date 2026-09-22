@@ -62,7 +62,7 @@ export default function FinancialReport({ adminName }: { adminName: string }) {
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[color:var(--accent-strong)]">Financial report</p>
             <h1 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">Laporan Keuangan</h1>
             <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
-              Revenue harian, mingguan, bulanan, atau rentang tanggal tertentu. Signed in as {adminName}
+              Revenue harian, mingguan, bulanan, atau rentang tanggal tertentu.
             </p>
           </div>
           <button onClick={() => void load()} className="btn-secondary px-4 py-2">

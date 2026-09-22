@@ -11,13 +11,6 @@ export default function AdminDashboard({
 }) {
   // Quick access removed: RBAC provides in-page CRUD/viewer access for each role.
 
-  const roleSummaryText =
-    admin.role === "super_admin"
-      ? "Full administrative access, including sensitive user management and revenue insights."
-      : admin.role === "manager"
-      ? "Can manage bookings, fields, schedules, payments, and operational content, while keeping admin-user management restricted."
-      : "Read-only access for booking history, field availability, and operational overview. No access to sensitive admin-user management.";
-
   return (
     <main className="flex-1 px-4 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-6 sm:space-y-8">
@@ -25,16 +18,12 @@ export default function AdminDashboard({
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--accent-strong)]">Admin dashboard</p>
-              <h1 className="mt-2 text-balance text-2xl font-semibold leading-tight text-[color:var(--foreground)] sm:text-3xl">{admin.role.replace("_", " ")}</h1>
+              <h1 className="mt-2 text-balance text-2xl font-semibold leading-tight text-[color:var(--foreground)] sm:text-3xl">Dashboard</h1>
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--accent-strong)]">
-                  Role: {admin.role}
-                </span>
                 <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-200">
                   Authenticated session active
                 </span>
               </div>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-[color:var(--muted)]">{roleSummaryText}</p>
               <nav aria-label="Admin sections" className="mt-4 flex flex-wrap gap-2">
                 {admin.permissions.canReadFields || admin.permissions.canManageFields ? (
                   <a href="#fields" className="rounded-full bg-white/5 px-3 py-1 text-sm text-[color:var(--foreground)] hover:bg-white/10">Fields</a>
@@ -87,23 +76,6 @@ export default function AdminDashboard({
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <div className="glass-panel rounded-[1.5rem] p-5 sm:p-6">
-            <p className="text-sm text-[color:var(--muted)]">Role permissions</p>
-            <div className="mt-4 space-y-2">
-              {Object.entries(admin.permissions).map(([label, allowed]) => (
-                <div
-                  key={label}
-                  className="flex items-center justify-between gap-2 rounded-2xl bg-white/5 px-3 py-2.5 text-xs sm:text-sm text-[color:var(--muted)]"
-                >
-                  <span className="truncate">{label}</span>
-                  <span className={`shrink-0 ${allowed ? "text-emerald-300" : "text-rose-300"}`}>
-                    {allowed ? "Allowed" : "Denied"}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
           {admin.permissions.canViewReports ? (
             <>
               <div className="glass-panel rounded-2xl p-5 sm:p-6">
@@ -124,7 +96,7 @@ export default function AdminDashboard({
               </div>
             </>
           ) : (
-            <div className="glass-panel rounded-2xl p-5 sm:p-6 sm:col-span-2 xl:col-span-3">
+            <div className="glass-panel rounded-2xl p-5 sm:p-6 sm:col-span-2 xl:col-span-4">
               <h2 className="text-xl font-semibold text-[color:var(--foreground)]">Report access restricted</h2>
               <p className="mt-3 text-sm text-[color:var(--muted)]">
                 Your current role does not include report access. Use the permitted actions above to manage bookings, verify payments, or collaborate with your team.

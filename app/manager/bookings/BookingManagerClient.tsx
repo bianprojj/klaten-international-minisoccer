@@ -191,7 +191,7 @@ export default function BookingManagerClient({ adminName, useMain = true }: { ad
                 Create, update, and delete bookings with staff-grade operational controls.
               </p>
             </div>
-            <div className="rounded-full bg-white/10 px-4 py-2 text-sm text-[color:var(--muted)]">Signed in as {adminName}</div>
+            
           </div>
         </div>
 

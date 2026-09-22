@@ -202,7 +202,7 @@ export default function PaymentManagerClient({ adminName, useMain = true }: { ad
                 Manage payment records for bookings in one operational interface.
               </p>
             </div>
-            <div className="rounded-full bg-white/10 px-4 py-2 text-sm text-[color:var(--muted)]">Signed in as {adminName}</div>
+            
           </div>
         </div>
 

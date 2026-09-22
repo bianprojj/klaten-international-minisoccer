@@ -144,7 +144,7 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
                 Read-only booking details for staff operations.
               </p>
             </div>
-            <div className="rounded-full bg-white/10 px-4 py-2 text-sm text-[color:var(--muted)]">Signed in as {adminName}</div>
+            
           </div>
         </div>
 

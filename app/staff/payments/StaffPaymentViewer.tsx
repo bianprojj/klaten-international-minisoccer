@@ -119,7 +119,7 @@ export default function StaffPaymentViewer({ adminName, useMain = true }: { admi
                 Read-only payment history for staff review.
               </p>
             </div>
-            <div className="rounded-full bg-white/10 px-4 py-2 text-sm text-[color:var(--muted)]">Signed in as {adminName}</div>
+            
           </div>
         </div>
 

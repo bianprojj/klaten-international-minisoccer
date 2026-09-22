@@ -171,7 +171,7 @@ export default function ScheduleManagerClient({ adminName }: { adminName: string
               Manage schedule slots that control availability for the booking engine.
             </p>
           </div>
-          <div className="rounded-full bg-white/10 px-4 py-2 text-sm text-[color:var(--muted)]">Signed in as {adminName}</div>
+          
         </div>
       </div>
 

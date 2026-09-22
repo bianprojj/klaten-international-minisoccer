@@ -49,7 +49,7 @@ export default function StaffFieldViewer({ adminName }: { adminName: string }) {
                 Read-only access to field availability and details for staff operations.
               </p>
             </div>
-            <div className="rounded-full bg-white/10 px-4 py-2 text-sm text-[color:var(--muted)]">Signed in as {adminName}</div>
+            
           </div>
         </div>
 
