@@ -5,6 +5,7 @@ import { getAdminSummary, getDefaultAdminSummary } from "@/lib/admin-dashboard";
 import AdminDashboard from "@/components/admin-dashboard";
 import StaffBookingViewer from "@/app/staff/bookings/StaffBookingViewer";
 import StaffPaymentViewer from "@/app/staff/payments/StaffPaymentViewer";
+import AdminResourceManager from "@/components/admin-resource-manager";
 import VenueFeatureManager from "@/components/venue-feature-manager";
 import VenueGalleryManager from "@/components/venue-gallery-manager";
 
@@ -41,6 +42,7 @@ export default async function StaffPage() {
         <AdminDashboard admin={admin} summary={summary} />
         <StaffBookingViewer adminName={admin.name} useMain={false} />
         <StaffPaymentViewer adminName={admin.name} useMain={false} />
+        <AdminResourceManager resource="invoices" canManage={admin.permissions.canManageInvoices} adminName={admin.name} />
         <VenueFeatureManager />
         <VenueGalleryManager />
       </>
@@ -48,7 +50,7 @@ export default async function StaffPage() {
   } catch (error) {
     console.error("[STAFF] Unable to render dashboard:", error);
     return (
-      <main className="flex-1 w-full min-h-screen px-4 py-12 sm:px-6 lg:px-8">
+      <main className="flex-1 px-4 py-12 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl rounded-2xl border border-amber-500/20 bg-[color:var(--surface)] p-6 sm:p-10">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-300">Dashboard unavailable</p>
           <h1 className="mt-4 text-balance text-3xl font-semibold leading-tight text-[color:var(--foreground)]">The admin dashboard could not be rendered.</h1>

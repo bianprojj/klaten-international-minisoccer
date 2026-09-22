@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { fetchJson } from "@/lib/fetch-json";
+import { LoadingOverlay, Spinner } from "@/components/ui/spinner";
 
 interface StaffPaymentItem {
   id: string;
@@ -10,11 +11,24 @@ interface StaffPaymentItem {
   status: string;
   paymentMethod: string;
   provider: string;
+  paidAt: string | null;
+  expiredAt: string | null;
   booking: {
     id: string;
     customerName: string;
     bookingDate: string;
   };
+}
+
+interface StaffPaymentFormState {
+  bookingId: string;
+  transactionId: string;
+  amount: number;
+  status: string;
+  paymentMethod: string;
+  provider: string;
+  paidAt: string;
+  expiredAt: string;
 }
 
 function statusBadge(status: string) {
@@ -41,9 +55,18 @@ export default function StaffPaymentViewer({ adminName, useMain = true }: { admi
   const [totalPages, setTotalPages] = useState(1);
   const [query, setQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editStatus, setEditStatus] = useState("");
-  const [editAmount, setEditAmount] = useState<number>(0);
+  const [editing, setEditing] = useState<StaffPaymentItem | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [formState, setFormState] = useState<StaffPaymentFormState>({
+    bookingId: "",
+    transactionId: "",
+    amount: 0,
+    status: "pending",
+    paymentMethod: "Midtrans",
+    provider: "Midtrans",
+    paidAt: "",
+    expiredAt: "",
+  });
 
   const fetchPayments = async (pageParam = 1, q = "", status = "") => {
     setLoading(true);
@@ -83,29 +106,87 @@ export default function StaffPaymentViewer({ adminName, useMain = true }: { admi
     await fetchPayments(p, query, filterStatus);
   };
 
-  const handleUpdatePayment = async (id: string) => {
+  const resetForm = () => {
+    setEditing(null);
+    setShowForm(false);
+    setFormState({
+      bookingId: "",
+      transactionId: "",
+      amount: 0,
+      status: "pending",
+      paymentMethod: "Midtrans",
+      provider: "Midtrans",
+      paidAt: "",
+      expiredAt: "",
+    });
+  };
+
+  const handleChange = (field: string, value: string | number) => {
+    setFormState((current) => ({ ...current, [field]: value }));
+  };
+
+  const handleSave = async () => {
+    setLoading(true);
+    setError(null);
+
     try {
-      const { res, data: __body } = await fetchJson(`/api/admin/payments/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: editStatus, amount: editAmount }) });
-      const data = __body;
-      if (!res.ok) throw new Error(String(data.message ?? "") || "Gagal update");
-      setEditingId(null);
-      await fetchPayments(page, query, filterStatus);
-    } catch (e) {
-      setError((e as Error).message);
+      const url = editing ? `/api/admin/payments/${editing.id}` : "/api/admin/payments";
+      const method = editing ? "PUT" : "POST";
+      const { res: response, data } = await fetchJson(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formState,
+          amount: Number(formState.amount),
+          paidAt: formState.paidAt || null,
+          expiredAt: formState.expiredAt || null,
+        }),
+      });
+      if (!response.ok) throw new Error(String(data.message ?? "") || "Unable to save payment");
+      await fetchPayments();
+      resetForm();
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleEdit = (payment: StaffPaymentItem) => {
+    setEditing(payment);
+    setShowForm(true);
+    setFormState({
+      bookingId: payment.booking.id,
+      transactionId: payment.transactionId,
+      amount: payment.amount,
+      status: payment.status,
+      paymentMethod: payment.paymentMethod,
+      provider: payment.provider,
+      paidAt: payment.paidAt ? payment.paidAt.split("T")[0] : "",
+      expiredAt: payment.expiredAt ? payment.expiredAt.split("T")[0] : "",
+    });
   };
 
   const handleDeletePayment = async (id: string) => {
     if (!confirm("Hapus pembayaran ini?")) return;
+    setLoading(true);
+    setError(null);
+
     try {
-      const { res, data: __body } = await fetchJson(`/api/admin/payments/${id}`, { method: "DELETE" });
+      const { res: response, data: __body } = await fetchJson(`/api/admin/payments/${id}`, { method: "DELETE" });
       const data = __body;
-      if (!res.ok) throw new Error(String(data.message ?? "") || "Gagal hapus");
-      await fetchPayments(page, query, filterStatus);
-    } catch (e) {
-      setError((e as Error).message);
+      if (!response.ok) throw new Error(String(data.message ?? "") || "Unable to delete payment");
+      await fetchPayments();
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setLoading(false);
     }
   };
+
+  const statusOptions = useMemo(() => ["pending", "success", "failed", "refunded", "expired", "cancelled"], []);
+  const paymentMethods = useMemo(() => ["Midtrans", "QRIS", "GoPay", "Dana", "ShopeePay", "OVO", "BCA", "BNI", "Mandiri", "Offline"], []);
+  const providers = useMemo(() => ["Midtrans", "QRIS", "GoPay", "Dana", "ShopeePay", "OVO", "BCA", "BNI", "Mandiri", "Offline"], []);
 
   const content = (
     <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8" id="staff-payments">
@@ -116,97 +197,159 @@ export default function StaffPaymentViewer({ adminName, useMain = true }: { admi
               <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[color:var(--accent-strong)]">Staff payment viewer</p>
               <h1 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">Payments</h1>
               <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
-                Read-only payment history for staff review.
+                Create, edit, and delete payment entries with staff-grade operational controls.
               </p>
             </div>
-            
           </div>
         </div>
 
-        <section className="glass-panel rounded-[1.5rem] p-5 sm:p-6">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-xl font-semibold text-white sm:text-2xl">Payment records</h2>
-            <div className="flex items-center gap-2">
-              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search transaction" className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-3 py-2 text-sm text-white" />
-              <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-3 py-2 text-sm text-white">
-                <option value="">All</option>
-                <option value="pending">pending</option>
-                <option value="success">success</option>
-                <option value="failed">failed</option>
-              </select>
-              <button onClick={handleSearch} className="btn-secondary px-3 py-1">Filter</button>
+        <div className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
+          <section className="glass-panel rounded-[1.5rem] p-5 sm:p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-white sm:text-2xl">Payment records</h2>
+                <p className="mt-2 text-sm text-[color:var(--muted)]">Create, edit, and delete payment entries.</p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search transaction" className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-3 py-2 text-sm text-white" />
+                <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-3 py-2 text-sm text-white">
+                  <option value="">All</option>
+                  {statusOptions.map((s) => (<option key={s} value={s}>{s}</option>))}
+                </select>
+                <button onClick={handleSearch} className="btn-secondary px-4 py-2">Filter</button>
+                <button onClick={() => setShowForm(true)} className="btn-secondary px-4 py-2">New payment</button>
+              </div>
             </div>
-          </div>
-          {error ? (
-            <div className="mt-4 rounded-3xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</div>
-          ) : null}
-          <div className="mt-6 overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)]">
-            <table className="w-full min-w-[860px] divide-y divide-white/10 text-left text-sm">
-              <thead className="bg-[color:rgba(255,255,255,0.03)] text-[color:var(--muted)]">
-                <tr>
-                  <th className="px-4 py-3">Booking</th>
-                  <th className="px-4 py-3">Amount</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Method</th>
-                  <th className="px-4 py-3">Provider</th>
-                  <th className="px-4 py-3">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/10">
-                {payments.map((payment) => (
-                  <tr key={payment.id} className="bg-[color:rgba(255,255,255,0.02)]">
-                    <td className="px-4 py-3">{payment.booking.customerName}</td>
-                    <td className="px-4 py-3">Rp {Number(payment.amount).toLocaleString("id-ID")}</td>
-                    <td className="px-4 py-3">
-                      {editingId === payment.id ? (
-                        <select value={editStatus} onChange={(e) => setEditStatus(e.target.value)} className="rounded border border-white/10 bg-[color:var(--background)] px-2 py-1 text-sm text-white">
-                          <option value="pending">pending</option>
-                          <option value="success">success</option>
-                          <option value="failed">failed</option>
-                          <option value="refunded">refunded</option>
-                        </select>
-                      ) : (
-                        statusBadge(payment.status)
-                      )}
-                    </td>
-                    <td className="px-4 py-3">{payment.paymentMethod}</td>
-                    <td className="px-4 py-3">{payment.provider}</td>
-                    <td className="px-4 py-3">
-                      {editingId === payment.id ? (
-                        <>
-                          <button onClick={() => handleUpdatePayment(payment.id)} className="rounded bg-emerald-600 px-3 py-1 text-sm text-white">Simpan</button>
-                          <button onClick={() => setEditingId(null)} className="ml-2 rounded bg-gray-600 px-3 py-1 text-sm text-white">Batal</button>
-                        </>
-                      ) : (
-                        <>
-                          <button onClick={() => { setEditingId(payment.id); setEditStatus(payment.status); setEditAmount(payment.amount); }} className="rounded bg-blue-600 px-3 py-1 text-sm text-white">Edit</button>
-                          <button onClick={() => handleDeletePayment(payment.id)} className="ml-2 rounded bg-rose-600 px-3 py-1 text-sm text-white">Hapus</button>
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-                {payments.length === 0 ? (
+            {error ? (
+              <div className="mt-4 rounded-3xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</div>
+            ) : null}
+            <div className="mt-6 overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)]">
+              <table className="w-full min-w-[860px] divide-y divide-white/10 text-left text-sm">
+                <thead className="bg-[color:rgba(255,255,255,0.03)] text-[color:var(--muted)]">
                   <tr>
-                    <td colSpan={6} className="px-4 py-6 text-center text-sm text-[color:var(--muted)]">
-                      {loading ? "Loading payments..." : "No payments found."}
-                    </td>
+                    <th className="px-4 py-3">Booking</th>
+                    <th className="px-4 py-3">Amount</th>
+                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3">Method</th>
+                    <th className="px-4 py-3">Provider</th>
+                    <th className="px-4 py-3">Actions</th>
                   </tr>
-                ) : null}
-              </tbody>
-            </table>
-          </div>
-          <div className="mt-4 flex items-center justify-end gap-2">
-            <button onClick={() => goToPage(page - 1)} disabled={page <= 1} className="rounded px-3 py-1 bg-white/5">Prev</button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-              <button key={p} onClick={() => goToPage(p)} className={`rounded px-3 py-1 ${p === page ? 'bg-[color:var(--accent)] text-black' : 'bg-white/5'}`}>{p}</button>
-            ))}
-            <button onClick={() => goToPage(page + 1)} disabled={page >= totalPages} className="rounded px-3 py-1 bg-white/5">Next</button>
-          </div>
-        </section>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  {payments.map((payment) => (
+                    <tr key={payment.id} className="bg-[color:rgba(255,255,255,0.02)]">
+                      <td className="px-4 py-3">{payment.booking.customerName}</td>
+                      <td className="px-4 py-3">Rp {Number(payment.amount).toLocaleString("id-ID")}</td>
+                      <td className="px-4 py-3">{statusBadge(payment.status)}</td>
+                      <td className="px-4 py-3">{payment.paymentMethod}</td>
+                      <td className="px-4 py-3">{payment.provider}</td>
+                      <td className="px-4 py-3 space-x-2">
+                        <button onClick={() => handleEdit(payment)} className="rounded-full border border-[color:rgba(56,189,248,0.24)] px-3 py-2 text-sm text-[color:var(--accent)] hover:bg-[color:rgba(56,189,248,0.06)]">
+                          Edit
+                        </button>
+                        <button onClick={() => handleDeletePayment(payment.id)} className="rounded-full border border-rose-500/20 px-3 py-2 text-sm text-rose-300 hover:bg-rose-500/10">
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {payments.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-6 text-center text-sm text-[color:var(--muted)]">
+                        {loading ? "Loading payments..." : "No payment records found."}
+                      </td>
+                    </tr>
+                  ) : null}
+                </tbody>
+              </table>
+            </div>
+            <div className="mt-4 flex items-center justify-between px-4">
+              <div className="text-sm text-[color:var(--muted)]">Total: {loading ? "..." : `${payments.length} items on this page`}</div>
+              <div className="flex gap-2">
+                <button onClick={() => goToPage(page - 1)} disabled={page <= 1} className="rounded px-3 py-1 bg-white/5">Prev</button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                  <button key={p} onClick={() => goToPage(p)} className={`rounded px-3 py-1 ${p === page ? 'bg-[color:var(--accent)] text-black' : 'bg-white/5'}`}>{p}</button>
+                ))}
+                <button onClick={() => goToPage(page + 1)} disabled={page >= totalPages} className="rounded px-3 py-1 bg-white/5">Next</button>
+              </div>
+            </div>
+          </section>
+
+          {showForm ? <section className="glass-panel rounded-[1.5rem] p-5 sm:p-6">
+            <h2 className="text-xl font-semibold text-white sm:text-2xl">Create / update payment</h2>
+            <div className="mt-6 space-y-4">
+              <div>
+                <label className="text-sm text-[color:var(--muted)]">Booking ID</label>
+                <input value={formState.bookingId} onChange={(e) => handleChange("bookingId", e.target.value)} className="mt-2 w-full rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white outline-none" />
+              </div>
+              <div>
+                <label className="text-sm text-[color:var(--muted)]">Transaction ID (kosongkan = otomatis)</label>
+                <input value={formState.transactionId} onChange={(e) => handleChange("transactionId", e.target.value)} placeholder="Auto: CASH-..." className="mt-2 w-full rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white outline-none" />
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="text-sm text-[color:var(--muted)]">Amount</label>
+                  <input type="number" value={formState.amount} onChange={(e) => handleChange("amount", Number(e.target.value))} className="mt-2 w-full rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white outline-none" />
+                </div>
+                <div>
+                  <label className="text-sm text-[color:var(--muted)]">Status</label>
+                  <select value={formState.status} onChange={(e) => handleChange("status", e.target.value)} className="mt-2 w-full rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white outline-none">
+                    {statusOptions.map((status) => (
+                      <option key={status} value={status}>{status}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="text-sm text-[color:var(--muted)]">Payment method</label>
+                  <select value={formState.paymentMethod} onChange={(e) => handleChange("paymentMethod", e.target.value)} className="mt-2 w-full rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white outline-none">
+                    {paymentMethods.map((method) => (
+                      <option key={method} value={method}>{method}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm text-[color:var(--muted)]">Provider</label>
+                  <select value={formState.provider} onChange={(e) => handleChange("provider", e.target.value)} className="mt-2 w-full rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white outline-none">
+                    {providers.map((provider) => (
+                      <option key={provider} value={provider}>{provider}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="text-sm text-[color:var(--muted)]">Paid at</label>
+                  <input type="date" value={formState.paidAt} onChange={(e) => handleChange("paidAt", e.target.value)} className="mt-2 w-full rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white outline-none" />
+                </div>
+                <div>
+                  <label className="text-sm text-[color:var(--muted)]">Expired at</label>
+                  <input type="date" value={formState.expiredAt} onChange={(e) => handleChange("expiredAt", e.target.value)} className="mt-2 w-full rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white outline-none" />
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <button onClick={handleSave} disabled={loading} className="btn-primary flex items-center gap-2 px-6 py-3 disabled:opacity-60">
+                  {loading ? <Spinner size={18} /> : null}
+                  {editing ? "Update payment" : "Create payment"}
+                </button>
+                <button onClick={resetForm} type="button" className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-6 py-3 text-sm text-white">
+                  Reset
+                </button>
+              </div>
+            </div>
+          </section> : null}
+        </div>
       </div>
     </div>
   );
 
-  return useMain ? <main className="flex-1 px-6 py-16 lg:px-8">{content}</main> : content;
+  const wrapped = (
+    <>
+      {content}
+      <LoadingOverlay show={loading} label={editing || showForm ? "Menyimpan payment..." : "Memuat payment..."} />
+    </>
+  );
+
+  return useMain ? <main className="flex-1 px-6 py-16 lg:px-8">{wrapped}</main> : wrapped;
 }
