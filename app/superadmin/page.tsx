@@ -51,8 +51,8 @@ export default async function SuperadminPage() {
         <AdminResourceManager resource="reviews" canManage={admin.permissions.canManageReviews} adminName={admin.name} />
         <AdminResourceManager resource="settings" canManage={admin.permissions.canManageSettings} adminName={admin.name} />
         <AdminResourceManager resource="users" canManage={admin.permissions.canManageAdmins} adminName={admin.name} />
-        <VenueFeatureManager />
-        <VenueGalleryManager />
+        <VenueFeatureManager canManage={admin.permissions.canManageFeatures} canRead={admin.permissions.canReadFeatures} />
+        <VenueGalleryManager canManage={admin.permissions.canManageGallery} canRead={admin.permissions.canReadGallery} />
         <AdminContentEditor />
       </>
     );

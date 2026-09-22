@@ -47,8 +47,8 @@ export default async function ManagerPage() {
         <AdminResourceManager resource="invoices" canManage={admin.permissions.canManageInvoices} adminName={admin.name} />
         <AdminResourceManager resource="reviews" canManage={admin.permissions.canManageReviews} adminName={admin.name} />
         <AdminResourceManager resource="settings" canManage={admin.permissions.canManageSettings} adminName={admin.name} />
-        <VenueFeatureManager />
-        <VenueGalleryManager />
+        <VenueFeatureManager canManage={admin.permissions.canManageFeatures} canRead={admin.permissions.canReadFeatures} />
+        <VenueGalleryManager canManage={admin.permissions.canManageGallery} canRead={admin.permissions.canReadGallery} />
       </>
     );
   } catch (error) {
