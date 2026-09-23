@@ -2,7 +2,7 @@ export const siteConfig = {
   name: "Klaten International Minisoccer",
   title: "Klaten International Minisoccer | Sewa Lapangan Mini Soccer Klaten",
   description:
-    "Klaten International Minisoccer — lapangan mini soccer premium di Klaten Utara. Booking online, harga Rp 214.000–750.000, buka 06.00–23.00 setiap hari.",
+    "Selamat datang di Klaten International Minisoccer, satu-satunya dan terbaik di Klaten! Booking online Rp 214.000–750.000, buka 06.00–23.00 setiap hari.",
   url: process.env.NEXT_PUBLIC_APP_URL || "https://klatenminisoccer.web.id",
   locale: "id_ID",
   keywords: [
