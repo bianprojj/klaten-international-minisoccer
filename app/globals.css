@@ -296,3 +296,13 @@ input.text-white::placeholder, select.text-white::placeholder, textarea.text-whi
 .text-emerald-200 { color: #065f46 !important; }
 .text-sky-300 { color: #0369a1 !important; }
 .text-amber-200 { color: #92400e !important; }
+
+/* dashboard CRUD tables: momentum swipe on touch + visible thin scrollbar */
+.table-scroll {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,81,54,0.35) transparent;
+}
+.table-scroll::-webkit-scrollbar { height: 6px; }
+.table-scroll::-webkit-scrollbar-track { background: transparent; }
+.table-scroll::-webkit-scrollbar-thumb { background: rgba(0,81,54,0.35); border-radius: 999px; }

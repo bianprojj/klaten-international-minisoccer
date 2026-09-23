@@ -63,7 +63,7 @@ export default function StaffFieldViewer({ adminName }: { adminName: string }) {
           {error ? (
             <div className="mt-4 rounded-3xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</div>
           ) : null}
-          <div className="mt-6 overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)]">
+          <div className="table-scroll mt-6 touch-pan-x touch-pan-y overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)] [-webkit-overflow-scrolling:touch]">
             <table className="w-full min-w-[680px] divide-y divide-white/10 text-left text-sm">
               <thead className="bg-[color:rgba(255,255,255,0.03)] text-[color:var(--muted)]">
                 <tr>

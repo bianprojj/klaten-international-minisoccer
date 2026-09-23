@@ -192,7 +192,7 @@ export default function ScheduleManagerClient({ adminName }: { adminName: string
             </div>
           </div>
 
-          <div className="mt-6 overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)]">
+          <div className="table-scroll mt-6 touch-pan-x touch-pan-y overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)] [-webkit-overflow-scrolling:touch]">
             <table className="hidden md:table w-full min-w-[680px] text-left text-sm">
               <thead className="bg-[color:rgba(255,255,255,0.03)] text-[color:var(--muted)]">
                 <tr>
