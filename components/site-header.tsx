@@ -13,7 +13,7 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-[1180px] flex-nowrap items-center justify-between gap-2 px-3 py-1.5 sm:px-4 lg:px-6">
         <div className="flex min-h-16 items-center md:min-h-20 min-w-0">
           <Link href="/" className="inline-flex items-center gap-3" aria-label={`Beranda ${siteConfig.name}`}>
-            <Image src="/kim-logo.png" alt="Klaten International Minisoccer" width={72} height={72} priority className="h-14 w-14 object-contain md:h-16 md:w-16" />
+            <Image src="/logo-sewa-lapangan-mini-soccer-klaten.png" alt="Logo Sewa Lapangan Mini Soccer di Klaten – Klaten International Minisoccer" width={72} height={72} priority className="h-14 w-14 object-contain md:h-16 md:w-16" />
             <span className="self-center bg-gradient-to-br from-[#005136] via-[#2c9e5f] to-[#C9D651] bg-clip-text text-sm font-black leading-tight text-transparent sm:text-base">
               KLATEN<br />
               INTERNATIONAL<br />
