@@ -135,6 +135,8 @@ export async function POST(request: Request) {
         customerName,
         email: customerEmail || undefined,
         phone: customerPhone || undefined,
+        subtotal,
+        discount,
         appBaseUrl,
       });
       await auditLog("walkin-booking-created", `Admin booking ${booking.id} for ${customerName} (Midtrans)`, customerEmail, clientIp);

@@ -122,6 +122,7 @@ export default function CheckoutPage() {
             customerEmail,
             customerPhone,
             notes: customerNotes.trim(),
+            referralCode,
           }),
         });
 
@@ -147,6 +148,8 @@ export default function CheckoutPage() {
           customerName,
           email: customerEmail,
           phone: customerPhone,
+          subtotal,
+          discount,
         }),
       });
 

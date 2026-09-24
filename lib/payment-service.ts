@@ -257,6 +257,8 @@ export async function createPaymentTransaction(input: PaymentTransactionInput & 
     },
   });
 
+  const invoiceSubtotal = Number.isFinite(Number(input.subtotal)) && Number(input.subtotal) > 0 ? Math.floor(Number(input.subtotal)) : booking.totalPrice;
+  const invoiceDiscount = Number.isFinite(Number(input.discount)) && Number(input.discount) > 0 ? Math.min(Math.floor(Number(input.discount)), invoiceSubtotal) : 0;
   await prisma.invoice.upsert({
     where: { bookingId: booking.id },
     update: {
@@ -264,7 +266,8 @@ export async function createPaymentTransaction(input: PaymentTransactionInput & 
       customerName: booking.customerName,
       customerEmail: booking.customerEmail,
       customerPhone: booking.customerPhone,
-      subtotal: booking.totalPrice,
+      subtotal: invoiceSubtotal,
+      discount: invoiceDiscount,
       total: booking.totalPrice,
       status: "issued",
       updatedAt: new Date(),
@@ -276,7 +279,8 @@ export async function createPaymentTransaction(input: PaymentTransactionInput & 
       customerName: booking.customerName,
       customerEmail: booking.customerEmail,
       customerPhone: booking.customerPhone,
-      subtotal: booking.totalPrice,
+      subtotal: invoiceSubtotal,
+      discount: invoiceDiscount,
       total: booking.totalPrice,
       status: "issued",
     },

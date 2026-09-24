@@ -39,6 +39,8 @@ export async function POST(request: Request) {
       customerName: typeof body?.customerName === "string" ? body.customerName : "Guest",
       email: typeof body?.email === "string" ? body.email : undefined,
       phone: typeof body?.phone === "string" ? body.phone : undefined,
+      subtotal: typeof body?.subtotal === "number" ? body.subtotal : undefined,
+      discount: typeof body?.discount === "number" ? body.discount : undefined,
       appBaseUrl,
     });
 

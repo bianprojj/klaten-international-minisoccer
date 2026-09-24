@@ -32,6 +32,8 @@ export interface PaymentTransactionInput {
   customerName: string;
   email?: string;
   phone?: string;
+  subtotal?: number;
+  discount?: number;
 }
 
 export interface PaymentSimulationDetails {

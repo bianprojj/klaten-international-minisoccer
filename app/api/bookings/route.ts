@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
     const customerPhone = typeof safeBody?.customerPhone === "string" ? safeBody.customerPhone.trim() : "";
     const customerEmail = typeof safeBody?.customerEmail === "string" ? safeBody.customerEmail.trim() : "";
     const notes = typeof safeBody?.notes === "string" ? safeBody.notes.trim().slice(0, 500) : "";
+    const referralCode = typeof safeBody?.referralCode === "string" ? safeBody.referralCode.trim().toUpperCase() : "";
     const validateOnly = safeBody?.validateOnly === true;
     const clientIp = request.headers.get("x-forwarded-for") ?? "unknown";
 
@@ -117,17 +118,34 @@ export async function POST(request: NextRequest) {
     const endMinutes = parseTimeToMinutes(endTime);
     const durationHours = Math.max(Math.ceil((endMinutes - startMinutes) / 60), 1);
 
-    // Calculate totalPrice by summing schedule slot prices for the requested blocks
+    // Server-authoritative pricing: subtotal (schedule) - referral discount + admin fee 2%.
+    // Must match client math in booking-form / checkout / admin-booking-creator.
     const requestedSlotTimes = requestedBlocks.map((b) => b.start);
     const slotRecords = await prisma.scheduleSlot.findMany({ where: { startTime: { in: requestedSlotTimes } } });
-    let totalPrice = 0;
+    let subtotal = 0;
     if (slotRecords && slotRecords.length > 0) {
-      totalPrice = slotRecords.reduce((sum, s) => sum + (s.price ?? 0), 0);
+      subtotal = slotRecords.reduce((sum, s) => sum + (s.price ?? 0), 0);
     } else {
       // fallback: use default field price per hour if schedule slots are not configured
       const defaultPrice = getDefaultFieldPrice();
-      totalPrice = defaultPrice * durationHours;
+      subtotal = defaultPrice * durationHours;
     }
+
+    let referralPercent = 0;
+    let referralApplied = "";
+    if (referralCode) {
+      const referral = await prisma.referralCode.findUnique({ where: { code: referralCode } });
+      if (!referral || !referral.isActive) {
+        const response = NextResponse.json({ success: false, message: "Kode referral tidak valid." }, { status: 400 });
+        response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+        return response;
+      }
+      referralPercent = Math.max(0, referral.percent ?? 0);
+      referralApplied = referral.code;
+    }
+    const discount = referralApplied ? Math.min(Math.round((subtotal * referralPercent) / 100), subtotal) : 0;
+    const adminFee = Math.round(((subtotal - discount) * 2) / 100);
+    const totalPrice = subtotal - discount + adminFee;
 
     const booking = await prisma.booking.create({
       data: {
@@ -159,6 +177,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: "Booking created successfully.",
       booking,
+      pricing: { subtotal, discount, adminFee, total: totalPrice, referralCode: referralApplied, referralPercent },
     });
     response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
 
