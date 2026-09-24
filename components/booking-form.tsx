@@ -369,7 +369,6 @@ export function BookingForm({ fields }: { fields: Field[] }) {
             <span className="font-[Manrope] text-sm text-[rgba(26,31,77,0.62)]">Estimated total</span>
             <span className="font-[Archivo] text-2xl font-extrabold">{formatCurrency(finalTotal)}</span>
           </div>
-          <p className="font-[Manrope] text-xs text-[rgba(26,31,77,0.62)]">Harga sudah termasuk admin fee {ADMIN_FEE_PERCENT}%.</p>
         </div>
 
         <div className="mt-4">
