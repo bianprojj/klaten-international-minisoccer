@@ -1,7 +1,5 @@
 "use client";
 
-import { fetchJson } from "@/lib/fetch-json";
-
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatedCard } from "@/components/animated-card";
@@ -38,11 +36,32 @@ function getSearchParam(value: string | null, fallback = "") {
   return value ?? fallback;
 }
 
+async function fetchWithTimeout(input: RequestInfo, init: RequestInit = {}, ms = 25000): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") {
+      throw new Error("Koneksi timeout. Periksa internet Anda lalu coba lagi.");
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function isNetworkError(message: string): boolean {
+  return /networkerror|failed to fetch|timeout|koneksi|network request failed/i.test(message);
+}
+
 export default function CheckoutPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [stage, setStage] = useState<string | null>(null);
+  const [createdBookingId, setCreatedBookingId] = useState<string | null>(null);
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -75,44 +94,54 @@ export default function CheckoutPage() {
     setSaving(true);
     setError(null);
 
+    let bookingId: string | null = createdBookingId;
     try {
-      const validateResp = await fetch("/api/bookings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookingDate, startTime, endTime, validateOnly: true }),
-      });
 
-      const validateResult = await validateResp.json().catch(() => null);
-      if (!validateResp.ok || !validateResult?.success) {
-        setError(validateResult?.message || "Slot no longer available.");
-        setSaving(false);
-        return;
+      if (!bookingId) {
+        setStage("Memvalidasi slot…");
+        const validateResp = await fetchWithTimeout("/api/bookings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bookingDate, startTime, endTime, validateOnly: true }),
+        });
+
+        const validateResult = await validateResp.json().catch(() => null);
+        if (!validateResp.ok || !validateResult?.success) {
+          throw new Error(validateResult?.message || "Slot no longer available.");
+        }
+
+        setStage("Membuat booking…");
+        const bookingResp = await fetchWithTimeout("/api/bookings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            bookingDate,
+            startTime,
+            endTime,
+            customerName,
+            customerEmail,
+            customerPhone,
+            notes: customerNotes.trim(),
+          }),
+        });
+
+        const bookingResult = await bookingResp.json().catch(() => null);
+        if (!bookingResp.ok || !bookingResult?.success || !bookingResult?.booking?.id) {
+          throw new Error(String(bookingResult?.message ?? "") || "Unable to create booking.");
+        }
+
+        bookingId = String(bookingResult.booking.id);
+        setCreatedBookingId(bookingId);
+      } else {
+        setStage("Melanjutkan pembayaran booking sebelumnya…");
       }
 
-      const { res: response, data: __body } = await fetchJson("/api/bookings", {
+      setStage("Membuat pembayaran…");
+      const paymentResponse = await fetchWithTimeout("/api/payments/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          bookingDate,
-          startTime,
-          endTime,
-          customerName,
-          customerEmail,
-          customerPhone,
-          notes: customerNotes.trim(),
-        }),
-      });
-
-      const result = __body;
-      if (!response.ok || !result.success || !result.booking?.id) {
-        throw new Error(String(result.message ?? "") || "Unable to create booking.");
-      }
-
-      const paymentResponse = await fetch("/api/payments/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          bookingId: result.booking.id,
+          bookingId,
           amount,
           paymentMethod: "Midtrans",
           customerName,
@@ -131,11 +160,17 @@ export default function CheckoutPage() {
         throw new Error("No direct payment URL was returned.");
       }
 
+      setStage(null);
       window.location.href = directPaymentUrl;
       return;
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      const raw = err instanceof Error ? err.message : String(err);
+      const hint = bookingId
+        ? " Booking Anda sudah tersimpan — silakan coba lagi untuk melanjutkan pembayaran tanpa membuat booking baru."
+        : " Silakan coba lagi.";
+      setError(isNetworkError(raw) ? `Koneksi terputus saat memproses.${hint}` : raw);
       setSaving(false);
+      setStage(null);
     }
   };
 
@@ -234,12 +269,18 @@ export default function CheckoutPage() {
             </p>
           ) : null}
 
+          {stage ? (
+            <p className="mt-4 text-center text-sm font-medium text-[color:var(--accent-strong)]" role="status">
+              {stage}
+            </p>
+          ) : null}
+
           <button
             onClick={handleCheckout}
             disabled={saving || !canSubmit}
             className="mt-8 btn-primary w-full py-4 text-lg disabled:opacity-60"
           >
-            {saving ? "Processing…" : canSubmit ? "Confirm and pay" : "Enter booking information to continue"}
+            {saving ? stage ?? "Processing…" : canSubmit ? "Confirm and pay" : "Enter booking information to continue"}
           </button>
         </AnimatedCard>
       </div>

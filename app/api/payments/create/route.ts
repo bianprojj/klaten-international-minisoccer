@@ -4,6 +4,8 @@ import { getRateLimitResult } from "@/lib/security-headers";
 
 const ALLOWED_HOSTS = new Set([
   "klaten-international-minisoccer.vercel.app",
+  "klatenminisoccer.web.id",
+  "www.klatenminisoccer.web.id",
   "localhost:3000",
   "127.0.0.1:3000",
 ]);
@@ -55,9 +57,10 @@ export async function POST(request: Request) {
       message: errorMsg,
       timestamp: new Date().toISOString(),
     });
-    
+
+    const isTimeout = error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError");
     return NextResponse.json(
-      { success: false, message: `Payment error: ${errorMsg}` },
+      { success: false, message: isTimeout ? "Payment gateway timeout. Silakan coba lagi." : `Payment error: ${errorMsg}` },
       { status: 500 }
     );
   }

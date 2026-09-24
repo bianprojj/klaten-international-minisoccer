@@ -75,6 +75,7 @@ export async function createMidtransTransaction(payload: MidtransCreatePayload):
       Authorization: `Basic ${Buffer.from(`${serverKey}:`).toString("base64")}`,
     },
     body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(15000),
   });
 
   const rawBody = await response.text();
@@ -114,6 +115,7 @@ export async function getMidtransTransactionStatus(orderId: string): Promise<Rec
       Authorization: `Basic ${Buffer.from(`${serverKey}:`).toString("base64")}`,
       "Accept": "application/json",
     },
+    signal: AbortSignal.timeout(15000),
   });
 
   const rawBody = await response.text();
