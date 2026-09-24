@@ -42,6 +42,8 @@ export async function POST(request: Request) {
     const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
     const payment = await prisma.payment.findUnique({ where: { id: paymentId } });
     if (!booking || !payment || payment.bookingId !== booking.id) return NextResponse.json({ success: false, message: "Booking and payment must exist and match." }, { status: 400 });
+    const existing = await prisma.invoice.findFirst({ where: { OR: [{ bookingId }, { paymentId }] } });
+    if (existing) return NextResponse.json({ success: false, message: "Invoice sudah ada untuk booking/pembayaran ini." }, { status: 409 });
     const subtotal = Math.floor(Number(body.subtotal ?? booking.totalPrice));
     const tax = Math.floor(Number(body.tax ?? 0));
     const discount = Math.floor(Number(body.discount ?? 0));

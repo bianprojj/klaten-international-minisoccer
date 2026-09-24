@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getAuthenticatedAdminFromToken, hasAdminPermission } from "@/lib/admin-auth";
 import { getRateLimitResult, sanitizeObject } from "@/lib/security-headers";
 import { getScheduleSlots, getRequestedScheduleBlocks } from "@/lib/booking-engine";
+import { createPaymentTransaction } from "@/lib/payment-service";
 import { auditLog } from "@/lib/audit-log";
 
 export const dynamic = "force-dynamic";
@@ -39,6 +40,8 @@ export async function POST(request: Request) {
     const startTime = typeof safeBody?.startTime === "string" ? safeBody.startTime : "";
     const endTime = typeof safeBody?.endTime === "string" ? safeBody.endTime : "";
     const paymentMethod = (typeof safeBody?.paymentMethod === "string" ? safeBody.paymentMethod : "Offline") as string;
+    const notes = typeof safeBody?.notes === "string" ? safeBody.notes.trim().slice(0, 500) : "";
+    const referralCode = typeof safeBody?.referralCode === "string" ? safeBody.referralCode.trim().toUpperCase() : "";
     const clientIp = request.headers.get("x-forwarded-for") ?? "unknown";
 
     if (!customerName || !customerPhone || !bookingDate || !startTime || !endTime) {
@@ -87,29 +90,68 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: "Too many requests. Please try again later." }, { status: 429 });
     }
 
+    // Referral: same rules as /api/referrals/validate (exists + active).
+    let referralPercent = 0;
+    let referralApplied = "";
+    if (referralCode) {
+      const referral = await prisma.referralCode.findUnique({ where: { code: referralCode } });
+      if (!referral || !referral.isActive) {
+        return NextResponse.json({ success: false, message: "Kode referral tidak valid." }, { status: 400 });
+      }
+      referralPercent = Math.max(0, referral.percent ?? 0);
+      referralApplied = referral.code;
+    }
+    const subtotal = totalPrice;
+    const discount = referralApplied ? Math.min(Math.round((subtotal * referralPercent) / 100), subtotal) : 0;
+    const adminFee = Math.round(((subtotal - discount) * 2) / 100);
+    const total = subtotal - discount + adminFee;
+
+    const useMidtrans = paymentMethod === "Midtrans";
+
     const booking = await prisma.booking.create({
       data: {
         bookingDate: range.start,
         startTime,
         endTime,
         durationHours,
-        totalPrice,
+        totalPrice: total,
         customerName,
         customerPhone,
         customerEmail: customerEmail || null,
-        status: "confirmed",
-        notes: "Walk-in cash booking",
+        status: useMidtrans ? "pending" : "confirmed",
+        notes: notes || (useMidtrans ? "Booking via admin (Midtrans)" : "Walk-in cash booking"),
       },
       select: { id: true, bookingDate: true, startTime: true, endTime: true, totalPrice: true, status: true },
     });
+
+    if (useMidtrans) {
+      const forwardedProto = request.headers.get("x-forwarded-proto") ?? new URL(request.url).protocol.replace(/:$/, "");
+      const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "";
+      const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || (host ? `${forwardedProto}://${host}` : "");
+      const result = await createPaymentTransaction({
+        bookingId: booking.id,
+        amount: total,
+        paymentMethod: "Midtrans",
+        customerName,
+        email: customerEmail || undefined,
+        phone: customerPhone || undefined,
+        appBaseUrl,
+      });
+      await auditLog("walkin-booking-created", `Admin booking ${booking.id} for ${customerName} (Midtrans)`, customerEmail, clientIp);
+      return NextResponse.json({
+        success: true,
+        message: "Booking dibuat, lanjutkan ke pembayaran Midtrans.",
+        data: { booking, payment: null, invoice: null, snapUrl: result.snapUrl, snapToken: result.snapToken, pricing: { subtotal, discount, adminFee, total, referralCode: referralApplied, referralPercent } },
+      }, { status: 201 });
+    }
 
     const transactionId = `CASH-${booking.id.substring(0, 8)}-${Date.now()}`;
     const payment = await prisma.payment.create({
       data: {
         bookingId: booking.id,
         transactionId,
-        amount: totalPrice,
-        paymentMethod: paymentMethod === "Offline" ? "Offline" : "Midtrans",
+        amount: total,
+        paymentMethod: "Offline",
         provider: "Offline",
         status: "success",
         paidAt: new Date(),
@@ -123,10 +165,10 @@ export async function POST(request: Request) {
         invoiceNumber,
         bookingId: booking.id,
         paymentId: payment.id,
-        subtotal: totalPrice,
+        subtotal,
         tax: 0,
-        discount: 0,
-        total: totalPrice,
+        discount,
+        total,
         status: "paid",
         issuedAt: new Date(),
         paidAt: new Date(),
@@ -139,7 +181,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       message: "Walk-in booking created successfully.",
-      data: { booking, payment, invoice },
+      data: { booking, payment, invoice, pricing: { subtotal, discount, adminFee, total, referralCode: referralApplied, referralPercent } },
     }, { status: 201 });
   } catch (error) {
     console.error("[STAFF WALK-IN] Error:", error);

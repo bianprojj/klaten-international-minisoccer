@@ -2,6 +2,7 @@
 
 import { fetchJson } from "@/lib/fetch-json";
 import { LoadingOverlay, Spinner } from "@/components/ui/spinner";
+import AdminBookingCreator from "@/components/admin-booking-creator";
 
 import { useEffect, useState } from "react";
 
@@ -54,10 +55,6 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
   const [query, setQuery] = useState("");
   const [filterDate, setFilterDate] = useState("");
   const [showWalkIn, setShowWalkIn] = useState(false);
-  const [walkInForm, setWalkInForm] = useState({ customerName: "", customerPhone: "", customerEmail: "", bookingDate: "", startTime: "", endTime: "", paymentMethod: "Offline" });
-  const [walkInError, setWalkInError] = useState<string | null>(null);
-  const [walkInSuccess, setWalkInSuccess] = useState<string | null>(null);
-  const [walkInLoading, setWalkInLoading] = useState(false);
   const [editing, setEditing] = useState<StaffBookingItem | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [formState, setFormState] = useState<StaffBookingFormState>({
@@ -107,29 +104,6 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
     if (p > totalPages) p = totalPages;
     setPage(p);
     await fetchBookings(p, query, filterDate);
-  };
-
-  const handleWalkIn = async () => {
-    setWalkInError(null);
-    setWalkInSuccess(null);
-    if (!walkInForm.customerName || !walkInForm.customerPhone || !walkInForm.bookingDate || !walkInForm.startTime || !walkInForm.endTime) {
-      setWalkInError("Nama, no HP, tanggal, dan waktu wajib diisi.");
-      return;
-    }
-    setWalkInLoading(true);
-    try {
-      const { res, data: __body } = await fetchJson("/api/staff/walk-in", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(walkInForm) });
-      const data = __body;
-      if (!res.ok) throw new Error(String(data.message ?? "") || "Gagal membuat booking");
-      setWalkInSuccess(`Booking berhasil! Invoice: ${data.data.invoice.invoiceNumber}`);
-      setWalkInForm({ customerName: "", customerPhone: "", customerEmail: "", bookingDate: "", startTime: "", endTime: "", paymentMethod: "Offline" });
-      setShowWalkIn(false);
-      await fetchBookings(1, query, filterDate);
-    } catch (e) {
-      setWalkInError((e as Error).message);
-    } finally {
-      setWalkInLoading(false);
-    }
   };
 
   const resetForm = () => {
@@ -239,36 +213,18 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
                 <input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-3 py-2 text-sm text-white" />
                 <button onClick={handleSearch} className="btn-secondary px-4 py-2">Filter</button>
                 <button onClick={() => setShowForm(true)} className="btn-secondary px-4 py-2">New booking</button>
-                <button onClick={() => setShowWalkIn(true)} className="rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-black">+ Walk-in</button>
+                <button onClick={() => setShowWalkIn((v) => !v)} className="rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-black">Buat booking pelanggan</button>
               </div>
             </div>
             {error ? (
               <div className="mt-4 rounded-3xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</div>
             ) : null}
 
-            {showWalkIn && (
-              <div className="mt-6 glass-panel rounded-3xl p-6">
-                <h3 className="text-xl font-semibold text-white">Walk-in Booking</h3>
-                <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                  <input placeholder="Nama" value={walkInForm.customerName} onChange={(e) => setWalkInForm(f => ({ ...f, customerName: e.target.value }))} className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white" />
-                  <input placeholder="No HP" value={walkInForm.customerPhone} onChange={(e) => setWalkInForm(f => ({ ...f, customerPhone: e.target.value }))} className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white" />
-                  <input type="email" placeholder="Email" value={walkInForm.customerEmail} onChange={(e) => setWalkInForm(f => ({ ...f, customerEmail: e.target.value }))} className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white" />
-                  <input type="date" placeholder="Tanggal" value={walkInForm.bookingDate} onChange={(e) => setWalkInForm(f => ({ ...f, bookingDate: e.target.value }))} className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white" />
-                  <input type="time" placeholder="Mulai" value={walkInForm.startTime} onChange={(e) => setWalkInForm(f => ({ ...f, startTime: e.target.value }))} className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white" />
-                  <input type="time" placeholder="Selesai" value={walkInForm.endTime} onChange={(e) => setWalkInForm(f => ({ ...f, endTime: e.target.value }))} className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white" />
-                  <select value={walkInForm.paymentMethod} onChange={(e) => setWalkInForm(f => ({ ...f, paymentMethod: e.target.value }))} className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-4 py-3 text-sm text-white">
-                    <option value="Offline">Cash</option>
-                    <option value="Midtrans">Midtrans</option>
-                  </select>
-                </div>
-                {walkInError ? <div className="mt-4 text-sm text-rose-200">{walkInError}</div> : null}
-                {walkInSuccess ? <div className="mt-4 text-sm text-emerald-200">{walkInSuccess}</div> : null}
-                <div className="mt-6 flex gap-3">
-                  <button onClick={handleWalkIn} disabled={walkInLoading} className="flex items-center gap-2 rounded-full bg-[color:var(--accent)] px-6 py-3 font-semibold text-black disabled:opacity-60">{walkInLoading ? <Spinner size={18} /> : null}{walkInLoading ? "Memproses..." : "Buat Booking"}</button>
-                  <button onClick={() => setShowWalkIn(false)} className="rounded-full border border-white/10 px-6 py-3 font-semibold text-white">Batal</button>
-                </div>
+            {showWalkIn ? (
+              <div className="mt-6">
+                <AdminBookingCreator />
               </div>
-            )}
+            ) : null}
 
             <p className="mt-4 text-xs text-[color:var(--muted)] md:hidden">← Geser tabel untuk lihat Edit / Hapus →</p>
             <div className="table-scroll mt-3 touch-pan-x touch-pan-y overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)] [-webkit-overflow-scrolling:touch]">
@@ -388,7 +344,7 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
   const wrapped = (
     <>
       {content}
-      <LoadingOverlay show={loading || walkInLoading} label={walkInLoading ? "Membuat booking + payment + invoice..." : editing || showForm ? "Menyimpan booking..." : "Memuat booking..."} />
+      <LoadingOverlay show={loading} label={editing || showForm ? "Menyimpan booking..." : "Memuat booking..."} />
     </>
   );
 
