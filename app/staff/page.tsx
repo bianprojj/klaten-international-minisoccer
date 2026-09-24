@@ -43,6 +43,7 @@ export default async function StaffPage() {
         <StaffBookingViewer adminName={admin.name} useMain={false} />
         <StaffPaymentViewer adminName={admin.name} useMain={false} />
         <AdminResourceManager resource="invoices" canManage={admin.permissions.canManageInvoices} adminName={admin.name} />
+        <AdminResourceManager resource="reviews" canManage={false} adminName={admin.name} />
         <VenueFeatureManager canManage={admin.permissions.canManageFeatures} canRead={admin.permissions.canReadFeatures} />
         <VenueGalleryManager canManage={admin.permissions.canManageGallery} canRead={admin.permissions.canReadGallery} />
       </>

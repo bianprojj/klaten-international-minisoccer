@@ -297,6 +297,13 @@ input.text-white::placeholder, select.text-white::placeholder, textarea.text-whi
 .text-sky-300 { color: #0369a1 !important; }
 .text-amber-200 { color: #92400e !important; }
 
+/* dashboard anchor nav: smooth scroll + offset under sticky header */
+html { scroll-behavior: smooth; }
+#bookings, #payments, #schedule-slots, #staff-bookings, #staff-payments,
+#invoices, #reviews, #settings, #users, #audit-logs, #fields, #financial-report {
+  scroll-margin-top: 96px;
+}
+
 /* dashboard CRUD tables: momentum swipe on touch + visible thin scrollbar */
 .table-scroll {
   -webkit-overflow-scrolling: touch;

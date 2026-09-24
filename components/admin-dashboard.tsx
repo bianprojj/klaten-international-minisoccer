@@ -26,31 +26,31 @@ export default function AdminDashboard({
               </div>
               <nav aria-label="Admin sections" className="mt-4 flex flex-wrap gap-2">
                 {admin.permissions.canReadFields || admin.permissions.canManageFields ? (
-                  <a href="#fields" className="rounded-full bg-white/5 px-3 py-1 text-sm text-[color:var(--foreground)] hover:bg-white/10">Fields</a>
+                  <a href="#schedule-slots" className="rounded-full bg-white/5 px-3 py-1 text-sm text-[color:var(--foreground)] hover:bg-white/10">Fields</a>
                 ) : null}
-                {admin.permissions.canReadBookings || admin.permissions.canManageBookings ? (
+                {admin.role !== "staff" && (admin.permissions.canReadBookings || admin.permissions.canManageBookings) ? (
                   <a href="#bookings" className="rounded-full bg-white/5 px-3 py-1 text-sm text-[color:var(--foreground)] hover:bg-white/10">Bookings</a>
                 ) : null}
-                {admin.permissions.canReadPayments || admin.permissions.canManagePayments ? (
+                {admin.role !== "staff" && (admin.permissions.canReadPayments || admin.permissions.canManagePayments) ? (
                   <a href="#payments" className="rounded-full bg-white/5 px-3 py-1 text-sm text-[color:var(--foreground)] hover:bg-white/10">Payments</a>
                 ) : null}
                 {admin.permissions.canReadInvoices ? (
-                  <Link href={admin.role === "super_admin" ? "/superadmin/invoices" : admin.role === "manager" ? "/manager/invoices" : "/staff/invoices"} className="rounded-full bg-white/5 px-3 py-1 text-sm text-[color:var(--foreground)] hover:bg-white/10">Invoices</Link>
+                  <a href="#invoices" className="rounded-full bg-white/5 px-3 py-1 text-sm text-[color:var(--foreground)] hover:bg-white/10">Invoices</a>
                 ) : null}
                 {admin.permissions.canReadReviews ? (
-                  <Link href={admin.role === "super_admin" ? "/superadmin/reviews" : admin.role === "manager" ? "/manager/reviews" : "/staff/reviews"} className="rounded-full bg-white/5 px-3 py-1 text-sm text-[color:var(--foreground)] hover:bg-white/10">Reviews</Link>
+                  <a href="#reviews" className="rounded-full bg-white/5 px-3 py-1 text-sm text-[color:var(--foreground)] hover:bg-white/10">Reviews</a>
                 ) : null}
                 {admin.permissions.canManageSettings ? (
-                  <Link href={admin.role === "super_admin" ? "/superadmin/settings" : "/manager/settings"} className="rounded-full bg-white/5 px-3 py-1 text-sm text-[color:var(--foreground)] hover:bg-white/10">Settings</Link>
+                  <a href="#settings" className="rounded-full bg-white/5 px-3 py-1 text-sm text-[color:var(--foreground)] hover:bg-white/10">Settings</a>
                 ) : null}
                 {admin.permissions.canManageSchedule ? (
-                  <Link href={admin.role === "super_admin" ? "/superadmin/schedule-slots" : "/manager/schedule-slots"} className="rounded-full bg-white/5 px-3 py-1 text-sm text-[color:var(--foreground)] hover:bg-white/10">Schedule slots</Link>
+                  <a href="#schedule-slots" className="rounded-full bg-white/5 px-3 py-1 text-sm text-[color:var(--foreground)] hover:bg-white/10">Schedule slots</a>
                 ) : null}
                 {admin.permissions.canManageAdmins ? (
-                  <Link href="/superadmin/users" className="rounded-full bg-white/5 px-3 py-1 text-sm text-[color:var(--foreground)] hover:bg-white/10">Admin users</Link>
+                  <a href="#users" className="rounded-full bg-white/5 px-3 py-1 text-sm text-[color:var(--foreground)] hover:bg-white/10">Admin users</a>
                 ) : null}
                 {admin.permissions.canViewReports && admin.role === "super_admin" ? (
-                  <Link href="/superadmin/audit-logs" className="rounded-full bg-white/5 px-3 py-1 text-sm text-[color:var(--foreground)] hover:bg-white/10">Audit logs</Link>
+                  <a href="#audit-logs" className="rounded-full bg-white/5 px-3 py-1 text-sm text-[color:var(--foreground)] hover:bg-white/10">Audit logs</a>
                 ) : null}
                 {admin.role === "staff" && admin.permissions.canReadBookings ? (
                   <a href="#staff-bookings" className="rounded-full bg-white/5 px-3 py-1 text-sm text-[color:var(--foreground)] hover:bg-white/10">Staff bookings</a>
