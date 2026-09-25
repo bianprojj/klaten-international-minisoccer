@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Archivo, Manrope } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { TableDragScroll } from "@/components/ui/table-drag-scroll";
 import { siteConfig } from "@/lib/site-config";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
@@ -160,6 +161,7 @@ export default function RootLayout({
         <SiteHeader />
         <div id="main-content" className="flex-1">{children}</div>
         <SiteFooter />
+        <TableDragScroll />
         <SpeedInsights />
       </body>
     </html>

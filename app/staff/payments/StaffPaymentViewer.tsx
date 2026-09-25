@@ -224,7 +224,7 @@ export default function StaffPaymentViewer({ adminName, useMain = true }: { admi
               <div className="mt-4 rounded-3xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</div>
             ) : null}
             <p className="mt-4 text-xs text-[color:var(--muted)] md:hidden">← Geser tabel untuk lihat Edit / Hapus →</p>
-            <div className="table-scroll mt-3 touch-pan-x touch-pan-y overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)] [-webkit-overflow-scrolling:touch]">
+            <div data-drag-scroll className="table-scroll mt-3 touch-pan-y overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)] [-webkit-overflow-scrolling:touch]">
               <table className="w-full min-w-[860px] divide-y divide-white/10 text-left text-sm">
                 <thead className="bg-[color:rgba(255,255,255,0.03)] text-[color:var(--muted)]">
                   <tr>
