@@ -208,7 +208,6 @@ export default function BookingManagerClient({ adminName, useMain = true }: { ad
                 <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search customer or phone" className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-3 py-2 text-sm text-white" />
                 <input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} className="rounded-3xl border border-white/10 bg-[color:var(--background)] px-3 py-2 text-sm text-white" />
                 <button onClick={handleSearch} className="btn-secondary px-4 py-2">Filter</button>
-                <button onClick={() => setShowForm(true)} className="btn-secondary px-4 py-2">New booking</button>
                 <button onClick={() => setShowCreator((v) => !v)} className="rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-black">Buat booking pelanggan</button>
               </div>
             </div>
