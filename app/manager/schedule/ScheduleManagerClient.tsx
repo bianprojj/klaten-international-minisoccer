@@ -180,7 +180,7 @@ export default function ScheduleManagerClient({ adminName }: { adminName: string
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-[1.4fr_0.6fr]">
-        <section className="glass-panel rounded-[1.5rem] p-5 sm:p-6">
+        <section className="glass-panel min-w-0 rounded-[1.5rem] p-5 sm:p-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-xl font-semibold text-white sm:text-2xl">Schedule slots</h2>
@@ -192,7 +192,7 @@ export default function ScheduleManagerClient({ adminName }: { adminName: string
             </div>
           </div>
 
-          <div data-drag-scroll className="table-scroll mt-6 touch-pan-y overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)] [-webkit-overflow-scrolling:touch]">
+          <div data-drag-scroll className="table-scroll mt-6 max-w-full touch-pan-y overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)] [-webkit-overflow-scrolling:touch]">
             <table className="w-full min-w-[680px] text-left text-sm">
               <thead className="bg-[color:rgba(255,255,255,0.03)] text-[color:var(--muted)]">
                 <tr>
@@ -286,7 +286,7 @@ export default function ScheduleManagerClient({ adminName }: { adminName: string
           </div>
         </section>
 
-        {showForm ? <section className="glass-panel rounded-[1.5rem] p-5 sm:p-6">
+          {showForm ? <section className="glass-panel min-w-0 rounded-[1.5rem] p-5 sm:p-6">
           <h2 className="text-xl font-semibold text-white sm:text-2xl">Create / update slot</h2>
           <div className="mt-6 space-y-4">
             <div>

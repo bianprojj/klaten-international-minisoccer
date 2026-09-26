@@ -204,7 +204,7 @@ export default function StaffPaymentViewer({ adminName, useMain = true }: { admi
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
-          <section className="glass-panel rounded-[1.5rem] p-5 sm:p-6">
+          <section className="glass-panel min-w-0 rounded-[1.5rem] p-5 sm:p-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-xl font-semibold text-white sm:text-2xl">Payment records</h2>
@@ -223,7 +223,7 @@ export default function StaffPaymentViewer({ adminName, useMain = true }: { admi
             {error ? (
               <div className="mt-4 rounded-3xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</div>
             ) : null}
-            <div data-drag-scroll className="table-scroll mt-3 touch-pan-y overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)] [-webkit-overflow-scrolling:touch]">
+            <div data-drag-scroll className="table-scroll mt-3 max-w-full touch-pan-y overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)] [-webkit-overflow-scrolling:touch]">
               <table className="w-full min-w-[860px] divide-y divide-white/10 text-left text-sm">
                 <thead className="bg-[color:rgba(255,255,255,0.03)] text-[color:var(--muted)]">
                   <tr>
@@ -299,7 +299,7 @@ export default function StaffPaymentViewer({ adminName, useMain = true }: { admi
             </div>
           </section>
 
-          {showForm ? <section className="glass-panel rounded-[1.5rem] p-5 sm:p-6">
+          {showForm ? <section className="glass-panel min-w-0 rounded-[1.5rem] p-5 sm:p-6">
             <h2 className="text-xl font-semibold text-white sm:text-2xl">Create / update payment</h2>
             <div className="mt-6 space-y-4">
               <div>
