@@ -3,22 +3,29 @@
 import { useEffect } from "react";
 
 const TRACK_CLASS =
-  "table-scrollbar-track mt-2 flex h-4 touch-none items-center rounded-full bg-white/5 px-1";
+  "table-scrollbar-track mt-2 flex h-4 touch-none items-center rounded-full bg-[color:var(--foreground)]/10 px-1";
 const THUMB_CLASS =
-  "h-2 shrink-0 cursor-grab touch-none rounded-full bg-[color:var(--accent)] active:cursor-grabbing";
+  "h-2 shrink-0 cursor-grab touch-none rounded-full bg-[color:var(--accent-strong)] active:cursor-grabbing";
 
 const repainters = new WeakMap<HTMLElement, () => void>();
 
 function paintThumb(scroller: HTMLElement, track: HTMLElement, thumb: HTMLElement) {
   const max = scroller.scrollWidth - scroller.clientWidth;
-  if (max <= 0 || track.clientWidth <= 0) {
+  if (max <= 0) {
     track.style.display = "none";
     return;
   }
+  // Un-hide BEFORE measuring: clientWidth of a display:none element is 0,
+  // which previously kept the scrollbar hidden forever.
   track.style.display = "";
-  const thumbWidth = Math.max((scroller.clientWidth / scroller.scrollWidth) * track.clientWidth, 28);
+  const trackWidth = track.clientWidth;
+  if (trackWidth <= 0) {
+    track.style.display = "none";
+    return;
+  }
+  const thumbWidth = Math.max((scroller.clientWidth / scroller.scrollWidth) * trackWidth, 28);
   thumb.style.width = `${thumbWidth}px`;
-  const range = Math.max(track.clientWidth - thumbWidth, 1);
+  const range = Math.max(trackWidth - thumbWidth, 1);
   thumb.style.transform = `translateX(${(scroller.scrollLeft / max) * range}px)`;
 }
 
