@@ -3,6 +3,7 @@ import { Archivo, Manrope } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { TableDragScroll } from "@/components/ui/table-drag-scroll";
+import { TableScrollbars } from "@/components/ui/table-scrollbars";
 import { siteConfig } from "@/lib/site-config";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
@@ -162,6 +163,7 @@ export default function RootLayout({
         <div id="main-content" className="flex-1">{children}</div>
         <SiteFooter />
         <TableDragScroll />
+        <TableScrollbars />
         <SpeedInsights />
       </body>
     </html>

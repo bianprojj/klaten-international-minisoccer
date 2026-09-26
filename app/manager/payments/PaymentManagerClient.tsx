@@ -227,7 +227,7 @@ export default function PaymentManagerClient({ adminName, useMain = true }: { ad
               <div className="mt-4 rounded-3xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</div>
             ) : null}
             <div data-drag-scroll className="table-scroll mt-3 touch-pan-y overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)] [-webkit-overflow-scrolling:touch]">
-              <table className="hidden w-full min-w-[860px] divide-y divide-white/10 text-left text-sm md:table">
+              <table className="w-full min-w-[860px] divide-y divide-white/10 text-left text-sm">
                 <thead className="bg-[color:rgba(255,255,255,0.03)] text-[color:var(--muted)]">
                   <tr>
                     <th className="px-4 py-3">Booking</th>
@@ -266,7 +266,7 @@ export default function PaymentManagerClient({ adminName, useMain = true }: { ad
                 </tbody>
               </table>
             </div>
-            <div className="mt-3 space-y-3 md:hidden">
+            <div className="hidden">
               {payments.map((payment) => (
                 <div key={payment.id} className="rounded-2xl border border-white/10 bg-[color:rgba(255,255,255,0.02)] p-4">
                   <div className="flex items-start justify-between gap-3">

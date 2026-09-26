@@ -193,7 +193,7 @@ export default function ScheduleManagerClient({ adminName }: { adminName: string
           </div>
 
           <div data-drag-scroll className="table-scroll mt-6 touch-pan-y overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)] [-webkit-overflow-scrolling:touch]">
-            <table className="hidden md:table w-full min-w-[680px] text-left text-sm">
+            <table className="w-full min-w-[680px] text-left text-sm">
               <thead className="bg-[color:rgba(255,255,255,0.03)] text-[color:var(--muted)]">
                 <tr>
                   <th className="px-4 py-3">Time</th>
@@ -230,7 +230,7 @@ export default function ScheduleManagerClient({ adminName }: { adminName: string
               </tbody>
             </table>
 
-            <div className="md:hidden space-y-3 p-3">
+            <div className="hidden">
               {slots.map((slot) => (
                 <div key={slot.id} className="rounded-2xl border border-white/10 bg-[color:rgba(255,255,255,0.02)] p-4">
                   <div className="flex items-start justify-between mb-3">
