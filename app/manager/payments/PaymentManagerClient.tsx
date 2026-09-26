@@ -226,9 +226,8 @@ export default function PaymentManagerClient({ adminName, useMain = true }: { ad
             {error ? (
               <div className="mt-4 rounded-3xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</div>
             ) : null}
-            <p className="mt-4 text-xs text-[color:var(--muted)] md:hidden">← Geser tabel untuk lihat Edit / Hapus →</p>
             <div data-drag-scroll className="table-scroll mt-3 touch-pan-y overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)] [-webkit-overflow-scrolling:touch]">
-              <table className="w-full min-w-[860px] divide-y divide-white/10 text-left text-sm">
+              <table className="hidden w-full min-w-[860px] divide-y divide-white/10 text-left text-sm md:table">
                 <thead className="bg-[color:rgba(255,255,255,0.03)] text-[color:var(--muted)]">
                   <tr>
                     <th className="px-4 py-3">Booking</th>
@@ -266,6 +265,30 @@ export default function PaymentManagerClient({ adminName, useMain = true }: { ad
                   ) : null}
                 </tbody>
               </table>
+            </div>
+            <div className="mt-3 space-y-3 md:hidden">
+              {payments.map((payment) => (
+                <div key={payment.id} className="rounded-2xl border border-white/10 bg-[color:rgba(255,255,255,0.02)] p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-white">{payment.booking.customerName}</p>
+                      <p className="mt-1 text-xs text-[color:var(--muted)]">{payment.paymentMethod} • {payment.provider}</p>
+                    </div>
+                    {statusBadge(payment.status)}
+                  </div>
+                  <div className="mt-2 flex items-center justify-between text-sm">
+                    <span className="text-[color:var(--muted)]">Amount</span>
+                    <span className="font-semibold text-white">Rp {Number(payment.amount).toLocaleString("id-ID")}</span>
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <button onClick={() => handleEdit(payment)} className="flex-1 rounded-full border border-[color:rgba(56,189,248,0.24)] px-3 py-2 text-sm text-[color:var(--accent)]">Edit</button>
+                    <button onClick={() => handleDelete(payment.id)} className="flex-1 rounded-full border border-rose-500/20 px-3 py-2 text-sm text-rose-300">Delete</button>
+                  </div>
+                </div>
+              ))}
+              {payments.length === 0 ? (
+                <p className="py-6 text-center text-sm text-[color:var(--muted)]">{loading ? "Loading payments..." : "No payment records found."}</p>
+              ) : null}
             </div>
             <div className="mt-4 flex flex-col gap-3 px-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="text-sm text-[color:var(--muted)]">Total: {loading ? "..." : `${payments.length} items on this page`}</div>

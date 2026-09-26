@@ -64,7 +64,7 @@ export default function StaffFieldViewer({ adminName }: { adminName: string }) {
             <div className="mt-4 rounded-3xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</div>
           ) : null}
           <div data-drag-scroll className="table-scroll mt-6 touch-pan-y overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)] [-webkit-overflow-scrolling:touch]">
-            <table className="w-full min-w-[680px] divide-y divide-white/10 text-left text-sm">
+            <table className="hidden w-full min-w-[680px] divide-y divide-white/10 text-left text-sm md:table">
               <thead className="bg-[color:rgba(255,255,255,0.03)] text-[color:var(--muted)]">
                 <tr>
                   <th className="px-4 py-3">Time</th>
@@ -93,6 +93,26 @@ export default function StaffFieldViewer({ adminName }: { adminName: string }) {
                 ) : null}
               </tbody>
             </table>
+          </div>
+          <div className="mt-3 space-y-3 p-3 md:hidden">
+            {slots.map((slot) => (
+              <div key={slot.id} className="rounded-2xl border border-white/10 bg-[color:rgba(255,255,255,0.02)] p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-white">{slot.startTime} - {slot.endTime}</p>
+                    <p className="mt-1 text-xs text-[color:var(--muted)]">{slot.dayOfWeek}</p>
+                  </div>
+                  <Switch small checked={Boolean(slot.isActive)} disabled label="Active" />
+                </div>
+                <div className="mt-2 flex items-center justify-between text-sm">
+                  <span className="text-[color:var(--muted)]">Price</span>
+                  <span className="font-semibold text-white">Rp {Number(slot.price ?? 0).toLocaleString("id-ID")}</span>
+                </div>
+              </div>
+            ))}
+            {slots.length === 0 ? (
+              <p className="py-6 text-center text-sm text-[color:var(--muted)]">{loading ? "Loading fields..." : "No fields available."}</p>
+            ) : null}
           </div>
         </section>
       </div>
