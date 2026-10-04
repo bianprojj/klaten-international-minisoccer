@@ -76,6 +76,9 @@ export default function RootLayout({
         />
         <link rel="preconnect" href="https://www.openstreetmap.org" />
         <link rel="dns-prefetch" href="https://www.openstreetmap.org" />
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
         {/* Schema.org Structured Data: LocalBusiness + SportsActivityLocation */}
         <script
           type="application/ld+json"

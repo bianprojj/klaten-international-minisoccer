@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   serverExternalPackages: ["puppeteer", "puppeteer-core", "@sparticuz/chromium"],
   async redirects() {
     return [
@@ -25,7 +26,7 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: "/:path(favicon-16x16.png|apple-touch-icon.png|android-chrome-192x192.png|android-chrome-512x512.png|logo-sewa-lapangan-mini-soccer-klaten.png|og-sewa-lapangan-mini-soccer-klaten.jpg)",
+        source: "/:path(favicon-16x16.png|apple-touch-icon.png|android-chrome-192x192.png|android-chrome-512x512.png|logo-sewa-lapangan-mini-soccer-klaten.png|og-sewa-lapangan-mini-soccer-klaten.jpg|site.webmanifest)",
         headers: [
           { key: "Cache-Control", value: "public, max-age=86400, must-revalidate" },
           { key: "x-content-type-options", value: "nosniff" },
