@@ -27,8 +27,11 @@ function resolveTransactionStatus(body: Record<string, unknown>) {
 export async function POST(request: Request) {
   try {
     const rawBody = await request.text();
-    const signature = request.headers.get("x-midtrans-signature") ?? request.headers.get("x-signature") ?? "";
     const body = rawBody ? JSON.parse(rawBody) : {};
+    // Midtrans sends signature_key inside the JSON body, not as a header.
+    // Headers are still honored for manual/test callers.
+    const bodySignature = typeof (body as Record<string, unknown>)?.signature_key === "string" ? String((body as Record<string, unknown>).signature_key) : "";
+    const signature = request.headers.get("x-midtrans-signature") || request.headers.get("x-signature") || bodySignature;
 
     if (process.env.NODE_ENV === "production" && (!signature || !verifyMidtransSignature(rawBody, signature))) {
       console.warn("[MIDTRANS] Invalid signature detected", { timestamp: new Date().toISOString() });
