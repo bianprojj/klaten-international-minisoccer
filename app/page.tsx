@@ -28,14 +28,16 @@ export const metadata: Metadata = {
 export const revalidate = 60;
 
 export default async function Home() {
-  let reviews: Review[] = [];
-  const [features, gallery, content] = await Promise.all([getVenueFeatures(), getVenueGallery(), getSiteContent()]);
+  const [features, gallery, content, reviews] = await Promise.all([
+    getVenueFeatures(),
+    getVenueGallery(),
+    getSiteContent(),
+    getReviews().catch((error) => {
+      console.error('❌ Failed to load reviews:', error);
+      return [] as Review[];
+    }),
+  ]);
   const hourlyRate = getDefaultFieldPrice();
-  try {
-    reviews = await getReviews();
-  } catch (error) {
-    console.error('❌ Failed to load reviews:', error);
-  }
   const ratings = reviews.map((r) => Number(r.rating)).filter((n) => Number.isFinite(n) && n > 0);
   const reviewCount = ratings.length;
   const ratingValue = reviewCount ? Number((ratings.reduce((a, b) => a + b, 0) / reviewCount).toFixed(1)) : 4.9;

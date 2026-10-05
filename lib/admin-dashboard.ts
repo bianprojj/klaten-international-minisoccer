@@ -37,6 +37,19 @@ function isMissingTableError(error: unknown) {
   return maybeCode === "P2021" || (typeof maybeMessage === "string" && maybeMessage.includes("does not exist"));
 }
 
+// Runs a summary query with the same degrade-to-default semantics as before.
+// All queries are independent, so callers run them concurrently.
+async function safeSummaryQuery<T>(label: string, fallbackValue: T, query: () => Promise<T>): Promise<T> {
+  try {
+    return await query();
+  } catch (error) {
+    if (!isMissingTableError(error)) {
+      console.error(label, error);
+    }
+    return fallbackValue;
+  }
+}
+
 export async function getAdminSummary(): Promise<AdminSummary> {
   const fallback = getDefaultAdminSummary();
 
@@ -49,157 +62,119 @@ export async function getAdminSummary(): Promise<AdminSummary> {
     const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
     const endOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
 
-    let revenueToday = 0;
-    let revenueThisMonth = 0;
-    let bookingsToday = 0;
-    let bookingsThisMonth = 0;
-    let peakHours: Array<{ hour: string; bookings: number }> = [];
-    let mostBookedField: { name: string; bookings: number } | null = null;
-    let pendingBookings = 0;
-    let pendingPayments = 0;
-    let totalCustomers = 0;
-    let activeCustomers = 0;
-    let newCustomersThisMonth = 0;
+    const [
+      revenueToday,
+      revenueThisMonth,
+      pendingBookings,
+      pendingPayments,
+      bookingsToday,
+      bookingsThisMonth,
+      peakHours,
+      mostBookedField,
+      customerStats,
+    ] = await Promise.all([
+      safeSummaryQuery("[ADMIN] Unable to load today's revenue summary:", 0, async () => {
+        const result = await prisma.payment.aggregate({
+          _sum: { amount: true },
+          where: { status: "success", paidAt: { gte: startOfToday, lt: endOfToday } },
+        });
+        return Number(result._sum.amount ?? 0);
+      }),
+      safeSummaryQuery("[ADMIN] Unable to load monthly revenue summary:", 0, async () => {
+        const result = await prisma.payment.aggregate({
+          _sum: { amount: true },
+          where: { status: "success", paidAt: { gte: startOfMonth, lt: endOfMonth } },
+        });
+        return Number(result._sum.amount ?? 0);
+      }),
+      safeSummaryQuery("[ADMIN] Unable to load pending bookings summary:", 0, async () => {
+        return prisma.booking.count({
+          where: { status: "pending" },
+        });
+      }),
+      safeSummaryQuery("[ADMIN] Unable to load pending payments summary:", 0, async () => {
+        return prisma.payment.count({
+          where: { status: "pending" },
+        });
+      }),
+      safeSummaryQuery("[ADMIN] Unable to load today's booking count:", 0, async () => {
+        return prisma.booking.count({
+          where: {
+            bookingDate: { gte: startOfToday, lt: endOfToday },
+            status: { in: ["confirmed", "completed"] },
+          },
+        });
+      }),
+      safeSummaryQuery("[ADMIN] Unable to load monthly booking count:", 0, async () => {
+        return prisma.booking.count({
+          where: {
+            bookingDate: { gte: startOfMonth, lt: endOfMonth },
+            status: { in: ["confirmed", "completed"] },
+          },
+        });
+      }),
+      safeSummaryQuery("[ADMIN] Unable to load peak hours summary:", [] as Array<{ hour: string; bookings: number }>, async () => {
+        const peakRows = await prisma.booking.groupBy({
+          by: ["startTime"],
+          _count: { startTime: true },
+          where: {
+            bookingDate: { gte: startOfMonth, lt: endOfMonth },
+            status: { in: ["confirmed", "completed"] },
+          },
+          orderBy: { _count: { startTime: "desc" } },
+          take: 5,
+        });
+        return peakRows.map((r) => ({ hour: r.startTime, bookings: r._count.startTime }));
+      }),
+      safeSummaryQuery("[ADMIN] Unable to load most-booked-field summary:", null as { name: string; bookings: number } | null, async () => {
+        const mostBookedCount = await prisma.booking.count({
+          where: {
+            bookingDate: { gte: startOfMonth, lt: endOfMonth },
+            status: { in: ["confirmed", "completed"] },
+          },
+        });
 
-    try {
-      const revenueTodayResult = await prisma.payment.aggregate({
-        _sum: { amount: true },
-        where: { status: "success", paidAt: { gte: startOfToday, lt: endOfToday } },
-      });
-      revenueToday = Number(revenueTodayResult._sum.amount ?? 0);
-    } catch (error) {
-      if (!isMissingTableError(error)) {
-        console.error("[ADMIN] Unable to load today's revenue summary:", error);
-      }
-    }
+        return {
+          name: "Lapangan Klaten International",
+          bookings: mostBookedCount,
+        };
+      }),
+      safeSummaryQuery(
+        "[ADMIN] Unable to load customer stats summary:",
+        { totalCustomers: 0, activeCustomers: 0, newCustomersThisMonth: 0 },
+        async () => {
+          const customerBookings = await prisma.booking.findMany({
+            select: {
+              customerEmail: true,
+              customerPhone: true,
+              createdAt: true,
+              status: true,
+            },
+          });
+          const customerKey = (booking: (typeof customerBookings)[number]) =>
+            booking.customerEmail?.trim().toLowerCase() || booking.customerPhone.trim();
+          const customers = new Map<string, (typeof customerBookings)[number]>();
 
-    try {
-      const revenueMonthResult = await prisma.payment.aggregate({
-        _sum: { amount: true },
-        where: { status: "success", paidAt: { gte: startOfMonth, lt: endOfMonth } },
-      });
-      revenueThisMonth = Number(revenueMonthResult._sum.amount ?? 0);
-    } catch (error) {
-      if (!isMissingTableError(error)) {
-        console.error("[ADMIN] Unable to load monthly revenue summary:", error);
-      }
-    }
+          for (const booking of customerBookings) {
+            const key = customerKey(booking);
+            const existing = customers.get(key);
+            if (!existing || booking.createdAt < existing.createdAt) {
+              customers.set(key, booking);
+            }
+          }
 
-    try {
-      pendingBookings = await prisma.booking.count({
-        where: { status: "pending" },
-      });
-    } catch (error) {
-      if (!isMissingTableError(error)) {
-        console.error("[ADMIN] Unable to load pending bookings summary:", error);
-      }
-    }
+          const totalCustomers = customers.size;
+          const activeCustomers = customerBookings
+            .filter((booking) => !["cancelled", "expired"].includes(booking.status))
+            .reduce((keys, booking) => keys.add(customerKey(booking)), new Set<string>()).size;
+          const newCustomersThisMonth = [...customers.values()].filter(
+            (booking) => booking.createdAt >= startOfMonth,
+          ).length;
 
-    try {
-      pendingPayments = await prisma.payment.count({
-        where: { status: "pending" },
-      });
-    } catch (error) {
-      if (!isMissingTableError(error)) {
-        console.error("[ADMIN] Unable to load pending payments summary:", error);
-      }
-    }
-
-    try {
-      bookingsToday = await prisma.booking.count({
-        where: {
-          bookingDate: { gte: startOfToday, lt: endOfToday },
-          status: { in: ["confirmed", "completed"] },
+          return { totalCustomers, activeCustomers, newCustomersThisMonth };
         },
-      });
-    } catch (error) {
-      if (!isMissingTableError(error)) {
-        console.error("[ADMIN] Unable to load today's booking count:", error);
-      }
-    }
-
-    try {
-      bookingsThisMonth = await prisma.booking.count({
-        where: {
-          bookingDate: { gte: startOfMonth, lt: endOfMonth },
-          status: { in: ["confirmed", "completed"] },
-        },
-      });
-    } catch (error) {
-      if (!isMissingTableError(error)) {
-        console.error("[ADMIN] Unable to load monthly booking count:", error);
-      }
-    }
-
-    try {
-      const peakRows = await prisma.booking.groupBy({
-        by: ["startTime"],
-        _count: { startTime: true },
-        where: {
-          bookingDate: { gte: startOfMonth, lt: endOfMonth },
-          status: { in: ["confirmed", "completed"] },
-        },
-        orderBy: { _count: { startTime: "desc" } },
-        take: 5,
-      });
-      peakHours = peakRows.map((r) => ({ hour: r.startTime, bookings: r._count.startTime }));
-    } catch (error) {
-      if (!isMissingTableError(error)) {
-        console.error("[ADMIN] Unable to load peak hours summary:", error);
-      }
-    }
-
-    try {
-      const mostBookedCount = await prisma.booking.count({
-        where: {
-          bookingDate: { gte: startOfMonth, lt: endOfMonth },
-          status: { in: ["confirmed", "completed"] },
-        },
-      });
-
-      mostBookedField = {
-        name: "Lapangan Klaten International",
-        bookings: mostBookedCount,
-      };
-    } catch (error) {
-      if (!isMissingTableError(error)) {
-        console.error("[ADMIN] Unable to load most-booked-field summary:", error);
-      }
-    }
-
-    try {
-      const customerBookings = await prisma.booking.findMany({
-        select: {
-          customerEmail: true,
-          customerPhone: true,
-          createdAt: true,
-          status: true,
-        },
-      });
-      const customerKey = (booking: (typeof customerBookings)[number]) =>
-        booking.customerEmail?.trim().toLowerCase() || booking.customerPhone.trim();
-      const customers = new Map<string, (typeof customerBookings)[number]>();
-
-      for (const booking of customerBookings) {
-        const key = customerKey(booking);
-        const existing = customers.get(key);
-        if (!existing || booking.createdAt < existing.createdAt) {
-          customers.set(key, booking);
-        }
-      }
-
-      totalCustomers = customers.size;
-      activeCustomers = customerBookings
-        .filter((booking) => !["cancelled", "expired"].includes(booking.status))
-        .reduce((keys, booking) => keys.add(customerKey(booking)), new Set<string>()).size;
-      newCustomersThisMonth = [...customers.values()].filter(
-        (booking) => booking.createdAt >= startOfMonth,
-      ).length;
-    } catch (error) {
-      if (!isMissingTableError(error)) {
-        console.error("[ADMIN] Unable to load customer stats summary:", error);
-      }
-    }
+      ),
+    ]);
 
     return {
       revenueToday,
@@ -210,7 +185,7 @@ export async function getAdminSummary(): Promise<AdminSummary> {
       pendingPayments,
       peakHours,
       mostBookedField,
-      customerStats: { totalCustomers, activeCustomers, newCustomersThisMonth },
+      customerStats,
     };
   } catch (error) {
     console.error("[ADMIN] Unable to load dashboard summary:", error);

@@ -22,6 +22,7 @@ export function auditLog(event: string, details: string, actor?: string, ip?: st
   };
 
   auditEntries.push(entry);
+  if (auditEntries.length > 500) auditEntries.splice(0, auditEntries.length - 500);
   void prisma.auditLog
     .create({
       data: {

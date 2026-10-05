@@ -212,6 +212,7 @@ export async function sendNotification(event: NotificationEvent, payload: Notifi
   }
 
   notificationHistory.push(result);
+  if (notificationHistory.length > 200) notificationHistory.splice(0, notificationHistory.length - 200);
   return result;
 }
 
