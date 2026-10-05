@@ -49,6 +49,10 @@ export default async function Home() {
     { q: "Bagaimana cara booking lapangan Klaten online?", a: "Pilih tanggal dan jam di halaman Booking, isi nama dan WhatsApp, lalu bayar via Midtrans. Konfirmasi instan." },
     { q: "Jam berapa lapangan buka?", a: "Setiap hari 06.00–23.00 WIB, termasuk akhir pekan dan hari libur." },
     { q: "Apakah cocok untuk futsal dan komunitas?", a: "Ya. Lapangan 5v5 premium, lampu malam, sewa bola dan sepatu, ruang ganti, cocok untuk futsal, mini soccer, dan komunitas." },
+    { q: "Apakah KIM satu-satunya minisoccer di Klaten?", a: "Ya. Klaten International Minisoccer (KIM) adalah satu-satunya lapangan mini soccer standar internasional di Klaten — pilihan utama komunitas futsal dan mini soccer Klaten Utara dan sekitarnya." },
+    { q: "Berapa tarif sewa lapangan KIM per jam? Apakah ada yang murah?", a: `Tarif mulai ${PRICE_RANGE_TEXT} per jam, tergantung jam main (siang lebih hemat, prime time malam menyesuaikan). Pantau promo di media sosial kami untuk harga sewa lapangan murah Klaten.` },
+    { q: "Bisa main malam hari? Apakah cocok untuk mabar atau sparing komunitas?", a: "Bisa. Lapangan bola KIM Klaten buka 06.00–23.00 setiap hari dengan lampu malam, cocok untuk mabar, sparing futsal, dan latihan rutin komunitas." },
+    { q: "Apakah KIM cocok untuk turnamen atau event futsal?", a: "Cocok. Lapangan mini soccer 5v5 premium dengan fasilitas lengkap — sering dipakai event dan turnamen komunitas. Hubungi admin untuk reservasi jadwal turnamen atau sewa event." },
   ];
   const structuredData = {
     "@context": "https://schema.org",
