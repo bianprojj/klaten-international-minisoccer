@@ -42,6 +42,8 @@ export default async function Home() {
   const reviewCount = ratings.length;
   const ratingValue = reviewCount ? Number((ratings.reduce((a, b) => a + b, 0) / reviewCount).toFixed(1)) : 4.9;
   const faqs = [
+    { q: "Apa itu KIM soccerfield Klaten?", a: "KIM adalah singkatan dari Klaten International Minisoccer (KIM soccerfield) — lapangan bola mini soccer 5v5 premium di Klaten Utara. Orang juga mengenalnya sebagai KIM minisoccer atau lapangan bola KIM Klaten." },
+    { q: "Di mana lapangan bola KIM Klaten?", a: "Lapangan bola KIM Klaten (Klaten International Minisoccer) di Jl. Desa Karanganom, Karanganom, Klaten Utara, Klaten, Jawa Tengah. Buka setiap hari 06.00–23.00 WIB." },
     { q: "Di mana lapangan mini soccer di Klaten?", a: "Klaten International Minisoccer di Jl. Desa Karanganom, Karanganom, Klaten Utara, Klaten, Jawa Tengah. Buka setiap hari 06.00–23.00 WIB." },
     { q: "Berapa harga sewa lapangan Klaten?", a: `Harga sewa sekitar ${PRICE_RANGE_TEXT} per jam. ${PRICE_DISCOUNT_NOTE}` },
     { q: "Bagaimana cara booking lapangan Klaten online?", a: "Pilih tanggal dan jam di halaman Booking, isi nama dan WhatsApp, lalu bayar via Midtrans. Konfirmasi instan." },
@@ -54,8 +56,9 @@ export default async function Home() {
       {
         "@type": "SportsActivityLocation",
         "@id": `${siteConfig.url}/#venue`,
-        name: "Klaten International Minisoccer - Sewa Lapangan Mini Soccer di Klaten",
-        url: siteConfig.url,
+          name: "Klaten International Minisoccer - Sewa Lapangan Mini Soccer di Klaten",
+          alternateName: ["KIM", "KIM Minisoccer", "KIM Soccerfield", "Lapangan Bola KIM Klaten"],
+          url: siteConfig.url,
         image: [`${siteConfig.url}/android-chrome-512x512.png`],
         telephone: siteConfig.phone,
         email: siteConfig.email,

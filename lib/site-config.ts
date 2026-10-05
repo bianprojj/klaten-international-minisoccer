@@ -6,6 +6,13 @@ export const siteConfig = {
   url: process.env.NEXT_PUBLIC_APP_URL || "https://klatenminisoccer.web.id",
   locale: "id_ID",
   keywords: [
+    "kim minisoccer",
+    "kim soccerfield",
+    "kim soccerfield klaten",
+    "lapangan bola kim klaten",
+    "lapangan bola klaten",
+    "kim klaten",
+    "soccerfield klaten",
     "klaten international minisoccer",
     "lapangan di klaten",
     "sewa lapangan klaten",

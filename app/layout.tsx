@@ -88,6 +88,7 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": ["SportsActivityLocation", "LocalBusiness"],
               "name": siteConfig.name,
+              "alternateName": ["KIM", "KIM Minisoccer", "KIM Soccerfield", "Lapangan Bola KIM Klaten"],
               "description": siteConfig.description,
               "url": siteConfig.url,
               "telephone": siteConfig.phone,
