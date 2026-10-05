@@ -7,7 +7,7 @@ import AdminResourceManager from "@/components/admin-resource-manager";
 import VenueFeatureManager from "@/components/venue-feature-manager";
 import VenueGalleryManager from "@/components/venue-gallery-manager";
 import ScheduleManagerClient from "@/app/manager/schedule/ScheduleManagerClient";
-import BookingManagerClient from "@/app/manager/bookings/BookingManagerClient";
+import StaffBookingViewer from "@/app/staff/bookings/StaffBookingViewer";
 import PaymentManagerClient from "@/app/manager/payments/PaymentManagerClient";
 
 export const dynamic = "force-dynamic";
@@ -41,7 +41,7 @@ export default async function ManagerPage() {
     return (
       <>
         <AdminDashboard admin={admin} summary={summary} />
-<BookingManagerClient adminName={admin.name} useMain={false} />
+        <StaffBookingViewer adminName={admin.name} useMain={false} />
 <PaymentManagerClient adminName={admin.name} useMain={false} />
 <ScheduleManagerClient adminName={admin.name} />
         <AdminResourceManager resource="invoices" canManage={admin.permissions.canManageInvoices} adminName={admin.name} />

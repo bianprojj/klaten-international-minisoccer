@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getAuthenticatedAdminFromToken, getAdminPanelPath, isAdminRoleAllowed } from "@/lib/admin-auth";
-import BookingManagerClient from "./BookingManagerClient";
+import StaffBookingViewer from "@/app/staff/bookings/StaffBookingViewer";
 
 export const dynamic = "force-dynamic";
 
@@ -18,5 +18,5 @@ export default async function ManagerBookingsPage() {
     redirect(`${getAdminPanelPath(admin.role)}/login`);
   }
 
-  return <BookingManagerClient adminName={admin.name} />;
+  return <StaffBookingViewer adminName={admin.name} />;
 }
