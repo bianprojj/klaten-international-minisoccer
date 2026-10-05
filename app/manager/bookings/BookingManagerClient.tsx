@@ -2,6 +2,7 @@
 
 import { fetchJson } from "@/lib/fetch-json";
 import { LoadingOverlay, Spinner } from "@/components/ui/spinner";
+import { TableBodySkeleton } from "@/components/ui/skeleton";
 import AdminBookingCreator from "@/components/admin-booking-creator";
 
 import { useEffect, useState } from "react";
@@ -216,8 +217,9 @@ export default function BookingManagerClient({ adminName, useMain = true }: { ad
               <div className="mt-4 rounded-3xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</div>
             ) : null}
 
+            {loading ? <span className="sr-only" role="status">Memuat data booking…</span> : null}
             <div data-drag-scroll className="table-scroll mt-3 max-w-full touch-pan-y overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)] [-webkit-overflow-scrolling:touch]">
-              <table className="w-full min-w-[860px] divide-y divide-white/10 text-left text-sm">
+              <table aria-busy={loading} className="w-full min-w-[860px] divide-y divide-white/10 text-left text-sm">
                 <thead className="bg-[color:rgba(255,255,255,0.03)] text-[color:var(--muted)]">
                   <tr>
                     <th className="px-4 py-3">Customer</th>
@@ -244,10 +246,13 @@ export default function BookingManagerClient({ adminName, useMain = true }: { ad
                       </td>
                     </tr>
                   ))}
-                  {bookings.length === 0 ? (
+                  {loading && bookings.length === 0 ? (
+                    <TableBodySkeleton rows={6} cols={5} />
+                  ) : null}
+                  {!loading && bookings.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="px-4 py-6 text-center text-sm text-[color:var(--muted)]">
-                        {loading ? "Loading bookings..." : "No bookings found."}
+                        No bookings found.
                       </td>
                     </tr>
                   ) : null}

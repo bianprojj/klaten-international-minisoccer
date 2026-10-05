@@ -4,6 +4,7 @@ import { fetchJson } from "@/lib/fetch-json";
 
 import { useState } from "react";
 import { AnimatedCard } from "@/components/animated-card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency } from "@/utils/formatting";
 
 type BookingHistoryItem = {
@@ -153,7 +154,15 @@ export default function BookingHistoryPage() {
 
             <div className="mt-8">
               {loading ? (
-                <div className="glass-panel rounded-3xl p-6 text-sm text-[color:var(--muted)]">Loading booking history…</div>
+                <div className="glass-panel rounded-3xl p-6" aria-busy="true">
+                  <span className="sr-only" role="status">Memuat riwayat booking…</span>
+                  <div className="space-y-3" aria-hidden="true">
+                    <Skeleton className="block h-6 w-1/3" />
+                    <Skeleton className="block h-4 w-full" />
+                    <Skeleton className="block h-4 w-5/6" />
+                    <Skeleton className="block h-4 w-2/3" />
+                  </div>
+                </div>
               ) : bookings.length === 0 ? (
                 <div className="glass-panel rounded-3xl p-6 text-sm text-[color:var(--muted)]">No bookings found for this email or phone number.</div>
               ) : (

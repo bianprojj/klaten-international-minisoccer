@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { formatDayOfWeek, normalizeDayOfWeek, EVERYDAY_VALUE, WEEKDAYS_VALUE, WEEKEND_VALUE } from "@/lib/schedule-days";
 
 import { LoadingOverlay, Spinner } from "@/components/ui/spinner";
+import { TableBodySkeleton } from "@/components/ui/skeleton";
 
 type ScheduleSlotItem = {
   id: string;
@@ -192,8 +193,9 @@ export default function ScheduleManagerClient({ adminName }: { adminName: string
             </div>
           </div>
 
+          {loading ? <span className="sr-only" role="status">Memuat jadwal…</span> : null}
           <div data-drag-scroll className="table-scroll mt-6 max-w-full touch-pan-y overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)] [-webkit-overflow-scrolling:touch]">
-            <table className="w-full min-w-[680px] text-left text-sm">
+            <table aria-busy={loading} className="w-full min-w-[680px] text-left text-sm">
               <thead className="bg-[color:rgba(255,255,255,0.03)] text-[color:var(--muted)]">
                 <tr>
                   <th className="px-4 py-3">Time</th>
@@ -220,10 +222,13 @@ export default function ScheduleManagerClient({ adminName }: { adminName: string
                     </td>
                   </tr>
                 ))}
-                {slots.length === 0 ? (
+                {loading && slots.length === 0 ? (
+                  <TableBodySkeleton rows={6} cols={6} />
+                ) : null}
+                {!loading && slots.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-4 py-6 text-center text-sm text-[color:var(--muted)]">
-                      {loading ? "Loading schedule slots..." : "No schedule slots found."}
+                      No schedule slots found.
                     </td>
                   </tr>
                 ) : null}
