@@ -596,10 +596,15 @@ export async function processWebhookEvent(transactionId: string, status: Payment
         })
       : undefined;
 
+    const invoiceSubtotal = Number(invoice?.subtotal ?? 0);
+    const invoiceDiscount = Number(invoice?.discount ?? 0);
     await sendNotification("email-confirmation", {
       bookingId: booking.id,
       invoiceNumber: invoice?.invoiceNumber,
       amount: updatedPayment.amount,
+      subtotal: invoiceSubtotal > 0 ? invoiceSubtotal : undefined,
+      discount: invoiceDiscount > 0 ? invoiceDiscount : undefined,
+      adminFee: Math.max(0, Math.round(updatedPayment.amount - invoiceSubtotal + invoiceDiscount)) || undefined,
       customerName: booking.customerName,
       fieldName: DEFAULT_FIELD_NAME,
       startAt: `${formatJakartaDateKey(booking.bookingDate)} ${booking.startTime} WIB`,

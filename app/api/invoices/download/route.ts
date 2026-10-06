@@ -59,9 +59,9 @@ export async function GET(request: Request) {
     },
   };
 
-  // Default live: Classic HTML/Puppeteer. Legacy only if ?format=legacy or engine fails.
+  // Default live: jsPDF, then Classic HTML/Puppeteer, then legacy.
   let pdfBuffer: Buffer;
-  let engine: "classic" | "legacy";
+  let engine: "jspdf" | "classic" | "legacy";
   if (forceLegacy) {
     pdfBuffer = generateInvoicePdfBuffer(pdfPayload);
     engine = "legacy";

@@ -303,13 +303,22 @@ function toClassicInvoicePayload(invoice: InvoicePdfInput) {
 }
 
 /**
- * Classic (HTML/Puppeteer) first, legacy fallback on failure.
+ * jsPDF first (fast, no browser), then Classic HTML/Puppeteer, then legacy.
  * Used by live download route + email attachment.
  */
-export async function generateInvoicePdfBufferAuto(invoice: InvoicePdfInput): Promise<{ buffer: Buffer; engine: "classic" | "legacy" }> {
+export async function generateInvoicePdfBufferAuto(invoice: InvoicePdfInput): Promise<{ buffer: Buffer; engine: "jspdf" | "classic" | "legacy" }> {
   // Allow emergency opt-out: INVOICE_PDF_ENGINE=legacy forces old generator.
   if (process.env.INVOICE_PDF_ENGINE === "legacy") {
     return { buffer: generateInvoicePdfBuffer(invoice), engine: "legacy" };
+  }
+  try {
+    const mod = await import("./invoice-jspdf");
+    return { buffer: mod.buildInvoicePdfBufferJsPdf(invoice), engine: "jspdf" };
+  } catch (err) {
+    console.warn("[invoice-pdf] jsPDF engine failed, trying classic HTML", {
+      invoiceNumber: invoice.invoiceNumber,
+      error: err instanceof Error ? err.message : String(err),
+    });
   }
   try {
     const mod = await import("./invoice-html-pdf");

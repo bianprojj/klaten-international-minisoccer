@@ -14,7 +14,10 @@ export async function GET() {
       fieldName: "Mini Soccer Field",
       startAt: "2026-08-30 18:00",
       endAt: "2026-08-30 19:30",
-      amount: 300000,
+      amount: 275400,
+      subtotal: 300000,
+      discount: 30000,
+      adminFee: 5400,
       invoiceNumber: "INV-TEST-001",
       attachment: {
         filename: "invoice-test-001.pdf",

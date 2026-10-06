@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { siteConfig } from "./site-config";
 
 export type NotificationEvent =
   | "email-confirmation"
@@ -22,6 +23,9 @@ export interface NotificationPayload {
   orderId?: string;
   reason?: string;
   invoiceNumber?: string;
+  subtotal?: number;
+  discount?: number;
+  adminFee?: number;
   attachment?: {
     filename: string;
     content: string;
@@ -92,10 +96,10 @@ function buildMessage(event: NotificationEvent, payload: NotificationPayload) {
   }
 }
 
-function getEmailSubject(event: NotificationEvent) {
+function getEmailSubject(event: NotificationEvent, payload?: NotificationPayload) {
   switch (event) {
     case "email-confirmation":
-      return "Booking confirmed";
+      return payload?.invoiceNumber ? `Booking Dikonfirmasi – ${payload.invoiceNumber}` : "Booking Dikonfirmasi";
     case "payment-reminder":
       return "Payment reminder";
     case "booking-cancelled":
@@ -103,6 +107,81 @@ function getEmailSubject(event: NotificationEvent) {
     default:
       return "Notification from MiniSoccer";
   }
+}
+
+function formatRupiah(amount?: number): string {
+  return `Rp ${Math.round(Number(amount) || 0).toLocaleString("id-ID")}`;
+}
+
+function buildConfirmationHtml(payload: NotificationPayload): string {
+  const siteUrl = siteConfig.url.replace(/\/+$/, "");
+  const logoUrl = `${siteUrl}/logo-invoice-400.png`;
+  const subtotal = payload.subtotal ?? payload.amount ?? 0;
+  const discount = payload.discount ?? 0;
+  const adminFee = payload.adminFee ?? 0;
+  const total = payload.amount ?? 0;
+  const invoiceUrl = payload.invoiceNumber
+    ? `${siteUrl}/api/invoices/download?invoiceNumber=${encodeURIComponent(payload.invoiceNumber)}`
+    : `${siteUrl}/booking-history`;
+
+  return `<!doctype html>
+<html lang="id">
+<body style="margin:0;padding:0;background-color:#F1EED9;">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">Booking Anda dikonfirmasi. Invoice PDF terlampir di email ini.</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F1EED9;padding:24px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#FFFFFF;border-radius:16px;overflow:hidden;">
+          <tr>
+            <td style="background-color:#005136;padding:28px 32px;text-align:center;">
+              <img src="${logoUrl}" alt="Klaten International Minisoccer" width="72" style="display:block;margin:0 auto 12px;border:0;" />
+              <div style="font-family:Arial,sans-serif;font-size:22px;font-weight:bold;color:#FFFFFF;">Booking Dikonfirmasi</div>
+              <div style="font-family:Arial,sans-serif;font-size:13px;color:#C9D651;margin-top:6px;">Terima kasih, ${payload.customerName ?? "Guest"}! Lapangan siap untuk Anda.</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:28px 32px;font-family:Arial,sans-serif;color:#1A1F4D;">
+              <p style="margin:0 0 16px;font-size:14px;line-height:1.6;">Halo <strong>${payload.customerName ?? "Guest"}</strong>,<br />Pembayaran Anda telah kami terima. Berikut ringkasan booking:</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F1EED9;border-radius:12px;">
+                <tr><td style="padding:14px 16px;font-size:13px;">
+                  <div style="margin-bottom:8px;"><span style="color:#5b6478;">Lapangan</span><br /><strong>${payload.fieldName ?? "Mini Soccer"}</strong></div>
+                  <div style="margin-bottom:8px;"><span style="color:#5b6478;">Jadwal</span><br /><strong>${payload.startAt ?? "-"} — ${payload.endAt ?? "-"}</strong></div>
+                  <div><span style="color:#5b6478;">ID Booking</span><br /><strong>${payload.bookingId ?? "-"}</strong></div>
+                </td></tr>
+              </table>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;font-size:13px;">
+                <tr><td style="padding:4px 0;color:#5b6478;">Subtotal</td><td align="right">${formatRupiah(subtotal)}</td></tr>
+                ${discount > 0 ? `<tr><td style="padding:4px 0;color:#005136;">Diskon referral</td><td align="right" style="color:#005136;">-${formatRupiah(discount)}</td></tr>` : ""}
+                ${adminFee > 0 ? `<tr><td style="padding:4px 0;color:#5b6478;">Admin fee (2%)</td><td align="right">${formatRupiah(adminFee)}</td></tr>` : ""}
+                <tr><td style="padding:8px 0 0;font-size:16px;font-weight:bold;">Total Lunas</td><td align="right" style="padding:8px 0 0;font-size:16px;font-weight:bold;color:#005136;">${formatRupiah(total)}</td></tr>
+                ${payload.invoiceNumber ? `<tr><td style="padding:4px 0;color:#5b6478;">No. Invoice</td><td align="right"><strong>${payload.invoiceNumber}</strong></td></tr>` : ""}
+              </table>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:20px;">
+                <tr>
+                  <td align="center" style="padding-bottom:10px;">
+                    <a href="${invoiceUrl}" style="display:inline-block;background-color:#C9D651;color:#1A1F4D;font-size:14px;font-weight:bold;text-decoration:none;padding:12px 28px;border-radius:999px;">Download Invoice (PDF)</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center">
+                    <a href="${siteUrl}/booking-history" style="font-size:13px;color:#005136;">Lihat Riwayat Booking</a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:20px 0 0;font-size:12px;color:#5b6478;">File PDF invoice juga terlampir di email ini. Sampai jumpa di lapangan!</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color:#005136;padding:18px 32px;text-align:center;font-family:Arial,sans-serif;font-size:11px;color:#FFFFFF;">
+              ${siteConfig.address}<br />Telp ${siteConfig.phone} &nbsp;•&nbsp; ${siteConfig.email}
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
 }
 
 async function sendEmail(event: NotificationEvent, payload: NotificationPayload) {
@@ -128,22 +207,9 @@ async function sendEmail(event: NotificationEvent, payload: NotificationPayload)
   });
 
   const { message } = buildMessage(event, payload);
-  const subject = getEmailSubject(event);
+  const subject = getEmailSubject(event, payload);
 
-  const body = event === "email-confirmation"
-    ? `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#0f172a;">
-        <h2 style="margin-bottom:12px;">Booking Confirmed</h2>
-        <p>${message}</p>
-        <p><strong>Customer:</strong> ${payload.customerName ?? "Guest"}</p>
-        <p><strong>Email:</strong> ${payload.email ?? "N/A"}</p>
-        <p><strong>Phone:</strong> ${payload.phone ?? "N/A"}</p>
-        <p><strong>Field:</strong> ${payload.fieldName ?? "N/A"}</p>
-        <p><strong>Schedule:</strong> ${payload.startAt ?? "N/A"} - ${payload.endAt ?? "N/A"}</p>
-        <p><strong>Amount:</strong> Rp ${payload.amount?.toLocaleString("id-ID") ?? "0"}</p>
-        <p><strong>Booking ID:</strong> ${payload.bookingId ?? "N/A"}</p>
-        ${payload.invoiceNumber ? `<p><strong>Invoice:</strong> ${payload.invoiceNumber}</p>` : ""}
-      </div>`
-    : `<p>${message}</p>`;
+  const body = event === "email-confirmation" ? buildConfirmationHtml(payload) : `<p>${message}</p>`;
 
   const emailPayload: Parameters<typeof resendClient.emails.send>[0] = {
     from,
