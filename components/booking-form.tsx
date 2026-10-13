@@ -284,7 +284,7 @@ export function BookingForm({ fields }: { fields: Field[] }) {
           ) : slots.length === 0 ? (
             <div className="rounded-[20px] border border-[rgba(0,81,54,0.16)] bg-[#FFFFFF] p-6 font-[Manrope] text-sm text-[rgba(26,31,77,0.62)]">No schedule available for this field on the selected date.</div>
           ) : (
-            <div className="slot-scroll grid max-h-[600px] grid-cols-1 gap-3 overflow-y-auto pr-1 sm:grid-cols-2">
+            <div className="slot-scroll grid max-h-[588px] grid-cols-1 gap-3 overflow-y-auto pr-1 sm:grid-cols-2">
               {slots.map((slot) => {
                 const label = `${slot.startTime} - ${slot.endTime}`;
                 const isSelected = selectedIds.has(slot.id);
