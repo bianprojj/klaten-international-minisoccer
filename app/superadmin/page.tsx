@@ -10,6 +10,7 @@ import StaffBookingViewer from "@/app/staff/bookings/StaffBookingViewer";
 import PaymentManagerClient from "@/app/manager/payments/PaymentManagerClient";
 import VenueFeatureManager from "@/components/venue-feature-manager";
 import VenueGalleryManager from "@/components/venue-gallery-manager";
+import ScheduleBoard from "@/components/schedule-board";
 import { AdminContentEditor } from "@/components/admin-content-editor";
 
 export const dynamic = "force-dynamic";
@@ -43,6 +44,7 @@ export default async function SuperadminPage() {
     return (
       <>
         <AdminDashboard admin={admin} summary={summary} />
+        <ScheduleBoard />
         <FinancialReport adminName={admin.name} />
         <ScheduleManagerClient adminName={admin.name} />
         <StaffBookingViewer adminName={admin.name} useMain={false} />

@@ -6,6 +6,7 @@ import AdminDashboard from "@/components/admin-dashboard";
 import StaffBookingViewer from "@/app/staff/bookings/StaffBookingViewer";
 import StaffPaymentViewer from "@/app/staff/payments/StaffPaymentViewer";
 import AdminResourceManager from "@/components/admin-resource-manager";
+import ScheduleBoard from "@/components/schedule-board";
 import VenueFeatureManager from "@/components/venue-feature-manager";
 import VenueGalleryManager from "@/components/venue-gallery-manager";
 
@@ -40,6 +41,7 @@ export default async function StaffPage() {
     return (
       <>
         <AdminDashboard admin={admin} summary={summary} />
+        <ScheduleBoard />
         <StaffBookingViewer adminName={admin.name} useMain={false} />
         <StaffPaymentViewer adminName={admin.name} useMain={false} />
         <AdminResourceManager resource="invoices" canManage={admin.permissions.canManageInvoices} adminName={admin.name} />

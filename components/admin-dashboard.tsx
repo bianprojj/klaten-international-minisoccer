@@ -46,6 +46,9 @@ export default function AdminDashboard({
                 {admin.permissions.canManageSchedule ? (
                   <a href="#schedule-slots" className="rounded-full bg-white/5 px-3 py-1 text-sm text-[color:var(--foreground)] hover:bg-white/10">Schedule slots</a>
                 ) : null}
+                {admin.permissions.canReadBookings || admin.permissions.canManageBookings ? (
+                  <a href="#schedule-board" className="rounded-full bg-white/5 px-3 py-1 text-sm text-[color:var(--foreground)] hover:bg-white/10">Papan Jadwal</a>
+                ) : null}
                 {admin.permissions.canManageAdmins ? (
                   <a href="#users" className="rounded-full bg-white/5 px-3 py-1 text-sm text-[color:var(--foreground)] hover:bg-white/10">Admin users</a>
                 ) : null}
