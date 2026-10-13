@@ -215,7 +215,7 @@ export default function AdminBookingCreator() {
           ) : slots.length === 0 ? (
             <p className="mt-2 text-sm text-[color:var(--muted)]">Tidak ada jadwal di tanggal ini.</p>
           ) : (
-            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            <div className="slot-scroll mt-2 grid max-h-[420px] grid-cols-1 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
               {slots.map((slot) => {
                 const active = selectedIds.has(slot.id);
                 return (
