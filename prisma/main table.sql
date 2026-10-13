@@ -85,24 +85,47 @@ CREATE INDEX IF NOT EXISTS idx_schedule_slot_sort_order ON schedule_slot(sort_or
 -- ALTER TABLE schedule_slot ADD COLUMN IF NOT EXISTS day_of_week VARCHAR(50) DEFAULT 'mon,tue,wed,thu,fri,sat,sun';
 -- UPDATE schedule_slot SET day_of_week = 'mon,tue,wed,thu,fri,sat,sun' WHERE day_of_week IS NULL;
 
+-- Slot per 30 menit (07:00-23:00). Harga = setengah tarif per jam:
+-- 55rb (07-18), 75rb (18-21), 60rb (21-23). Ubah price sesuai kebutuhan.
 INSERT INTO schedule_slot (id, start_time, end_time, is_active, sort_order, price, day_of_week, created_at, updated_at)
 VALUES
-  (gen_random_uuid(), '07:00', '08:00', true, 0, 110000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
-  (gen_random_uuid(), '08:00', '09:00', true, 1, 110000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
-  (gen_random_uuid(), '09:00', '10:00', true, 2, 110000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
-  (gen_random_uuid(), '10:00', '11:00', true, 3, 110000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
-  (gen_random_uuid(), '11:00', '12:00', true, 4, 110000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
-  (gen_random_uuid(), '12:00', '13:00', true, 5, 110000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
-  (gen_random_uuid(), '13:00', '14:00', true, 6, 110000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
-  (gen_random_uuid(), '14:00', '15:00', true, 7, 110000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
-  (gen_random_uuid(), '15:00', '16:00', true, 8, 110000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
-  (gen_random_uuid(), '16:00', '17:00', true, 9, 110000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
-  (gen_random_uuid(), '17:00', '18:00', true, 10, 110000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
-  (gen_random_uuid(), '18:00', '19:00', true, 11, 150000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
-  (gen_random_uuid(), '19:00', '20:00', true, 12, 150000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
-  (gen_random_uuid(), '20:00', '21:00', true, 13, 150000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
-  (gen_random_uuid(), '21:00', '22:00', true, 14, 120000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
-  (gen_random_uuid(), '22:00', '23:00', true, 15, 120000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW());
+  (gen_random_uuid(), '07:00', '07:30', true, 0, 55000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '07:30', '08:00', true, 1, 55000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '08:00', '08:30', true, 2, 55000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '08:30', '09:00', true, 3, 55000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '09:00', '09:30', true, 4, 55000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '09:30', '10:00', true, 5, 55000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '10:00', '10:30', true, 6, 55000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '10:30', '11:00', true, 7, 55000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '11:00', '11:30', true, 8, 55000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '11:30', '12:00', true, 9, 55000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '12:00', '12:30', true, 10, 55000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '12:30', '13:00', true, 11, 55000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '13:00', '13:30', true, 12, 55000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '13:30', '14:00', true, 13, 55000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '14:00', '14:30', true, 14, 55000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '14:30', '15:00', true, 15, 55000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '15:00', '15:30', true, 16, 55000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '15:30', '16:00', true, 17, 55000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '16:00', '16:30', true, 18, 55000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '16:30', '17:00', true, 19, 55000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '17:00', '17:30', true, 20, 55000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '17:30', '18:00', true, 21, 55000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '18:00', '18:30', true, 22, 75000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '18:30', '19:00', true, 23, 75000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '19:00', '19:30', true, 24, 75000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '19:30', '20:00', true, 25, 75000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '20:00', '20:30', true, 26, 75000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '20:30', '21:00', true, 27, 75000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '21:00', '21:30', true, 28, 60000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '21:30', '22:00', true, 29, 60000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '22:00', '22:30', true, 30, 60000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW()),
+  (gen_random_uuid(), '22:30', '23:00', true, 31, 60000, 'mon,tue,wed,thu,fri,sat,sun', NOW(), NOW());
+
+-- Untuk DB yang sudah ada (JANGAN run ulang file ini): hapus slot lama lalu
+-- copy-paste blok INSERT di atas (tanpa komentar ini) ke Supabase SQL editor.
+-- Booking lama aman (menyimpan start/end sendiri, tidak refer ke slot id).
+-- DELETE FROM schedule_slot;
 
 -- ==================== PAYMENT & TRANSACTION (MIDTRANS) ====================
 CREATE TABLE payment (

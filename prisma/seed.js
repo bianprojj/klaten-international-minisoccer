@@ -219,25 +219,20 @@ async function main() {
   const existingScheduleSlots = await prisma.scheduleSlot.findMany();
   if (existingScheduleSlots.length === 0) {
     console.log('Creating default schedule slots...');
+    // Slot per 30 menit 07:00-23:00 (55rb jam 07-18, 75rb jam 18-21, 60rb jam 21-23)
+    const halfHourSlots = [];
+    let sortOrder = 0;
+    for (let hour = 7; hour < 23; hour++) {
+      const price = hour < 18 ? 55000 : hour < 21 ? 75000 : 60000;
+      const hh = String(hour).padStart(2, '0');
+      const hhNext = String(hour + 1).padStart(2, '0');
+      halfHourSlots.push(
+        { startTime: `${hh}:00`, endTime: `${hh}:30`, isActive: true, sortOrder: sortOrder++, price },
+        { startTime: `${hh}:30`, endTime: `${hhNext}:00`, isActive: true, sortOrder: sortOrder++, price },
+      );
+    }
     await prisma.scheduleSlot.createMany({
-      data: [
-        { startTime: '06:00', endTime: '07:00', isActive: true, sortOrder: 0, price: 90000 },
-        { startTime: '07:00', endTime: '07:30', isActive: true, sortOrder: 1, price: 90000 },
-        { startTime: '07:30', endTime: '08:30', isActive: true, sortOrder: 2, price: 100000 },
-        { startTime: '08:30', endTime: '09:30', isActive: true, sortOrder: 3, price: 100000 },
-        { startTime: '09:30', endTime: '10:30', isActive: true, sortOrder: 4, price: 100000 },
-        { startTime: '10:30', endTime: '11:30', isActive: true, sortOrder: 5, price: 100000 },
-        { startTime: '11:30', endTime: '12:30', isActive: true, sortOrder: 6, price: 110000 },
-        { startTime: '12:30', endTime: '13:30', isActive: true, sortOrder: 7, price: 110000 },
-        { startTime: '13:30', endTime: '14:30', isActive: true, sortOrder: 8, price: 110000 },
-        { startTime: '14:30', endTime: '15:30', isActive: true, sortOrder: 9, price: 110000 },
-        { startTime: '15:30', endTime: '16:30', isActive: true, sortOrder: 10, price: 120000 },
-        { startTime: '16:30', endTime: '17:30', isActive: true, sortOrder: 11, price: 120000 },
-        { startTime: '17:30', endTime: '18:30', isActive: true, sortOrder: 12, price: 140000 },
-        { startTime: '18:30', endTime: '19:30', isActive: true, sortOrder: 13, price: 150000 },
-        { startTime: '19:30', endTime: '20:30', isActive: true, sortOrder: 14, price: 150000 },
-        { startTime: '20:30', endTime: '21:30', isActive: true, sortOrder: 15, price: 120000 },
-      ],
+      data: halfHourSlots,
     });
   }
 
