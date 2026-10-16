@@ -319,6 +319,16 @@ input.text-white::placeholder, select.text-white::placeholder, textarea.text-whi
   }
 }
 
+/* slot picker grids: vertical scroll area showing ~5 rows (5x2 desktop, 5x1 mobile) */
+.slot-scroll {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,81,54,0.35) transparent;
+}
+.slot-scroll::-webkit-scrollbar { width: 6px; }
+.slot-scroll::-webkit-scrollbar-track { background: transparent; }
+.slot-scroll::-webkit-scrollbar-thumb { background: rgba(0,81,54,0.35); border-radius: 999px; }
+
 /* dashboard anchor nav: smooth scroll + offset under sticky header */
 html { scroll-behavior: smooth; }
 #bookings, #payments, #schedule-slots, #schedule-board, #staff-bookings, #staff-payments,
