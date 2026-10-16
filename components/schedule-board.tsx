@@ -163,11 +163,14 @@ export default function ScheduleBoard() {
             <table aria-busy={loading} className="w-full min-w-[900px] border-collapse text-left text-sm">
               <thead>
                 <tr>
-                  <th className="sticky left-0 z-10 w-28 bg-[color:var(--background)] px-4 py-3 text-[color:var(--muted)]">Jam</th>
+                  <th className="sticky left-0 z-10 w-28 bg-[color:var(--background)] px-4 py-3 text-[color:var(--muted)] border-r border-white/10">Jam</th>
                   {days.map((day, i) => {
                     const isToday = day === today;
                     return (
-                      <th key={day} className={`px-2 py-3 text-center ${isToday ? "text-white" : "text-[color:var(--muted)]"}`}>
+                      <th
+                        key={day}
+                        className={`px-2 py-3 text-center border-r border-white/10 last:border-r-0 ${isToday ? "text-white" : "text-[color:var(--muted)]"}`}
+                      >
                         <span className={`inline-block rounded-2xl px-3 py-1 ${isToday ? "bg-[color:var(--accent)] font-semibold text-black" : ""}`}>
                           {DAY_SHORT[DAY_KEYS[i]]} {Number(day.slice(8, 10))}
                         </span>
@@ -178,11 +181,11 @@ export default function ScheduleBoard() {
               </thead>
               <tbody>
                 {slots.map((slot) => (
-                  <tr key={slot.id} className="border-t border-white/10">
-                    <td className="sticky left-0 z-10 bg-[color:var(--background)] px-4 py-2 text-xs font-semibold whitespace-nowrap text-white">
+                  <tr key={slot.id} className="border-b border-white/10 last:border-b-0">
+                    <td className="sticky left-0 z-10 bg-[color:var(--background)] px-4 py-2 text-xs font-semibold whitespace-nowrap text-white border-r border-white/10">
                       {slot.startTime} - {slot.endTime}
                     </td>
-                    {days.map((day) => {
+                    {days.map((day, i) => {
                       const open = slotAppliesOnDate(slot.dayOfWeek, day);
                       const fills = open
                         ? bookings.filter(
@@ -192,7 +195,10 @@ export default function ScheduleBoard() {
                           )
                         : [];
                       return (
-                        <td key={day} className="px-1.5 py-1.5 align-top">
+                        <td
+                          key={day}
+                          className={`px-1.5 py-1.5 align-top border-r border-white/10 last:border-r-0 ${i === days.length - 1 ? "pr-2" : ""}`}
+                        >
                           {fills.length > 0 ? (
                             <div className="space-y-1">
                               {fills.map((b) => (
@@ -201,14 +207,14 @@ export default function ScheduleBoard() {
                                   type="button"
                                   onClick={() => setSelectedId((current) => (current === b.id ? null : b.id))}
                                   title={`${b.customerName} (${b.status})`}
-                                  className={`block w-full truncate rounded-xl border px-2 py-2 text-center text-xs font-semibold transition hover:brightness-110 ${blockStyle(b.status)} ${selectedId === b.id ? "ring-2 ring-white" : ""}`}
+                                  className={`block w-full min-w-0 truncate rounded-xl border px-1.5 py-1.5 text-center text-xs font-semibold transition hover:brightness-110 ${blockStyle(b.status)} ${selectedId === b.id ? "ring-2 ring-white" : ""}`}
                                 >
                                   {b.customerName}
                                 </button>
                               ))}
                             </div>
                           ) : (
-                            <div className={`rounded-xl px-2 py-2 text-center text-xs ${open ? "text-[color:var(--muted)]/40" : "bg-white/5 text-[color:var(--muted)]/50"}`}>
+                            <div className={`rounded-xl px-1.5 py-1.5 text-center text-xs ${open ? "text-[color:var(--muted)]/40" : "bg-white/5 text-[color:var(--muted)]/50"}`}>
                               {open ? "·" : "–"}
                             </div>
                           )}
