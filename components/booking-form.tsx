@@ -30,7 +30,7 @@ function parseTimeToMinutes(time: string) {
 function getDurationHours(startTime: string, endTime: string) {
   const startMinutes = parseTimeToMinutes(startTime);
   const endMinutes = parseTimeToMinutes(endTime);
-  return Math.max(Math.ceil((endMinutes - startMinutes) / 60), 1);
+  return Math.max((endMinutes - startMinutes) / 60, 0);
 }
 
 function getSelectedRange(slots: AvailabilitySlot[]) {
@@ -221,6 +221,11 @@ export function BookingForm({ fields }: { fields: Field[] }) {
 
     if (!selectedRange.isContinuous) {
       setSubmitError("Please select a continuous range of slots without gaps.");
+      return;
+    }
+
+    if (selectedSlots.length < 2) {
+      setSubmitError("Pesanan minimal 1 jam. Pilih setidaknya 2 slot waktu berurutan.");
       return;
     }
 
