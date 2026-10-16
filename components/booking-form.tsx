@@ -322,7 +322,7 @@ export function BookingForm({ fields }: { fields: Field[] }) {
               <div
                 ref={slotScrollRef}
                 onScroll={handleSlotScroll}
-                className="slot-scroll grid max-h-[442px] grid-cols-2 gap-2 overflow-y-auto pr-1 sm:max-h-[588px] sm:gap-3"
+                className="slot-scroll grid max-h-[442px] grid-cols-2 gap-1.5 overflow-x-hidden overflow-y-auto pr-1 sm:max-h-[588px] sm:gap-3"
               >
               {slots.map((slot) => {
                 const label = `${slot.startTime} - ${slot.endTime}`;
@@ -342,11 +342,11 @@ export function BookingForm({ fields }: { fields: Field[] }) {
                     disabled={!slot.isAvailable}
                     >
                     <div className="flex min-w-0 flex-col gap-1">
-                      <p className="text-sm font-bold sm:text-lg">{label}</p>
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm font-normal opacity-70">{typeof slot.price === "number" && slot.price > 0 ? formatCurrency(slot.price) : "—"}</p>
+                      <p className="text-xs font-bold sm:text-sm">{label}</p>
+                      <div className="flex items-center justify-between gap-1">
+                        <p className="text-xs font-normal opacity-70">{typeof slot.price === "number" && slot.price > 0 ? formatCurrency(slot.price) : "—"}</p>
                         <span
-                          className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold leading-3 sm:px-3 sm:py-1 sm:text-xs sm:leading-4 ${
+                          className={`inline-block shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-semibold leading-none sm:px-2 sm:py-0.5 sm:text-xs sm:leading-4 ${
                             slot.isAvailable
                               ? isSelected
                                 ? "bg-[#1A1F4D]/10 text-[#1A1F4D]"
