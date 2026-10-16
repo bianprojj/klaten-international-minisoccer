@@ -339,10 +339,7 @@ export function BookingForm({ fields }: { fields: Field[] }) {
                     <div className="flex min-w-0 flex-col gap-1">
                       <p className="text-sm font-bold sm:text-lg">{label}</p>
                       <p className="text-xs font-normal opacity-70">{typeof slot.price === "number" && slot.price > 0 ? formatCurrency(slot.price) : "—"}</p>
-                      <div className="flex items-center justify-end gap-2 sm:justify-between">
-                        <p className="hidden text-sm opacity-70 sm:block">
-                          {slot.isAvailable ? "Available" : "Booked"}
-                        </p>
+                      <div className="flex items-center justify-center gap-2">
                         <span
                           className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold leading-3 sm:px-3 sm:py-1 sm:text-xs sm:leading-4 ${
                             slot.isAvailable
