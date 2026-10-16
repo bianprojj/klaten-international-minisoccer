@@ -2,7 +2,7 @@
 
 import { fetchJson } from "@/lib/fetch-json";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Field } from "@/types";
 import { formatCurrency } from "@/utils/formatting";
@@ -63,6 +63,8 @@ export function BookingForm({ fields }: { fields: Field[] }) {
   const [referralState, setReferralState] = useState<"idle" | "checking" | "applied" | "invalid">("idle");
   const [referralPercent, setReferralPercent] = useState(0);
   const [referralMessage, setReferralMessage] = useState<string | null>(null);
+  const slotScrollRef = useRef<HTMLDivElement | null>(null);
+  const [hasMoreSlots, setHasMoreSlots] = useState(false);
 
   useEffect(() => {
     if (!selectedDate || !selectedField?.id) {
@@ -115,6 +117,33 @@ export function BookingForm({ fields }: { fields: Field[] }) {
 
     return () => controller.abort();
   }, [selectedField?.id, selectedDate]);
+
+  // Deteksi apakah masih ada slot di bawah area scroll (untuk hint "scroll ke bawah")
+  useEffect(() => {
+    const element = slotScrollRef.current;
+    if (!element) {
+      setHasMoreSlots(false);
+      return;
+    }
+
+    const update = () => {
+      setHasMoreSlots(element.scrollTop + element.clientHeight < element.scrollHeight - 8);
+    };
+
+    update();
+    const raf = requestAnimationFrame(update);
+    window.addEventListener("resize", update);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", update);
+    };
+  }, [slots]);
+
+  const handleSlotScroll = () => {
+    const element = slotScrollRef.current;
+    if (!element) return;
+    setHasMoreSlots(element.scrollTop + element.clientHeight < element.scrollHeight - 8);
+  };
 
   const selectedIds = useMemo(() => new Set(selectedSlots.map((slot) => slot.id)), [selectedSlots]);
   const selectedRange = useMemo(() => getSelectedRange(selectedSlots), [selectedSlots]);
@@ -284,7 +313,12 @@ export function BookingForm({ fields }: { fields: Field[] }) {
           ) : slots.length === 0 ? (
             <div className="rounded-[20px] border border-[rgba(0,81,54,0.16)] bg-[#FFFFFF] p-6 font-[Manrope] text-sm text-[rgba(26,31,77,0.62)]">No schedule available for this field on the selected date.</div>
           ) : (
-            <div className="slot-scroll grid max-h-[588px] grid-cols-1 gap-3 overflow-y-auto pr-1 sm:grid-cols-2">
+            <div className="relative">
+              <div
+                ref={slotScrollRef}
+                onScroll={handleSlotScroll}
+                className="slot-scroll grid max-h-[588px] grid-cols-1 gap-3 overflow-y-auto pr-1 sm:grid-cols-2"
+              >
               {slots.map((slot) => {
                 const label = `${slot.startTime} - ${slot.endTime}`;
                 const isSelected = selectedIds.has(slot.id);
@@ -325,6 +359,14 @@ export function BookingForm({ fields }: { fields: Field[] }) {
                   </button>
                 );
               })}
+              </div>
+              {hasMoreSlots ? (
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center rounded-b-[16px] bg-gradient-to-t from-white via-white/85 to-transparent pb-2 pt-10">
+                  <p className="rounded-full border border-[rgba(0,81,54,0.16)] bg-[#FFFFFF] px-3 py-1 font-[Manrope] text-xs font-semibold text-[#005136] shadow-[0_2px_10px_rgba(26,31,77,0.12)]">
+                    More slots below — scroll down ↓
+                  </p>
+                </div>
+              ) : null}
             </div>
           )}
         </div>
