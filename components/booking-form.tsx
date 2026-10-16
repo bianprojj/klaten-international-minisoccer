@@ -317,7 +317,7 @@ export function BookingForm({ fields }: { fields: Field[] }) {
               <div
                 ref={slotScrollRef}
                 onScroll={handleSlotScroll}
-                className="slot-scroll grid max-h-[588px] grid-cols-1 gap-3 overflow-y-auto pr-1 sm:grid-cols-2"
+                className="slot-scroll grid max-h-[442px] grid-cols-2 gap-2 overflow-y-auto pr-1 sm:max-h-[588px] sm:gap-3"
               >
               {slots.map((slot) => {
                 const label = `${slot.startTime} - ${slot.endTime}`;
@@ -327,7 +327,7 @@ export function BookingForm({ fields }: { fields: Field[] }) {
                     key={slot.id}
                     type="button"
                     onClick={() => handleSlotToggle(slot)}
-                    className={`rounded-[12px] border px-4 py-4 text-left font-[Manrope] transition-all duration-200 min-w-0 ${
+                    className={`rounded-[12px] border px-2.5 py-2.5 text-left font-[Manrope] transition-all duration-200 min-w-0 sm:px-4 sm:py-4 ${
                       slot.isAvailable
                         ? isSelected
                           ? "border-none bg-[#C9D651] text-[#1A1F4D] shadow-[0_4px_14px_rgba(201,214,81,0.35)]"
@@ -337,14 +337,14 @@ export function BookingForm({ fields }: { fields: Field[] }) {
                     disabled={!slot.isAvailable}
                     >
                     <div className="flex min-w-0 flex-col gap-1">
-                      <p className="text-lg font-bold">{label}</p>
+                      <p className="text-sm font-bold sm:text-lg">{label}</p>
                       <p className="text-xs font-normal opacity-70">{typeof slot.price === "number" && slot.price > 0 ? formatCurrency(slot.price) : "—"}</p>
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm opacity-70">
+                      <div className="flex items-center justify-end gap-2 sm:justify-between">
+                        <p className="hidden text-sm opacity-70 sm:block">
                           {slot.isAvailable ? "Available" : "Booked"}
                         </p>
                         <span
-                          className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
+                          className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold leading-3 sm:px-3 sm:py-1 sm:text-xs sm:leading-4 ${
                             slot.isAvailable
                               ? isSelected
                                 ? "bg-[#1A1F4D]/10 text-[#1A1F4D]"
