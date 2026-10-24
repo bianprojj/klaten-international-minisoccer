@@ -124,10 +124,10 @@ export default function ScheduleBoard() {
               Lihat keterisian slot per jam setiap hari. Klik blok berwarna untuk detail booking.
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <button onClick={() => setMonday((m) => addDaysStr(m, -7))} className="btn-secondary px-4 py-2">‹ Minggu lalu</button>
-            <button onClick={() => setMonday(mondayOf(todayStr()))} className="btn-secondary px-4 py-2">Hari ini</button>
-            <button onClick={() => setMonday((m) => addDaysStr(m, 7))} className="btn-secondary px-4 py-2">Minggu depan ›</button>
+          <div className="flex w-full min-w-0 flex-wrap items-center gap-2 md:w-auto md:shrink-0">
+            <button onClick={() => setMonday((m) => addDaysStr(m, -7))} className="btn-secondary max-w-full px-3 py-2 sm:px-4">‹ Minggu lalu</button>
+            <button onClick={() => setMonday(mondayOf(todayStr()))} className="btn-secondary max-w-full px-3 py-2 sm:px-4">Hari ini</button>
+            <button onClick={() => setMonday((m) => addDaysStr(m, 7))} className="btn-secondary max-w-full px-3 py-2 sm:px-4">Minggu depan ›</button>
           </div>
         </div>
         <p className="mt-4 text-sm font-semibold text-white">{formatWeekLabel(monday)}</p>

@@ -556,3 +556,7 @@ If you want, I can open a PR with these changes, run `npm run lint -- --fix`, or
 - Penyebab: warna grid memakai `white/10` di atas latar terang `#F1EED9`, sehingga garis sel dan header kehilangan kontras.
 - `components/schedule-board.tsx`: gunakan garis hijau dengan kontras yang jelas, header hari berwarna, kolom jam tetap memiliki latar solid saat scroll, dan sel kosong dibedakan dengan warna teks/latar yang terbaca.
 - Dampak berlaku untuk staff, manager, dan superadmin karena ketiganya merender komponen `ScheduleBoard` yang sama.
+
+### 64. Tombol navigasi minggu tidak keluar batas di ponsel
+- Tombol Minggu lalu, Hari ini, dan Minggu depan pada papan jadwal kini dapat membungkus ke baris berikutnya pada layar sempit.
+- Lebar tombol dibatasi container dan padding disesuaikan untuk layar kecil; navigasi tetap sama.
