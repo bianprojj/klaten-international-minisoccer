@@ -142,7 +142,7 @@ export default function ScheduleBoard() {
           <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded bg-rose-500/85" /> Terisi</span>
           <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded bg-amber-500/85" /> Pending</span>
           <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded bg-sky-500/85" /> Selesai</span>
-          <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded bg-white/10" /> Kosong / tutup</span>
+          <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded border border-[rgba(0,81,54,0.24)] bg-[rgba(0,81,54,0.12)]" /> Kosong / tutup</span>
         </div>
 
         {loading && bookings.length === 0 && slots.length === 0 ? (
@@ -159,19 +159,19 @@ export default function ScheduleBoard() {
             Belum ada slot jadwal aktif. Tambahkan dulu di tabel schedule slots.
           </p>
         ) : (
-          <div data-drag-scroll className="table-scroll mt-6 max-w-full touch-pan-y overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)] [-webkit-overflow-scrolling:touch]">
+          <div data-drag-scroll className="table-scroll mt-6 max-w-full touch-pan-y overflow-x-auto rounded-3xl border border-[rgba(0,81,54,0.3)] bg-white shadow-sm [-webkit-overflow-scrolling:touch]">
             <table aria-busy={loading} className="w-full min-w-[900px] border-collapse text-left text-sm">
               <thead>
                 <tr>
-                  <th className="sticky left-0 z-20 w-28 bg-[color:var(--background)] px-4 py-3 text-xs font-semibold text-[color:var(--muted)] border-r border-white/10 border-b border-white/10">Jam</th>
+                  <th className="sticky left-0 z-20 w-28 border-b border-r border-[rgba(0,81,54,0.24)] bg-[#F1EED9] px-4 py-3 text-xs font-semibold text-[#1A1F4D]">Jam</th>
                   {days.map((day, i) => {
                     const isToday = day === today;
                     return (
                       <th
                         key={day}
-                        className={`px-2 py-3 text-center border-r border-white/10 border-b border-white/10 last:border-r-0 ${isToday ? "bg-[color:var(--accent)]/20 text-white font-semibold" : "bg-white/5 text-[color:var(--muted)]"}`} 
+                        className={`border-b border-r border-[rgba(0,81,54,0.24)] px-2 py-3 text-center last:border-r-0 ${isToday ? "bg-[#C9D651] font-semibold text-[#1A1F4D]" : "bg-[rgba(0,81,54,0.1)] font-semibold text-[#1A1F4D]"}`}
                       >
-                        <span className={`inline-block rounded-lg px-3 py-1.5 font-semibold ${isToday ? "text-black" : "text-[color:var(--muted)]"}`}>
+                        <span className="inline-block rounded-lg px-3 py-1.5">
                           {DAY_SHORT[DAY_KEYS[i]]} {Number(day.slice(8, 10))}
                         </span>
                       </th>
@@ -181,8 +181,8 @@ export default function ScheduleBoard() {
               </thead>
               <tbody>
                 {slots.map((slot) => (
-                  <tr key={slot.id} className="border-b border-white/10 last:border-b-0">
-                    <td className="sticky left-0 z-20 bg-[color:var(--background)] px-4 py-3 text-xs font-semibold whitespace-nowrap text-white border-r border-white/10 border-b border-white/10">
+                  <tr key={slot.id}>
+                    <td className="sticky left-0 z-20 whitespace-nowrap border-b border-r border-[rgba(0,81,54,0.24)] bg-[#F1EED9] px-4 py-3 text-xs font-semibold text-[#1A1F4D]">
                       {slot.startTime} - {slot.endTime}
                     </td>
                     {days.map((day, i) => {
@@ -197,7 +197,7 @@ export default function ScheduleBoard() {
                       return (
                         <td
                           key={day}
-                          className={`px-1 py-1 align-top border-r border-white/10 border-b border-white/10 last:border-r-0 bg-white/3 ${i === days.length - 1 ? "pr-1" : ""}`} 
+                          className={`min-h-12 border-b border-r border-[rgba(0,81,54,0.24)] bg-[rgba(255,255,255,0.62)] px-1 py-1 align-top last:border-r-0 ${i === days.length - 1 ? "pr-1" : ""}`}
                         >
                           {fills.length > 0 ? (
                             <div className="space-y-1">
@@ -214,7 +214,7 @@ export default function ScheduleBoard() {
                               ))}
                             </div>
                           ) : (
-                            <div className={`rounded-lg px-2 py-2 text-center text-xs ${open ? "text-[color:var(--muted)]/30" : "bg-white/5 text-[color:var(--muted)]/40"}`}>
+                            <div className={`min-h-10 rounded-lg px-2 py-2 text-center text-xs ${open ? "text-[rgba(26,31,77,0.42)]" : "bg-[rgba(0,81,54,0.08)] text-[rgba(26,31,77,0.62)]"}`}>
                               {open ? "·" : "–"}
                             </div>
                           )}

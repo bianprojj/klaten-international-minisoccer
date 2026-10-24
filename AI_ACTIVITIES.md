@@ -548,3 +548,11 @@ If you want, I can open a PR with these changes, run `npm run lint -- --fix`, or
 **Files Created or Substantially Modified**:
 - Modified: `app/api/admin/schedule-board/route.ts`
 - Modified: `components/schedule-board.tsx`
+
+## 2026-10-24
+
+### 63. Grid papan jadwal tetap terlihat pada tema terang
+- Menindaklanjuti laporan bahwa grid jadwal di staff, manager, dan superadmin masih nyaris tidak terlihat.
+- Penyebab: warna grid memakai `white/10` di atas latar terang `#F1EED9`, sehingga garis sel dan header kehilangan kontras.
+- `components/schedule-board.tsx`: gunakan garis hijau dengan kontras yang jelas, header hari berwarna, kolom jam tetap memiliki latar solid saat scroll, dan sel kosong dibedakan dengan warna teks/latar yang terbaca.
+- Dampak berlaku untuk staff, manager, dan superadmin karena ketiganya merender komponen `ScheduleBoard` yang sama.
