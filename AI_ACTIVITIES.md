@@ -507,3 +507,44 @@ If you want, I can open a PR with these changes, run `npm run lint -- --fix`, or
 - `site-config.ts` description ditulis ulang bernada promosi: sambutan selamat datang, klaim satu-satunya & terbaik di Klaten, lapangan premium standar internasional, ajakan "ajak timmu dan buktikan sendiri keseruannya", tetap memuat alamat/harga/jam/telp.
 - Berlaku otomatis ke meta description, OpenGraph, Twitter card, dan Schema.org (semua ambil dari siteConfig.description).
 - Build 57/57 sukses.
+
+## 2026-09-24
+
+### 62. Perbaikan papan jadwal (Schedule Board) untuk staff, manager, superadmin
+**Problem**: Papan jadwal di panel admin staff, manager, dan superadmin tidak memiliki grid yang jelas (mirip gambar referensi), sulit dibaca, dan ada booking yang "miss" / tidak muncul pada tanggal yang benar karena sinkronisasi zona waktu.
+
+**Root Cause Analysis**:
+- API `schedule-board` mengirim `bookingDate` sebagai `toISOString()` (UTC), sehingga tanggal booking di WIB (Jakarta) bergeser satu hari saat dibandingkan di frontend. Contoh: booking untuk 21 Sep di WIB disimpan sebagai 20 Sep di UTC, lalu muncul pada tanggal yang salah di papan jadwal.
+- Tampilan tabelScheduleBoard kurang memiliki grid yang jelas: border sel tipis, blok booking tidak menonjol, header hari kurang kontras, sehingga sulit dibaca seperti pada gambar referensi.
+
+**Fixes Applied**:
+
+1. **Sinkronisasi tanggal booking (zona waktu WIB)** — `app/api/admin/schedule-board/route.ts`:
+   - Impor `formatJakartaDateKey` dari `@/lib/timezone`.
+   - Ganti `bookingDate: b.bookingDate.toISOString()` dengan `bookingDate: formatJakartaDateKey(b.bookingDate)`.
+   - Hasil: tanggal booking sekarang dikirim dalam format YYYY-MM-DD sesuai Jakarta (WIB), sehingga frontend bisa mencocokkan dengan hari yang ditampilkan di papan jadwal tanpa bergeser satu hari. Booking sekarang sinkron dan sesuai dengan data booking asli.
+
+2. **Tampilan grid papan jadwal yang jelas** — `components/schedule-board.tsx`:
+   - Header hari: tambahkan `border-b border-white/10`, background `bg-white/5` (non-hari ini) atau `bg-[color:var(--accent)]/20` (hari ini), teks lebih tebal (`font-semibold`), dan highlight hari ini dengan background aksen + teks hitam.
+   - Kolom waktu (jam): tambahkan `border-b border-white/10`, `z-20` agar menempel di atas saat scroll, teks `font-semibold`.
+   - Sel tabel: tambahkan `border-b border-white/10` dan `bg-white/3` pada setiap sel, sehingga grid terlihat jelas seperti spreadsheet.
+   - Blok booking: border lebih tebal (`rounded-lg`, `border`, `px-2 py-2`), hover brightness, ring seleksi yang lebih jelas (`ring-2 ring-white ring-offset-1`).
+   - Sel kosong: teks lebih netra (`text-[color:var(--muted)]/30` untuk terbuka, `bg-white/5 text-[color:var(--muted)]/40` untuk tutup).
+
+**Scope**: Perubahan berlaku untuk ketiga panel admin yang menggunakan `ScheduleBoard`:
+- `/staff` (StaffBookingViewer + ScheduleBoard)
+- `/manager` (ScheduleBoard + StaffBookingViewer + ScheduleManagerClient)
+- `/superadmin` (ScheduleBoard + ScheduleManagerClient + StaffBookingViewer)
+
+**Files Modified**:
+- `app/api/admin/schedule-board/route.ts` — sinkronisasi tanggal booking ke zona Jakarta (WIB)
+- `components/schedule-board.tsx` — perbaikan tampilan grid, border sel, blok booking, header hari
+
+**Verification**:
+- `npx tsc --noEmit` — tidak ada error TypeScript
+- `npm run build` — berhasil (60/60 halaman), hanya warning ESLint lama yang tidak terkait perubahan ini
+- Route `/api/admin/schedule-board` terdaftar dalam daftar build
+
+**Files Created or Substantially Modified**:
+- Modified: `app/api/admin/schedule-board/route.ts`
+- Modified: `components/schedule-board.tsx`

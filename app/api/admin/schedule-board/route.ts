@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAuthenticatedAdminFromToken, hasAdminPermission } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
+import { formatJakartaDateKey } from "@/lib/timezone";
 
 function tokenFrom(request: Request) {
   const match = (request.headers.get("cookie") ?? "").match(/admin-session=([^;]+)/);
@@ -64,7 +65,9 @@ export async function GET(request: Request) {
       bookings: bookings.map((b) => ({
         id: b.id,
         customerName: b.customerName,
-        bookingDate: b.bookingDate.toISOString(),
+        // Gunakan tanggal Jakarta (WIB) agar papan jadwal sinkron dengan booking
+        // dan tidak bergeser satu hari karena konversi UTC.
+        bookingDate: formatJakartaDateKey(b.bookingDate),
         startTime: b.startTime,
         endTime: b.endTime,
         status: b.status,
