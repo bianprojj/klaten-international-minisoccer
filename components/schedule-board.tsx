@@ -159,7 +159,7 @@ export default function ScheduleBoard() {
             Belum ada slot jadwal aktif. Tambahkan dulu di tabel schedule slots.
           </p>
         ) : (
-          <div data-drag-scroll className="table-scroll mt-6 max-w-full touch-pan-y overflow-x-auto rounded-3xl border border-[rgba(0,81,54,0.3)] bg-white shadow-sm [-webkit-overflow-scrolling:touch]">
+          <div data-drag-scroll className="table-scroll mt-6 max-w-full touch-pan-x overflow-x-auto rounded-3xl border border-[rgba(0,81,54,0.3)] bg-white shadow-sm [-webkit-overflow-scrolling:touch]">
             <table aria-busy={loading} className="w-full min-w-[900px] border-collapse text-left text-sm">
               <thead>
                 <tr>

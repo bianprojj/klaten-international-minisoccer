@@ -341,12 +341,13 @@ html { scroll-behavior: smooth; }
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: rgba(0,81,54,0.35) transparent;
+  touch-action: pan-x;
 }
 .table-scroll::-webkit-scrollbar { height: 6px; }
 .table-scroll::-webkit-scrollbar-track { background: transparent; }
 .table-scroll::-webkit-scrollbar-thumb { background: rgba(0,81,54,0.35); border-radius: 999px; }
 
 /* drag-to-scroll affordance for dashboard tables (see TableDragScroll) */
-[data-drag-scroll] { cursor: grab; }
+[data-drag-scroll] { cursor: grab; touch-action: pan-x; }
 [data-drag-scroll].dragging { cursor: grabbing; user-select: none; }
 [data-drag-scroll].dragging * { user-select: none; }

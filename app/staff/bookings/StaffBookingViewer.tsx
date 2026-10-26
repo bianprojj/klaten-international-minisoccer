@@ -227,7 +227,7 @@ export default function StaffBookingViewer({ adminName, useMain = true }: { admi
             ) : null}
 
             {loading ? <span className="sr-only" role="status">Memuat data booking…</span> : null}
-            <div data-drag-scroll className="table-scroll mt-3 max-w-full touch-pan-y overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)] [-webkit-overflow-scrolling:touch]">
+            <div data-drag-scroll className="table-scroll mt-3 max-w-full touch-pan-x overflow-x-auto rounded-3xl border border-white/10 bg-[color:var(--background)] [-webkit-overflow-scrolling:touch]">
               <table aria-busy={loading} className="w-full min-w-[860px] divide-y divide-white/10 text-left text-sm">
                 <thead className="bg-[color:rgba(255,255,255,0.03)] text-[color:var(--muted)]">
                   <tr>
