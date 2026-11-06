@@ -348,6 +348,11 @@ html { scroll-behavior: smooth; }
 .table-scroll::-webkit-scrollbar-thumb { background: rgba(0,81,54,0.35); border-radius: 999px; }
 
 /* drag-to-scroll affordance for dashboard tables (see TableDragScroll) */
-[data-drag-scroll] { cursor: grab; touch-action: pan-x; }
+[data-drag-scroll] {
+  cursor: grab;
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
 [data-drag-scroll].dragging { cursor: grabbing; user-select: none; }
 [data-drag-scroll].dragging * { user-select: none; }

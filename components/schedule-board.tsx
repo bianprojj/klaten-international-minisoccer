@@ -114,7 +114,7 @@ export default function ScheduleBoard() {
   );
 
   return (
-    <section id="schedule-board" className="mx-auto max-w-7xl space-y-6 overflow-x-clip px-4 sm:px-6 lg:px-8">
+    <section id="schedule-board" className="mx-auto max-w-7xl min-w-0 space-y-6 overflow-x-visible px-4 sm:px-6 lg:px-8">
       <div className="glass-panel rounded-[2rem] p-6 sm:p-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>

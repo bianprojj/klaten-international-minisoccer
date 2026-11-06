@@ -11,6 +11,7 @@ export function TableDragScroll() {
   useEffect(() => {
     let el: HTMLElement | null = null;
     let startX = 0;
+    let startY = 0;
     let startLeft = 0;
     let moved = false;
     let down = false;
@@ -20,27 +21,38 @@ export function TableDragScroll() {
       return target.closest("[data-drag-scroll]");
     };
 
+    const isInteractiveElement = (target: EventTarget | null): boolean => {
+      if (!(target instanceof HTMLElement)) return false;
+      return Boolean(target.closest("button, a, input, select, textarea, label, [role='button']"));
+    };
+
     const onPointerDown = (e: PointerEvent) => {
       const scroller = findScroller(e.target);
-      if (!scroller) return;
+      if (!scroller || isInteractiveElement(e.target)) return;
       if (e.pointerType === "mouse" && e.button !== 0) return;
       el = scroller;
       down = true;
       moved = false;
       startX = e.clientX;
+      startY = e.clientY;
       startLeft = scroller.scrollLeft;
     };
 
     const onPointerMove = (e: PointerEvent) => {
       if (!down || !el) return;
       const dx = e.clientX - startX;
-      if (Math.abs(dx) > 8) {
-        if (!moved) {
-          moved = true;
-          el.classList.add("dragging");
-        }
-        el.scrollLeft = startLeft - dx;
+      const dy = e.clientY - startY;
+
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      if (Math.abs(dx) <= Math.abs(dy)) return;
+
+      if (!moved) {
+        moved = true;
+        el.classList.add("dragging");
       }
+
+      e.preventDefault();
+      el.scrollLeft = startLeft - dx;
     };
 
     const endGesture = () => {
@@ -49,8 +61,6 @@ export function TableDragScroll() {
       el = null;
     };
 
-    // Suppress the click that follows a real drag so Edit/Delete
-    // buttons are not activated accidentally.
     const onClickCapture = (e: MouseEvent) => {
       if (moved) {
         e.preventDefault();
@@ -60,14 +70,14 @@ export function TableDragScroll() {
     };
 
     document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("pointermove", onPointerMove);
+    document.addEventListener("pointermove", onPointerMove, { passive: false });
     document.addEventListener("pointerup", endGesture);
     document.addEventListener("pointercancel", endGesture);
     document.addEventListener("click", onClickCapture, true);
 
     return () => {
       document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("pointermove", onPointerMove);
+      document.removeEventListener("pointermove", onPointerMove as EventListener);
       document.removeEventListener("pointerup", endGesture);
       document.removeEventListener("pointercancel", endGesture);
       document.removeEventListener("click", onClickCapture, true);
